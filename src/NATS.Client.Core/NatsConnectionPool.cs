@@ -6,26 +6,22 @@ public sealed class NatsConnectionPool : INatsConnectionPool
     private int _index = -1;
 
     public NatsConnectionPool()
-        : this(Environment.ProcessorCount / 2, NatsOpts.Default, _ => { })
-    {
-    }
+        : this(Environment.ProcessorCount / 2, NatsOpts.Default, _ => { }) { }
 
     public NatsConnectionPool(int poolSize)
-        : this(poolSize, NatsOpts.Default, _ => { })
-    {
-    }
+        : this(poolSize, NatsOpts.Default, _ => { }) { }
 
     public NatsConnectionPool(NatsOpts opts)
-        : this(Environment.ProcessorCount / 2, opts, _ => { })
-    {
-    }
+        : this(Environment.ProcessorCount / 2, opts, _ => { }) { }
 
     public NatsConnectionPool(int poolSize, NatsOpts opts)
-        : this(poolSize, opts, _ => { })
-    {
-    }
+        : this(poolSize, opts, _ => { }) { }
 
-    public NatsConnectionPool(int poolSize, NatsOpts opts, Action<NatsConnection> configureConnection)
+    public NatsConnectionPool(
+        int poolSize,
+        NatsOpts opts,
+        Action<NatsConnection> configureConnection
+    )
     {
         poolSize = Math.Max(1, poolSize);
         _connections = new NatsConnection[poolSize];

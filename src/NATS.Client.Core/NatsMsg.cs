@@ -32,7 +32,8 @@ public readonly record struct NatsMsg<T>(
     int Size,
     NatsHeaders? Headers,
     T? Data,
-    INatsConnection? Connection)
+    INatsConnection? Connection
+)
 {
     internal static NatsMsg<T> Build(
         string subject,
@@ -41,14 +42,13 @@ public readonly record struct NatsMsg<T>(
         in ReadOnlySequence<byte> payloadBuffer,
         INatsConnection? connection,
         NatsHeaderParser headerParser,
-        INatsSerializer serializer)
+        INatsSerializer serializer
+    )
     {
         // Consider an empty payload as null or default value for value types. This way we are able to
         // receive sentinels as nulls or default values. This might cause an issue with where we are not
         // able to differentiate between an empty sentinel and actual default value of a struct e.g. 0 (zero).
-        var data = payloadBuffer.Length > 0
-            ? serializer.Deserialize<T>(payloadBuffer)
-            : default;
+        var data = payloadBuffer.Length > 0 ? serializer.Deserialize<T>(payloadBuffer) : default;
 
         NatsHeaders? headers = null;
 
@@ -63,12 +63,13 @@ public readonly record struct NatsMsg<T>(
             headers.SetReadOnly();
         }
 
-        var size = subject.Length
-                   + (replyTo?.Length ?? 0)
-                   + (headersBuffer?.Length ?? 0)
-                   + payloadBuffer.Length;
+        var size =
+            subject.Length
+            + (replyTo?.Length ?? 0)
+            + (headersBuffer?.Length ?? 0)
+            + payloadBuffer.Length;
 
-        return new NatsMsg<T>(subject, replyTo, (int) size, headers, data, connection);
+        return new NatsMsg<T>(subject, replyTo, (int)size, headers, data, connection);
     }
 
     /// <summary>
@@ -84,7 +85,13 @@ public readonly record struct NatsMsg<T>(
     /// <remarks>
     ///     Publishes a new message using the reply-to subject from the this message as the destination subject.
     /// </remarks>
-    public ValueTask ReplyAsync<TReply>(TReply data, NatsHeaders? headers = default, string? replyTo = default, NatsPubOpts? opts = default, CancellationToken cancellationToken = default)
+    public ValueTask ReplyAsync<TReply>(
+        TReply data,
+        NatsHeaders? headers = default,
+        string? replyTo = default,
+        NatsPubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    )
     {
         CheckReplyPreconditions();
         return Connection.PublishAsync(ReplyTo!, data, headers, replyTo, opts, cancellationToken);
@@ -101,7 +108,11 @@ public readonly record struct NatsMsg<T>(
     /// <remarks>
     ///     Publishes a new message using the reply-to subject from the this message as the destination subject.
     /// </remarks>
-    public ValueTask ReplyAsync<TReply>(NatsMsg<TReply> msg, NatsPubOpts? opts = default, CancellationToken cancellationToken = default)
+    public ValueTask ReplyAsync<TReply>(
+        NatsMsg<TReply> msg,
+        NatsPubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    )
     {
         CheckReplyPreconditions();
         return Connection.PublishAsync(msg with { Subject = ReplyTo! }, opts, cancellationToken);
@@ -112,7 +123,9 @@ public readonly record struct NatsMsg<T>(
     {
         if (Connection == default)
         {
-            throw new NatsException("unable to send reply; message did not originate from a subscription");
+            throw new NatsException(
+                "unable to send reply; message did not originate from a subscription"
+            );
         }
 
         if (string.IsNullOrWhiteSpace(ReplyTo))

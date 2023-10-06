@@ -47,18 +47,25 @@ internal abstract class CommandBase<TSelf> : ICommand, IObjectPoolNode<TSelf>
     public ref TSelf? NextNode => ref _next;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) => pool.TryRent(out self!);
+    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) =>
+        pool.TryRent(out self!);
 
     protected abstract void Reset();
 
     private static void SetCancel(object? state)
     {
-        var self = (CommandBase<TSelf>) state!;
+        var self = (CommandBase<TSelf>)state!;
         self.IsCanceled = true;
     }
 }
 
-internal abstract class AsyncCommandBase<TSelf> : ICommand, IAsyncCommand, IObjectPoolNode<TSelf>, IValueTaskSource, IPromise, IThreadPoolWorkItem
+internal abstract class AsyncCommandBase<TSelf>
+    : ICommand,
+        IAsyncCommand,
+        IObjectPoolNode<TSelf>,
+        IValueTaskSource,
+        IPromise,
+        IThreadPoolWorkItem
     where TSelf : class, IObjectPoolNode<TSelf>
 {
     private static readonly Action<object?> CancelAction = SetCancel;
@@ -126,14 +133,16 @@ internal abstract class AsyncCommandBase<TSelf> : ICommand, IAsyncCommand, IObje
         ThreadPool.UnsafeQueueUserWorkItem(
             state =>
             {
-                var ex = state._timer != null
-                    ? state._timer.GetExceptionWhenCanceled()
-                    : new OperationCanceledException();
+                var ex =
+                    state._timer != null
+                        ? state._timer.GetExceptionWhenCanceled()
+                        : new OperationCanceledException();
 
                 state._core.SetException(ex);
             },
             this,
-            false);
+            false
+        );
     }
 
     public void SetException(Exception exception)
@@ -151,7 +160,8 @@ internal abstract class AsyncCommandBase<TSelf> : ICommand, IAsyncCommand, IObje
                 state.self._core.SetException(state.exception);
             },
             (self: this, exception),
-            false);
+            false
+        );
     }
 
     void IThreadPoolWorkItem.Execute() => _core.SetResult(null!);
@@ -181,22 +191,35 @@ internal abstract class AsyncCommandBase<TSelf> : ICommand, IAsyncCommand, IObje
 
     ValueTaskSourceStatus IValueTaskSource.GetStatus(short token) => _core.GetStatus(token);
 
-    void IValueTaskSource.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags) => _core.OnCompleted(continuation, state, token, flags);
+    void IValueTaskSource.OnCompleted(
+        Action<object?> continuation,
+        object? state,
+        short token,
+        ValueTaskSourceOnCompletedFlags flags
+    ) => _core.OnCompleted(continuation, state, token, flags);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) => pool.TryRent(out self!);
+    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) =>
+        pool.TryRent(out self!);
 
     protected abstract void Reset();
 
     private static void SetCancel(object? state)
     {
-        var self = (AsyncCommandBase<TSelf>) state!;
+        var self = (AsyncCommandBase<TSelf>)state!;
         self.IsCanceled = true;
         self.SetCanceled();
     }
 }
 
-internal abstract class AsyncCommandBase<TSelf, TResponse> : ICommand, IAsyncCommand<TResponse>, IObjectPoolNode<TSelf>, IValueTaskSource<TResponse>, IPromise, IPromise<TResponse>, IThreadPoolWorkItem
+internal abstract class AsyncCommandBase<TSelf, TResponse>
+    : ICommand,
+        IAsyncCommand<TResponse>,
+        IObjectPoolNode<TSelf>,
+        IValueTaskSource<TResponse>,
+        IPromise,
+        IPromise<TResponse>,
+        IThreadPoolWorkItem
     where TSelf : class, IObjectPoolNode<TSelf>
 {
     private static readonly Action<object?> CancelAction = SetCancel;
@@ -243,13 +266,15 @@ internal abstract class AsyncCommandBase<TSelf, TResponse> : ICommand, IAsyncCom
         ThreadPool.UnsafeQueueUserWorkItem(
             state =>
             {
-                var ex = state._timer != null
-                    ? state._timer.GetExceptionWhenCanceled()
-                    : new OperationCanceledException();
+                var ex =
+                    state._timer != null
+                        ? state._timer.GetExceptionWhenCanceled()
+                        : new OperationCanceledException();
                 state._core.SetException(ex);
             },
             this,
-            false);
+            false
+        );
     }
 
     public void SetException(Exception exception)
@@ -267,7 +292,8 @@ internal abstract class AsyncCommandBase<TSelf, TResponse> : ICommand, IAsyncCom
                 state.self._core.SetException(state.exception);
             },
             (self: this, exception),
-            false);
+            false
+        );
     }
 
     public void SetResult(TResponse result)
@@ -320,18 +346,25 @@ internal abstract class AsyncCommandBase<TSelf, TResponse> : ICommand, IAsyncCom
         }
     }
 
-    ValueTaskSourceStatus IValueTaskSource<TResponse>.GetStatus(short token) => _core.GetStatus(token);
+    ValueTaskSourceStatus IValueTaskSource<TResponse>.GetStatus(short token) =>
+        _core.GetStatus(token);
 
-    void IValueTaskSource<TResponse>.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags) => _core.OnCompleted(continuation, state, token, flags);
+    void IValueTaskSource<TResponse>.OnCompleted(
+        Action<object?> continuation,
+        object? state,
+        short token,
+        ValueTaskSourceOnCompletedFlags flags
+    ) => _core.OnCompleted(continuation, state, token, flags);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) => pool.TryRent(out self!);
+    protected static bool TryRent(ObjectPool pool, [NotNullWhen(true)] out TSelf? self) =>
+        pool.TryRent(out self!);
 
     protected abstract void Reset();
 
     private static void SetCancel(object? state)
     {
-        var self = (AsyncCommandBase<TSelf, TResponse>) state!;
+        var self = (AsyncCommandBase<TSelf, TResponse>)state!;
         self.IsCanceled = true;
         self.SetCanceled();
     }

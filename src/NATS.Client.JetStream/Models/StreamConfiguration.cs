@@ -47,7 +47,8 @@ public record StreamConfiguration
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     [Required(AllowEmptyStrings = true)]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public StreamConfigurationRetention Retention { get; set; } = StreamConfigurationRetention.limits;
+    public StreamConfigurationRetention Retention { get; set; } =
+        StreamConfigurationRetention.limits;
 
     /// <summary>
     ///     How many Consumers can be defined for a given Stream. -1 for unlimited.
@@ -112,7 +113,8 @@ public record StreamConfiguration
     [JsonPropertyName("compression")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public StreamConfigurationCompression Compression { get; set; } = StreamConfigurationCompression.none;
+    public StreamConfigurationCompression Compression { get; set; } =
+        StreamConfigurationCompression.none;
 
     /// <summary>
     ///     How many replicas to keep for each message.

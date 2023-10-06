@@ -14,7 +14,7 @@ internal static class StringExtensions
         for (var i = 0; i < count; i++)
         {
             int c = key[i];
-            span[i] = (byte) c;
+            span[i] = (byte)c;
         }
     }
 }

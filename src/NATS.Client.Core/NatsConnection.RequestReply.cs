@@ -20,11 +20,19 @@ public partial class NatsConnection
         NatsHeaders? headers = default,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var opts = SetReplyOptsDefaults(replyOpts);
 
-        await using var sub = await RequestSubAsync<TRequest, TReply>(subject, data, headers, requestOpts, opts, cancellationToken)
+        await using var sub = await RequestSubAsync<TRequest, TReply>(
+                subject,
+                data,
+                headers,
+                requestOpts,
+                opts,
+                cancellationToken
+            )
             .ConfigureAwait(false);
 
         if (await sub.Msgs.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
@@ -45,9 +53,17 @@ public partial class NatsConnection
         NatsHeaders? headers = default,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
-        await using var sub = await RequestSubAsync<TRequest, TReply>(subject, data, headers, requestOpts, replyOpts, cancellationToken)
+        await using var sub = await RequestSubAsync<TRequest, TReply>(
+                subject,
+                data,
+                headers,
+                requestOpts,
+                replyOpts,
+                cancellationToken
+            )
             .ConfigureAwait(false);
 
         while (await sub.Msgs.WaitToReadAsync(cancellationToken).ConfigureAwait(false))

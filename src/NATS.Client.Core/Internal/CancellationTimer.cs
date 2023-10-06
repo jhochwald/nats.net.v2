@@ -12,7 +12,8 @@ internal sealed class CancellationTimerPool
         _rootToken = rootToken;
     }
 
-    public CancellationTimer Start(TimeSpan timeout, CancellationToken externalCancellationToken) => CancellationTimer.Start(_pool, _rootToken, timeout, externalCancellationToken);
+    public CancellationTimer Start(TimeSpan timeout, CancellationToken externalCancellationToken) =>
+        CancellationTimer.Start(_pool, _rootToken, timeout, externalCancellationToken);
 }
 
 internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
@@ -41,7 +42,12 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
 
     public ref CancellationTimer? NextNode => ref _next;
 
-    public static CancellationTimer Start(ObjectPool pool, CancellationToken rootToken, TimeSpan timeout, CancellationToken externalCancellationToken)
+    public static CancellationTimer Start(
+        ObjectPool pool,
+        CancellationToken rootToken,
+        TimeSpan timeout,
+        CancellationToken externalCancellationToken
+    )
     {
         if (!pool.TryRent<CancellationTimer>(out var self))
         {
@@ -55,11 +61,12 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
             self._externalTokenRegistration = externalCancellationToken.UnsafeRegister(
                 static state =>
                 {
-                    var self = (CancellationTimer) state!;
+                    var self = (CancellationTimer)state!;
                     self._calledExternalTokenCancel = true;
                     self._cancellationTokenSource.Cancel();
                 },
-                self);
+                self
+            );
         }
 
         self._timeout = timeout;
@@ -79,7 +86,9 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
             return new OperationCanceledException(_externalCancellationToken);
         }
 
-        return new TimeoutException($"Nats operation is canceled due to the configured timeout of {_timeout.TotalSeconds} seconds elapsing.");
+        return new TimeoutException(
+            $"Nats operation is canceled due to the configured timeout of {_timeout.TotalSeconds} seconds elapsing."
+        );
     }
 
     // We can check cancel is called(calling) by return value

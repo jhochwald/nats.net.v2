@@ -37,7 +37,9 @@ public class ProtocolTest
                 return;
             }
 
-            count.Pulse(m.Subject == "foo.bar" ? null : new Exception($"Subject mismatch {m.Subject}"));
+            count.Pulse(
+                m.Subject == "foo.bar" ? null : new Exception($"Subject mismatch {m.Subject}")
+            );
         });
 
         var reg2 = sub2.Register(m =>
@@ -48,7 +50,9 @@ public class ProtocolTest
                 return;
             }
 
-            count.Pulse(m.Subject == "foo.bar" ? null : new Exception($"Subject mismatch {m.Subject}"));
+            count.Pulse(
+                m.Subject == "foo.bar" ? null : new Exception($"Subject mismatch {m.Subject}")
+            );
         });
 
         var reg3 = sub3.Register(m =>
@@ -59,7 +63,9 @@ public class ProtocolTest
                 return;
             }
 
-            count.Pulse(m.Subject == "foo.baz" ? null : new Exception($"Subject mismatch {m.Subject}"));
+            count.Pulse(
+                m.Subject == "foo.baz" ? null : new Exception($"Subject mismatch {m.Subject}")
+            );
         });
 
         // Since subscription and publishing are sent through different connections there is
@@ -67,12 +73,14 @@ public class ProtocolTest
         // So, we make sure subscribers are accepted by the server before we send any test data.
         await Retry.Until(
             "all subscriptions are active",
-            () => Volatile.Read(ref sync1) + Volatile.Read(ref sync2) + Volatile.Read(ref sync3) == 3,
+            () =>
+                Volatile.Read(ref sync1) + Volatile.Read(ref sync2) + Volatile.Read(ref sync3) == 3,
             async () =>
             {
                 await nats1.PublishAsync("foo.bar", 0);
                 await nats1.PublishAsync("foo.baz", 0);
-            });
+            }
+        );
 
         await nats1.PublishAsync("foo.bar", 1);
         await nats1.PublishAsync("foo.baz", 1);
@@ -112,7 +120,10 @@ public class ProtocolTest
             _output.WriteLine($"[TESTS] {DateTime.Now:HH:mm:ss.fff} {text}");
         }
 
-        await using var server = NatsServer.Start(_output, new NatsServerOptsBuilder().UseTransport(TransportType.Tcp).Trace().Build());
+        await using var server = NatsServer.Start(
+            _output,
+            new NatsServerOptsBuilder().UseTransport(TransportType.Tcp).Trace().Build()
+        );
         var (nats, proxy) = server.CreateProxiedClientConnection();
 
         var sync = 0;
@@ -123,15 +134,15 @@ public class ProtocolTest
         {
             switch (m.Subject)
             {
-            case "foo.sync":
-                Interlocked.Exchange(ref sync, 1);
-                break;
-            case "foo.signal1":
-                signal1.Pulse(m);
-                break;
-            case "foo.signal2":
-                signal2.Pulse(m);
-                break;
+                case "foo.sync":
+                    Interlocked.Exchange(ref sync, 1);
+                    break;
+                case "foo.signal1":
+                    signal1.Pulse(m);
+                    break;
+                case "foo.signal2":
+                    signal2.Pulse(m);
+                    break;
             }
         });
 
@@ -139,7 +150,8 @@ public class ProtocolTest
             "subscription is active",
             () => Volatile.Read(ref sync) == 1,
             async () => await nats.PublishAsync("foo.sync"),
-            retryDelay: TimeSpan.FromSeconds(1));
+            retryDelay: TimeSpan.FromSeconds(1)
+        );
 
         Log("PUB notifications");
         await nats.PublishAsync("foo.signal1");
@@ -179,7 +191,10 @@ public class ProtocolTest
         }
 
         // Use a single server to test multiple scenarios to make test runs more efficient
-        await using var server = NatsServer.Start(_output, new NatsServerOptsBuilder().UseTransport(TransportType.Tcp).Trace().Build());
+        await using var server = NatsServer.Start(
+            _output,
+            new NatsServerOptsBuilder().UseTransport(TransportType.Tcp).Trace().Build()
+        );
         var (nats, proxy) = server.CreateProxiedClientConnection();
         var sid = 0;
 
@@ -209,7 +224,7 @@ public class ProtocolTest
             }
 
             Assert.Equal(maxMsgs, count);
-            Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) sub).EndReason);
+            Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)sub).EndReason);
         }
 
         Log("### Manual unsubscribe");
@@ -231,7 +246,10 @@ public class ProtocolTest
                 await nats.PublishAsync("foo2", i);
             }
 
-            await Retry.Until("all pub frames arrived", () => proxy.Frames.Count(f => f.Message.StartsWith("PUB foo2")) == pubMsgs);
+            await Retry.Until(
+                "all pub frames arrived",
+                () => proxy.Frames.Count(f => f.Message.StartsWith("PUB foo2")) == pubMsgs
+            );
 
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             var cancellationToken = cts.Token;
@@ -242,7 +260,7 @@ public class ProtocolTest
             }
 
             Assert.Equal(0, count);
-            Assert.Equal(NatsSubEndReason.None, ((NatsSubBase) sub).EndReason);
+            Assert.Equal(NatsSubEndReason.None, ((NatsSubBase)sub).EndReason);
         }
 
         Log("### Reconnect");
@@ -254,18 +272,24 @@ public class ProtocolTest
             sid++;
             var count = 0;
             var reg = sub.Register(_ => Interlocked.Increment(ref count));
-            await Retry.Until("subscribed", () => proxy.Frames.Any(f => f.Message == $"SUB foo3 {sid}"));
+            await Retry.Until(
+                "subscribed",
+                () => proxy.Frames.Any(f => f.Message == $"SUB foo3 {sid}")
+            );
 
             for (var i = 0; i < pubMsgs; i++)
             {
                 await nats.PublishAsync("foo3", i);
             }
 
-            await Retry.Until("published", () => proxy.Frames.Count(f => f.Message.StartsWith("PUB foo3")) == pubMsgs);
+            await Retry.Until(
+                "published",
+                () => proxy.Frames.Count(f => f.Message.StartsWith("PUB foo3")) == pubMsgs
+            );
             await Retry.Until("received", () => Volatile.Read(ref count) == pubMsgs);
 
             var pending = maxMsgs - pubMsgs;
-            Assert.Equal(pending, ((NatsSubBase) sub).PendingMsgs);
+            Assert.Equal(pending, ((NatsSubBase)sub).PendingMsgs);
 
             proxy.Reset();
 
@@ -284,11 +308,13 @@ public class ProtocolTest
 
             await Retry.Until(
                 "published more",
-                () => proxy.ClientFrames.Count(f => f.Message.StartsWith("PUB foo3")) == maxMsgs);
+                () => proxy.ClientFrames.Count(f => f.Message.StartsWith("PUB foo3")) == maxMsgs
+            );
 
             await Retry.Until(
                 "unsubscribed with max-msgs",
-                () => ((NatsSubBase) sub).EndReason == NatsSubEndReason.MaxMsgs);
+                () => ((NatsSubBase)sub).EndReason == NatsSubEndReason.MaxMsgs
+            );
 
             Assert.Equal(maxMsgs, Volatile.Read(ref count));
 
@@ -306,13 +332,18 @@ public class ProtocolTest
         const string subject = "foo";
 
         var sync = 0;
-        await using var sub = new NatsSubReconnectTest(nats, subject, i => Interlocked.Exchange(ref sync, i));
+        await using var sub = new NatsSubReconnectTest(
+            nats,
+            subject,
+            i => Interlocked.Exchange(ref sync, i)
+        );
         await nats.SubAsync(sub.Subject, default, default, sub);
 
         await Retry.Until(
             "subscribed",
             () => Volatile.Read(ref sync) == 1,
-            async () => await nats.PublishAsync(subject, 1));
+            async () => await nats.PublishAsync(subject, 1)
+        );
 
         var disconnected = new WaitSignal();
         nats.ConnectionDisconnected += (_, _) => disconnected.Pulse();
@@ -324,11 +355,13 @@ public class ProtocolTest
         await Retry.Until(
             "re-subscribed",
             () => Volatile.Read(ref sync) == 2,
-            async () => await nats.PublishAsync(subject, 2));
+            async () => await nats.PublishAsync(subject, 2)
+        );
 
         await Retry.Until(
             "frames collected",
-            () => proxy.ClientFrames.Any(f => f.Message.StartsWith("PUB foo")));
+            () => proxy.ClientFrames.Any(f => f.Message.StartsWith("PUB foo"))
+        );
 
         var frames = proxy.ClientFrames.Select(f => f.Message).ToList();
         Assert.StartsWith("SUB foo", frames[0]);
@@ -344,7 +377,11 @@ public class ProtocolTest
     {
         private readonly Action<int> _callback;
 
-        internal NatsSubReconnectTest(NatsConnection connection, string subject, Action<int> callback)
+        internal NatsSubReconnectTest(
+            NatsConnection connection,
+            string subject,
+            Action<int> callback
+        )
             : base(connection, connection.SubscriptionManager, subject, default, default) =>
             _callback = callback;
 
@@ -355,20 +392,44 @@ public class ProtocolTest
                 yield return command;
 
             // Any additional commands to send on reconnect
-            yield return PublishBytesCommand.Create(Connection.ObjectPool, "bar1", default, default, default, default);
-            yield return PublishBytesCommand.Create(Connection.ObjectPool, "bar2", default, default, default, default);
-            yield return PublishBytesCommand.Create(Connection.ObjectPool, "bar3", default, default, default, default);
+            yield return PublishBytesCommand.Create(
+                Connection.ObjectPool,
+                "bar1",
+                default,
+                default,
+                default,
+                default
+            );
+            yield return PublishBytesCommand.Create(
+                Connection.ObjectPool,
+                "bar2",
+                default,
+                default,
+                default,
+                default
+            );
+            yield return PublishBytesCommand.Create(
+                Connection.ObjectPool,
+                "bar3",
+                default,
+                default,
+                default,
+                default
+            );
         }
 
-        protected override ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
+        protected override ValueTask ReceiveInternalAsync(
+            string subject,
+            string? replyTo,
+            ReadOnlySequence<byte>? headersBuffer,
+            ReadOnlySequence<byte> payloadBuffer
+        )
         {
             _callback(int.Parse(Encoding.UTF8.GetString(payloadBuffer)));
             DecrementMaxMsgs();
             return ValueTask.CompletedTask;
         }
 
-        protected override void TryComplete()
-        {
-        }
+        protected override void TryComplete() { }
     }
 }

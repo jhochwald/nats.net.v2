@@ -10,9 +10,12 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum StreamConfigurationRetention
 {
-    [EnumMember(Value = @"limits")] limits = 0,
+    [EnumMember(Value = @"limits")]
+    limits = 0,
 
-    [EnumMember(Value = @"interest")] interest = 1,
+    [EnumMember(Value = @"interest")]
+    interest = 1,
 
-    [EnumMember(Value = @"workqueue")] workqueue = 2
+    [EnumMember(Value = @"workqueue")]
+    workqueue = 2
 }

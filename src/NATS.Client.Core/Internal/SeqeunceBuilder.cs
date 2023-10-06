@@ -16,7 +16,8 @@ internal sealed class SeqeunceBuilder
 
     public int Count { get; private set; }
 
-    public ReadOnlySequence<byte> ToReadOnlySequence() => new(_first!, 0, _last!, _last!.Memory.Length);
+    public ReadOnlySequence<byte> ToReadOnlySequence() =>
+        new(_first!, 0, _last!, _last!.Memory.Length);
 
     // Memory is only allowed rent from ArrayPool.
     public void Append(ReadOnlyMemory<byte> buffer)
@@ -31,13 +32,19 @@ internal sealed class SeqeunceBuilder
         else
         {
             // if append same and continuous buffer, edit memory.
-            if (MemoryMarshal.TryGetArray(_last!.Memory, out var array1) && MemoryMarshal.TryGetArray(buffer, out var array2))
+            if (
+                MemoryMarshal.TryGetArray(_last!.Memory, out var array1)
+                && MemoryMarshal.TryGetArray(buffer, out var array2)
+            )
             {
                 if (array1.Array == array2.Array)
                 {
                     if (array1.Offset + array1.Count == array2.Offset)
                     {
-                        var newMemory = array1.Array.AsMemory(array1.Offset, array1.Count + array2.Count);
+                        var newMemory = array1.Array.AsMemory(
+                            array1.Offset,
+                            array1.Count + array2.Count
+                        );
                         _last.SetMemory(newMemory);
                         Count += buffer.Length;
                         return;
@@ -62,7 +69,7 @@ internal sealed class SeqeunceBuilder
         Debug.Assert(_first != null, "First segment");
         Debug.Assert(_last != null, "Last segment");
 
-        var segment = (SequenceSegment) start.GetObject()!;
+        var segment = (SequenceSegment)start.GetObject()!;
         var index = start.GetInteger();
 
         // try to find matched segment
@@ -70,26 +77,26 @@ internal sealed class SeqeunceBuilder
         while (target != null && target != segment)
         {
             var t = target;
-            target = (SequenceSegment) target.Next!;
+            target = (SequenceSegment)target.Next!;
             t.Return(); // return to pool.
         }
 
         if (target == null)
             throw new InvalidOperationException("failed to find next segment.");
 
-        Count -= (int) target.RunningIndex + index;
+        Count -= (int)target.RunningIndex + index;
         target.SetMemory(target.Memory.Slice(index));
         target.SetRunningIndex(0);
         _first = target;
 
         // change all after node runningIndex
         var runningIndex = _first.Memory.Length;
-        target = (SequenceSegment?) _first.Next;
+        target = (SequenceSegment?)_first.Next;
         while (target != null)
         {
             target.SetRunningIndex(runningIndex);
             runningIndex += target.Memory.Length;
-            target = (SequenceSegment?) target.Next;
+            target = (SequenceSegment?)target.Next;
         }
     }
 }
@@ -98,9 +105,7 @@ internal class SequenceSegment : ReadOnlySequenceSegment<byte>
 {
     private static readonly ConcurrentQueue<SequenceSegment> Pool = new();
 
-    private SequenceSegment()
-    {
-    }
+    private SequenceSegment() { }
 
     public static SequenceSegment Create(ReadOnlyMemory<byte> buffer)
     {

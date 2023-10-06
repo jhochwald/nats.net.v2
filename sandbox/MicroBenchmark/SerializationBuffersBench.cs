@@ -20,7 +20,8 @@ public class SerializationBuffersBench
 
     private NatsConnection _nats;
 
-    [Params(64, 512, 1024)] public int Iter { get; set; }
+    [Params(64, 512, 1024)]
+    public int Iter { get; set; }
 
     [GlobalSetup]
     public void Setup() => _nats = new NatsConnection();

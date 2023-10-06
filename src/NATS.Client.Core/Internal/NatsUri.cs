@@ -20,21 +20,24 @@ internal sealed class NatsUri : IEquatable<NatsUri>
 
         switch (uriBuilder.Scheme)
         {
-        case "tls":
-            IsTls = true;
-            goto case "nats";
-        case "nats":
-            if (uriBuilder.Port == -1)
-                uriBuilder.Port = 4222;
-            break;
-        case "ws":
-            IsWebSocket = true;
-            break;
-        case "wss":
-            IsWebSocket = true;
-            break;
-        default:
-            throw new ArgumentException($"unsupported scheme {uriBuilder.Scheme} in nats URL {urlString}", urlString);
+            case "tls":
+                IsTls = true;
+                goto case "nats";
+            case "nats":
+                if (uriBuilder.Port == -1)
+                    uriBuilder.Port = 4222;
+                break;
+            case "ws":
+                IsWebSocket = true;
+                break;
+            case "wss":
+                IsWebSocket = true;
+                break;
+            default:
+                throw new ArgumentException(
+                    $"unsupported scheme {uriBuilder.Scheme} in nats URL {urlString}",
+                    urlString
+                );
         }
 
         Uri = uriBuilder.Uri;
@@ -62,7 +65,8 @@ internal sealed class NatsUri : IEquatable<NatsUri>
         return Uri.Equals(other.Uri);
     }
 
-    public override string ToString() => IsWebSocket && Uri.AbsolutePath != "/" ? Uri.ToString() : Uri.ToString().Trim('/');
+    public override string ToString() =>
+        IsWebSocket && Uri.AbsolutePath != "/" ? Uri.ToString() : Uri.ToString().Trim('/');
 
     public override int GetHashCode() => Uri.GetHashCode();
 }

@@ -9,10 +9,10 @@ namespace NATS.Client.Core.Internal;
 
 internal class HeaderWriter
 {
-    private const byte ByteCr = (byte) '\r';
-    private const byte ByteLf = (byte) '\n';
-    private const byte ByteColon = (byte) ':';
-    private const byte ByteSpace = (byte) ' ';
+    private const byte ByteCr = (byte)'\r';
+    private const byte ByteLf = (byte)'\n';
+    private const byte ByteColon = (byte)':';
+    private const byte ByteSpace = (byte)' ';
     private const byte ByteDel = 127;
     private readonly Encoding _encoding;
 
@@ -38,7 +38,8 @@ internal class HeaderWriter
                     if (!ValidateKey(keySpan.Slice(0, keyLength)))
                     {
                         throw new NatsException(
-                            $"Invalid header key '{kv.Key}': contains colon, space, or other non-printable ASCII characters");
+                            $"Invalid header key '{kv.Key}': contains colon, space, or other non-printable ASCII characters"
+                        );
                     }
 
                     bufferWriter.Advance(keyLength);
@@ -50,7 +51,9 @@ internal class HeaderWriter
                     _encoding.GetBytes(value, valueSpan);
                     if (!ValidateValue(valueSpan.Slice(0, valueLength)))
                     {
-                        throw new NatsException($"Invalid header value for key '{kv.Key}': contains CRLF");
+                        throw new NatsException(
+                            $"Invalid header value for key '{kv.Key}': contains CRLF"
+                        );
                     }
 
                     bufferWriter.Advance(valueLength);

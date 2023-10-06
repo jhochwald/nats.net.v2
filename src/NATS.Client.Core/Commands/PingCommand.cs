@@ -8,9 +8,7 @@ namespace NATS.Client.Core.Commands;
 
 internal sealed class PingCommand : CommandBase<PingCommand>
 {
-    private PingCommand()
-    {
-    }
+    private PingCommand() { }
 
     public static PingCommand Create(ObjectPool pool, CancellationTimer timer)
     {
@@ -26,22 +24,22 @@ internal sealed class PingCommand : CommandBase<PingCommand>
 
     public override void Write(ProtocolWriter writer) => writer.WritePing();
 
-    protected override void Reset()
-    {
-    }
+    protected override void Reset() { }
 }
 
 internal sealed class AsyncPingCommand : AsyncCommandBase<AsyncPingCommand, TimeSpan>
 {
     private NatsConnection? _connection;
 
-    private AsyncPingCommand()
-    {
-    }
+    private AsyncPingCommand() { }
 
     public DateTimeOffset? WriteTime { get; private set; }
 
-    public static AsyncPingCommand Create(NatsConnection connection, ObjectPool pool, CancellationTimer timer)
+    public static AsyncPingCommand Create(
+        NatsConnection connection,
+        ObjectPool pool,
+        CancellationTimer timer
+    )
     {
         if (!TryRent(pool, out var result))
         {

@@ -57,8 +57,13 @@ foreach (var (typeName, typeDef) in schema.Definitions)
 var generator = new CSharpGenerator(schema, generatorSettings);
 generator.GenerateFile();
 
-var removeGeneratedCodeLine = new Regex(@"^\[System.CodeDom.Compiler.GeneratedCode.*$", RegexOptions.Multiline);
-var removeExtraLineAfterAnnotation = new Regex(@"(\[System.Text.Json.Serialization.JsonPropertyName\(""\w+""\)])\n\n");
+var removeGeneratedCodeLine = new Regex(
+    @"^\[System.CodeDom.Compiler.GeneratedCode.*$",
+    RegexOptions.Multiline
+);
+var removeExtraLineAfterAnnotation = new Regex(
+    @"(\[System.Text.Json.Serialization.JsonPropertyName\(""\w+""\)])\n\n"
+);
 
 // loop through each type and write a model
 foreach (var type in generator.GenerateTypes())
@@ -82,12 +87,15 @@ public static class Utils
     public static string ProperCase(string str) =>
         string.IsNullOrEmpty(str)
             ? str
-            : string.Concat(str.Split("_").Select(s => string.Concat(s[0].ToString().ToUpper(), s.AsSpan(1))));
+            : string.Concat(
+                str.Split("_").Select(s => string.Concat(s[0].ToString().ToUpper(), s.AsSpan(1)))
+            );
 }
 
 public class ProperCaseEnumNameGenerator : IEnumNameGenerator
 {
-    public string Generate(int index, string name, object value, JsonSchema schema) => Utils.ProperCase(name);
+    public string Generate(int index, string name, object value, JsonSchema schema) =>
+        Utils.ProperCase(name);
 }
 
 public class ProperCasePropertyNameGenerator : IPropertyNameGenerator
@@ -97,5 +105,9 @@ public class ProperCasePropertyNameGenerator : IPropertyNameGenerator
 
 public class ProperCaseTypeNameGenerator : ITypeNameGenerator
 {
-    public string Generate(JsonSchema schema, string typeNameHint, IEnumerable<string> reservedTypeNames) => string.IsNullOrEmpty(typeNameHint) ? "Unknown" : Utils.ProperCase(typeNameHint);
+    public string Generate(
+        JsonSchema schema,
+        string typeNameHint,
+        IEnumerable<string> reservedTypeNames
+    ) => string.IsNullOrEmpty(typeNameHint) ? "Unknown" : Utils.ProperCase(typeNameHint);
 }

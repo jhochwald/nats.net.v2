@@ -8,23 +8,41 @@ public partial class NatsConnection
         NatsHeaders? headers = default,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var replyTo = $"{InboxPrefix}{Guid.NewGuid():n}";
 
         var replySerializer = replyOpts?.Serializer ?? Opts.Serializer;
-        var sub = new NatsSub<TReply>(this, SubscriptionManager.InboxSubBuilder, replyTo, default, replyOpts, replySerializer);
+        var sub = new NatsSub<TReply>(
+            this,
+            SubscriptionManager.InboxSubBuilder,
+            replyTo,
+            default,
+            replyOpts,
+            replySerializer
+        );
         await SubAsync(replyTo, default, replyOpts, sub, cancellationToken).ConfigureAwait(false);
 
         var serializer = requestOpts?.Serializer ?? Opts.Serializer;
 
         if (requestOpts?.WaitUntilSent == true)
         {
-            await PubModelAsync(subject, data, serializer, replyTo, headers, cancellationToken).ConfigureAwait(false);
+            await PubModelAsync(subject, data, serializer, replyTo, headers, cancellationToken)
+                .ConfigureAwait(false);
         }
         else
         {
-            await PubModelPostAsync(subject, data, serializer, replyTo, headers, requestOpts?.ErrorHandler, cancellationToken).ConfigureAwait(false);
+            await PubModelPostAsync(
+                    subject,
+                    data,
+                    serializer,
+                    replyTo,
+                    headers,
+                    requestOpts?.ErrorHandler,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
         }
 
         return sub;

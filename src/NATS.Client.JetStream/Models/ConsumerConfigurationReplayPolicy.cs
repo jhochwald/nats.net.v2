@@ -10,7 +10,9 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum ConsumerConfigurationReplayPolicy
 {
-    [EnumMember(Value = @"instant")] instant = 0,
+    [EnumMember(Value = @"instant")]
+    instant = 0,
 
-    [EnumMember(Value = @"original")] original = 1
+    [EnumMember(Value = @"original")]
+    original = 1
 }

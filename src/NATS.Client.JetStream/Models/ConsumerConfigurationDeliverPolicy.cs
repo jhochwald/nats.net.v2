@@ -10,16 +10,20 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum ConsumerConfigurationDeliverPolicy
 {
-    [EnumMember(Value = @"all")] all = 0,
+    [EnumMember(Value = @"all")]
+    all = 0,
 
-    [EnumMember(Value = @"last")] last = 1,
+    [EnumMember(Value = @"last")]
+    last = 1,
 
-    [EnumMember(Value = @"new")] @new = 2,
+    [EnumMember(Value = @"new")]
+    @new = 2,
 
     [EnumMember(Value = @"by_start_sequence")]
     by_start_sequence = 3,
 
-    [EnumMember(Value = @"by_start_time")] by_start_time = 4,
+    [EnumMember(Value = @"by_start_time")]
+    by_start_time = 4,
 
     [EnumMember(Value = @"last_per_subject")]
     last_per_subject = 5

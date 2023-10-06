@@ -25,7 +25,9 @@ public static class ServerVersions
 
 public class NatsServer : IAsyncDisposable
 {
-    private static readonly string Ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+    private static readonly string Ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        ? ".exe"
+        : string.Empty;
     private static readonly string NatsServerPath = $"nats-server{Ext}";
     private static readonly Version Version;
 
@@ -41,7 +43,16 @@ public class NatsServer : IAsyncDisposable
 
     static NatsServer()
     {
-        var process = new Process { StartInfo = new ProcessStartInfo { FileName = NatsServerPath, Arguments = "-v", RedirectStandardOutput = true, UseShellExecute = false } };
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = NatsServerPath,
+                Arguments = "-v",
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            }
+        };
         process.Start();
         process.WaitForExit();
         var output = process.StandardOutput.ReadToEnd();
@@ -75,24 +86,29 @@ public class NatsServer : IAsyncDisposable
 
         // Check for start server
         Task.Run(async () =>
-        {
-            using var client = new TcpClient();
-            while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                try
+                using var client = new TcpClient();
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    await client.ConnectAsync("localhost", Opts.ServerPort, _cancellationTokenSource.Token);
-                    if (client.Connected)
-                        return;
-                }
-                catch
-                {
-                    // ignore
-                }
+                    try
+                    {
+                        await client.ConnectAsync(
+                            "localhost",
+                            Opts.ServerPort,
+                            _cancellationTokenSource.Token
+                        );
+                        if (client.Connected)
+                            return;
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
 
-                await Task.Delay(500, _cancellationTokenSource.Token);
-            }
-        }).Wait(5000); // timeout
+                    await Task.Delay(500, _cancellationTokenSource.Token);
+                }
+            })
+            .Wait(5000); // timeout
 
         if (_processOut.IsFaulted)
         {
@@ -110,13 +126,14 @@ public class NatsServer : IAsyncDisposable
 
     public NatsServerOpts Opts { get; }
 
-    public string ClientUrl => _transportType switch
-    {
-        TransportType.Tcp => $"nats://localhost:{Opts.ServerPort}",
-        TransportType.Tls => $"tls://localhost:{Opts.ServerPort}",
-        TransportType.WebSocket => $"ws://localhost:{Opts.WebSocketPort}",
-        _ => throw new ArgumentOutOfRangeException()
-    };
+    public string ClientUrl =>
+        _transportType switch
+        {
+            TransportType.Tcp => $"nats://localhost:{Opts.ServerPort}",
+            TransportType.Tls => $"tls://localhost:{Opts.ServerPort}",
+            TransportType.WebSocket => $"ws://localhost:{Opts.WebSocketPort}",
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
     public int ConnectionPort
     {
@@ -154,9 +171,7 @@ public class NatsServer : IAsyncDisposable
                 }
             }
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
         finally
         {
             if (_configFileName != null)
@@ -185,35 +200,38 @@ public class NatsServer : IAsyncDisposable
 
     public static NatsServer StartJS() => StartJS(new NullOutputHelper(), TransportType.Tcp);
 
-    public static NatsServer StartJSWithTrace(ITestOutputHelper outputHelper) => Start(
-        outputHelper,
-        new NatsServerOptsBuilder()
-            .UseTransport(TransportType.Tcp)
-            .Trace()
-            .UseJetStream()
-            .Build());
+    public static NatsServer StartJSWithTrace(ITestOutputHelper outputHelper) =>
+        Start(
+            outputHelper,
+            new NatsServerOptsBuilder()
+                .UseTransport(TransportType.Tcp)
+                .Trace()
+                .UseJetStream()
+                .Build()
+        );
 
-    public static NatsServer StartJS(ITestOutputHelper outputHelper, TransportType transportType) => Start(
-        outputHelper,
-        new NatsServerOptsBuilder()
-            .UseTransport(transportType)
-            .UseJetStream()
-            .Build());
+    public static NatsServer StartJS(ITestOutputHelper outputHelper, TransportType transportType) =>
+        Start(
+            outputHelper,
+            new NatsServerOptsBuilder().UseTransport(transportType).UseJetStream().Build()
+        );
 
     public static NatsServer Start() => Start(new NullOutputHelper(), TransportType.Tcp);
 
-    public static NatsServer StartWithTrace(ITestOutputHelper outputHelper)
-        => Start(
+    public static NatsServer StartWithTrace(ITestOutputHelper outputHelper) =>
+        Start(
             outputHelper,
-            new NatsServerOptsBuilder()
-                .Trace()
-                .UseTransport(TransportType.Tcp)
-                .Build());
+            new NatsServerOptsBuilder().Trace().UseTransport(TransportType.Tcp).Build()
+        );
 
     public static NatsServer Start(ITestOutputHelper outputHelper, TransportType transportType) =>
         Start(outputHelper, new NatsServerOptsBuilder().UseTransport(transportType).Build());
 
-    public static NatsServer Start(ITestOutputHelper outputHelper, NatsServerOpts opts, NatsOpts? clientOpts = default)
+    public static NatsServer Start(
+        ITestOutputHelper outputHelper,
+        NatsServerOpts opts,
+        NatsOpts? clientOpts = default
+    )
     {
         NatsServer? server = null;
         NatsConnection? nats = null;
@@ -249,12 +267,23 @@ public class NatsServer : IAsyncDisposable
 
         var proxy = new NatsProxy(Opts.ServerPort, _outputHelper, Opts.Trace);
 
-        var client = new NatsConnection((options ?? NatsOpts.Default) with { LoggerFactory = _loggerFactory, Url = $"nats://localhost:{proxy.Port}", ConnectTimeout = TimeSpan.FromSeconds(10) });
+        var client = new NatsConnection(
+            (options ?? NatsOpts.Default) with
+            {
+                LoggerFactory = _loggerFactory,
+                Url = $"nats://localhost:{proxy.Port}",
+                ConnectTimeout = TimeSpan.FromSeconds(10)
+            }
+        );
 
         return (client, proxy);
     }
 
-    public NatsConnection CreateClientConnection(NatsOpts? options = default, int reTryCount = 10, bool ignoreAuthorizationException = false)
+    public NatsConnection CreateClientConnection(
+        NatsOpts? options = default,
+        int reTryCount = 10,
+        bool ignoreAuthorizationException = false
+    )
     {
         for (var i = 0; i < reTryCount; i++)
         {
@@ -288,29 +317,42 @@ public class NatsServer : IAsyncDisposable
         throw new Exception("Can't create a connection to nats-server");
     }
 
-    public NatsConnectionPool CreatePooledClientConnection() => CreatePooledClientConnection(NatsOpts.Default);
+    public NatsConnectionPool CreatePooledClientConnection() =>
+        CreatePooledClientConnection(NatsOpts.Default);
 
-    public NatsConnectionPool CreatePooledClientConnection(NatsOpts opts) => new(4, ClientOpts(opts));
+    public NatsConnectionPool CreatePooledClientConnection(NatsOpts opts) =>
+        new(4, ClientOpts(opts));
 
     public NatsOpts ClientOpts(NatsOpts opts) =>
         opts with
         {
             LoggerFactory = _loggerFactory,
-
             // ConnectTimeout = TimeSpan.FromSeconds(1),
             // ReconnectWait = TimeSpan.Zero,
             // ReconnectJitter = TimeSpan.Zero,
             TlsOpts = Opts.EnableTls
-                ? NatsTlsOpts.Default with { CertFile = Opts.TlsClientCertFile, KeyFile = Opts.TlsClientKeyFile, CaFile = Opts.TlsCaFile }
+                ? NatsTlsOpts.Default with
+                {
+                    CertFile = Opts.TlsClientCertFile,
+                    KeyFile = Opts.TlsClientKeyFile,
+                    CaFile = Opts.TlsCaFile
+                }
                 : NatsTlsOpts.Default,
             Url = ClientUrl
         };
 
-    public void LogMessage<TState>(string categoryName, LogLevel logLevel, EventId eventId, Exception? exception, string text, TState state)
+    public void LogMessage<TState>(
+        string categoryName,
+        LogLevel logLevel,
+        EventId eventId,
+        Exception? exception,
+        string text,
+        TState state
+    )
     {
         foreach (var @delegate in OnLog.GetInvocationList())
         {
-            var action = (Action<LogMessage>) @delegate;
+            var action = (Action<LogMessage>)@delegate;
             try
             {
                 if (state is IReadOnlyList<KeyValuePair<string, object?>> kvs)
@@ -319,7 +361,16 @@ public class NatsServer : IAsyncDisposable
                 }
                 else
                 {
-                    action(new LogMessage(categoryName, logLevel, eventId, exception, text, new[] { new KeyValuePair<string, object?>("text", text) }));
+                    action(
+                        new LogMessage(
+                            categoryName,
+                            logLevel,
+                            eventId,
+                            exception,
+                            text,
+                            new[] { new KeyValuePair<string, object?>("text", text) }
+                        )
+                    );
                 }
             }
             catch
@@ -329,7 +380,10 @@ public class NatsServer : IAsyncDisposable
         }
     }
 
-    private async Task<string[]> EnumerateWithLogsAsync(ProcessAsyncEnumerable enumerable, CancellationToken cancellationToken)
+    private async Task<string[]> EnumerateWithLogsAsync(
+        ProcessAsyncEnumerable enumerable,
+        CancellationToken cancellationToken
+    )
     {
         var l = new List<string>();
         try
@@ -339,9 +393,7 @@ public class NatsServer : IAsyncDisposable
                 l.Add(item);
             }
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
 
         return l.ToArray();
     }
@@ -353,15 +405,31 @@ public record LogMessage(
     EventId EventId,
     Exception? Exception,
     string Text,
-    IReadOnlyList<KeyValuePair<string, object?>> State);
+    IReadOnlyList<KeyValuePair<string, object?>> State
+);
 
 public class NatsCluster : IAsyncDisposable
 {
     public NatsCluster(ITestOutputHelper outputHelper, TransportType transportType)
     {
-        var opts1 = new NatsServerOpts { TransportType = transportType, EnableWebSocket = transportType == TransportType.WebSocket, EnableClustering = true };
-        var opts2 = new NatsServerOpts { TransportType = transportType, EnableWebSocket = transportType == TransportType.WebSocket, EnableClustering = true };
-        var opts3 = new NatsServerOpts { TransportType = transportType, EnableWebSocket = transportType == TransportType.WebSocket, EnableClustering = true };
+        var opts1 = new NatsServerOpts
+        {
+            TransportType = transportType,
+            EnableWebSocket = transportType == TransportType.WebSocket,
+            EnableClustering = true
+        };
+        var opts2 = new NatsServerOpts
+        {
+            TransportType = transportType,
+            EnableWebSocket = transportType == TransportType.WebSocket,
+            EnableClustering = true
+        };
+        var opts3 = new NatsServerOpts
+        {
+            TransportType = transportType,
+            EnableWebSocket = transportType == TransportType.WebSocket,
+            EnableClustering = true
+        };
         var routes = new[] { opts1, opts2, opts3 };
         foreach (var opt in routes)
         {
@@ -391,11 +459,7 @@ public class NatsCluster : IAsyncDisposable
 
 public class NullOutputHelper : ITestOutputHelper
 {
-    public void WriteLine(string message)
-    {
-    }
+    public void WriteLine(string message) { }
 
-    public void WriteLine(string format, params object[] args)
-    {
-    }
+    public void WriteLine(string format, params object[] args) { }
 }

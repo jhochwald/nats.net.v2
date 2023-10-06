@@ -10,9 +10,13 @@ namespace NATS.Client.Core.Internal;
 internal static class BufferExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Split(this ReadOnlySpan<byte> span, out ReadOnlySpan<byte> left, out ReadOnlySpan<byte> right)
+    public static void Split(
+        this ReadOnlySpan<byte> span,
+        out ReadOnlySpan<byte> left,
+        out ReadOnlySpan<byte> right
+    )
     {
-        var i = span.IndexOf((byte) ' ');
+        var i = span.IndexOf((byte)' ');
         if (i == -1)
         {
             left = span;
@@ -39,7 +43,11 @@ internal static class BufferExtensions
     ///     Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}" />
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SequencePosition? PositionOfAny<T>(in this ReadOnlySequence<T> source, T value0, T value1)
+    public static SequencePosition? PositionOfAny<T>(
+        in this ReadOnlySequence<T> source,
+        T value0,
+        T value1
+    )
         where T : IEquatable<T>
     {
         if (source.IsSingleSegment)
@@ -56,7 +64,11 @@ internal static class BufferExtensions
         return PositionOfAnyMultiSegment(source, value0, value1);
     }
 
-    private static SequencePosition? PositionOfAnyMultiSegment<T>(in ReadOnlySequence<T> source, T value0, T value1)
+    private static SequencePosition? PositionOfAnyMultiSegment<T>(
+        in ReadOnlySequence<T> source,
+        T value0,
+        T value1
+    )
         where T : IEquatable<T>
     {
         var position = source.Start;

@@ -25,7 +25,11 @@ public class ConsumerNextTest
 
         for (var i = 0; i < 10; i++)
         {
-            var ack = await js.PublishAsync("s1.foo", new TestData { Test = i }, cancellationToken: cts.Token);
+            var ack = await js.PublishAsync(
+                "s1.foo",
+                new TestData { Test = i },
+                cancellationToken: cts.Token
+            );
             ack.EnsureSuccess();
             var next = await consumer.NextAsync<TestData>(new NatsJSNextOpts(), cts.Token);
             if (next is { } msg)

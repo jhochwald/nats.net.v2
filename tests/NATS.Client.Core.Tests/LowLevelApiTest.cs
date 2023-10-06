@@ -27,7 +27,8 @@ public class LowLevelApiTest
         await Retry.Until(
             "subscription is ready",
             () => builder.IsSynced,
-            async () => await nats.PubAsync("foo.sync"));
+            async () => await nats.PubAsync("foo.sync")
+        );
 
         for (var i = 0; i < 10; i++)
         {
@@ -48,14 +49,25 @@ public class LowLevelApiTest
         private readonly NatsSubCustomTestBuilder _builder;
         private readonly ITestOutputHelper _output;
 
-        public NatsSubTest(string subject, NatsConnection connection, NatsSubCustomTestBuilder builder, ITestOutputHelper output, ISubscriptionManager manager)
+        public NatsSubTest(
+            string subject,
+            NatsConnection connection,
+            NatsSubCustomTestBuilder builder,
+            ITestOutputHelper output,
+            ISubscriptionManager manager
+        )
             : base(connection, manager, subject, default, default)
         {
             _builder = builder;
             _output = output;
         }
 
-        protected override ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
+        protected override ValueTask ReceiveInternalAsync(
+            string subject,
+            string? replyTo,
+            ReadOnlySequence<byte>? headersBuffer,
+            ReadOnlySequence<byte> payloadBuffer
+        )
         {
             if (subject.EndsWith(".sync"))
             {
@@ -87,9 +99,7 @@ public class LowLevelApiTest
             return ValueTask.CompletedTask;
         }
 
-        protected override void TryComplete()
-        {
-        }
+        protected override void TryComplete() { }
     }
 
     private class NatsSubCustomTestBuilder
@@ -113,7 +123,12 @@ public class LowLevelApiTest
             }
         }
 
-        public NatsSubTest Build(string subject, NatsSubOpts? opts, NatsConnection connection, ISubscriptionManager manager) => new(subject, connection, this, _output, manager);
+        public NatsSubTest Build(
+            string subject,
+            NatsSubOpts? opts,
+            NatsConnection connection,
+            ISubscriptionManager manager
+        ) => new(subject, connection, this, _output, manager);
 
         public void Sync() => Interlocked.Exchange(ref _sync, 1);
 

@@ -13,11 +13,16 @@ internal sealed class AsyncSubscribeCommand : AsyncCommandBase<AsyncSubscribeCom
     private int _sid;
     private string? _subject;
 
-    private AsyncSubscribeCommand()
-    {
-    }
+    private AsyncSubscribeCommand() { }
 
-    public static AsyncSubscribeCommand Create(ObjectPool pool, CancellationTimer timer, int sid, string subject, string? queueGroup, int? maxMsgs)
+    public static AsyncSubscribeCommand Create(
+        ObjectPool pool,
+        CancellationTimer timer,
+        int sid,
+        string subject,
+        string? queueGroup,
+        int? maxMsgs
+    )
     {
         if (!TryRent(pool, out var result))
         {
@@ -33,7 +38,8 @@ internal sealed class AsyncSubscribeCommand : AsyncCommandBase<AsyncSubscribeCom
         return result;
     }
 
-    public override void Write(ProtocolWriter writer) => writer.WriteSubscribe(_sid, _subject!, _queueGroup, _maxMsgs);
+    public override void Write(ProtocolWriter writer) =>
+        writer.WriteSubscribe(_sid, _subject!, _queueGroup, _maxMsgs);
 
     protected override void Reset()
     {
@@ -43,13 +49,13 @@ internal sealed class AsyncSubscribeCommand : AsyncCommandBase<AsyncSubscribeCom
     }
 }
 
-internal sealed class AsyncSubscribeBatchCommand : AsyncCommandBase<AsyncSubscribeBatchCommand>, IBatchCommand
+internal sealed class AsyncSubscribeBatchCommand
+    : AsyncCommandBase<AsyncSubscribeBatchCommand>,
+        IBatchCommand
 {
     private (int sid, string subject, string? queueGroup, int? maxMsgs)[]? _subscriptions;
 
-    private AsyncSubscribeBatchCommand()
-    {
-    }
+    private AsyncSubscribeBatchCommand() { }
 
     public override void Write(ProtocolWriter writer) => (this as IBatchCommand).Write(writer);
 
@@ -68,7 +74,11 @@ internal sealed class AsyncSubscribeBatchCommand : AsyncCommandBase<AsyncSubscri
         return i;
     }
 
-    public static AsyncSubscribeBatchCommand Create(ObjectPool pool, CancellationTimer timer, (int sid, string subject, string? queueGroup, int? maxMsgs)[]? subscriptions)
+    public static AsyncSubscribeBatchCommand Create(
+        ObjectPool pool,
+        CancellationTimer timer,
+        (int sid, string subject, string? queueGroup, int? maxMsgs)[]? subscriptions
+    )
     {
         if (!TryRent(pool, out var result))
         {

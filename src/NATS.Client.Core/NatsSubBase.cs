@@ -48,7 +48,8 @@ public abstract class NatsSubBase
         ISubscriptionManager manager,
         string subject,
         string? queueGroup,
-        NatsSubOpts? opts)
+        NatsSubOpts? opts
+    )
     {
         _logger = connection.Opts.LoggerFactory.CreateLogger<NatsSubBase>();
         _debug = _logger.IsEnabled(LogLevel.Debug);
@@ -107,7 +108,7 @@ public abstract class NatsSubBase
     // since INatsSub is marked as internal.
     public int? PendingMsgs => _pendingMsgs == -1 ? null : Volatile.Read(ref _pendingMsgs);
 
-    public NatsSubEndReason EndReason => (NatsSubEndReason) Volatile.Read(ref _endReasonRaw);
+    public NatsSubEndReason EndReason => (NatsSubEndReason)Volatile.Read(ref _endReasonRaw);
 
     protected NatsConnection Connection { get; }
 
@@ -176,14 +177,20 @@ public abstract class NatsSubBase
         return unsubscribeAsync;
     }
 
-    public virtual async ValueTask ReceiveAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
+    public virtual async ValueTask ReceiveAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer
+    )
     {
         ResetIdleTimeout();
 
         try
         {
             // Need to await to handle any exceptions
-            await ReceiveInternalAsync(subject, replyTo, headersBuffer, payloadBuffer).ConfigureAwait(false);
+            await ReceiveInternalAsync(subject, replyTo, headersBuffer, payloadBuffer)
+                .ConfigureAwait(false);
         }
         catch (ChannelClosedException)
         {
@@ -203,7 +210,14 @@ public abstract class NatsSubBase
                 headers = new Memory<byte>(new byte[headersBuffer.Value.Length]);
             }
 
-            SetException(new NatsSubException($"Message error: {e.Message}", ExceptionDispatchInfo.Capture(e), payload, headers));
+            SetException(
+                new NatsSubException(
+                    $"Message error: {e.Message}",
+                    ExceptionDispatchInfo.Capture(e),
+                    payload,
+                    headers
+                )
+            );
         }
     }
 
@@ -221,7 +235,14 @@ public abstract class NatsSubBase
     /// <returns>IEnumerable list of commands</returns>
     internal virtual IEnumerable<ICommand> GetReconnectCommands(int sid)
     {
-        yield return AsyncSubscribeCommand.Create(Connection.ObjectPool, Connection.GetCancellationTimer(default), sid, Subject, QueueGroup, PendingMsgs);
+        yield return AsyncSubscribeCommand.Create(
+            Connection.ObjectPool,
+            Connection.GetCancellationTimer(default),
+            sid,
+            Subject,
+            QueueGroup,
+            PendingMsgs
+        );
     }
 
     /// <summary>
@@ -235,7 +256,12 @@ public abstract class NatsSubBase
     /// <param name="headersBuffer">Raw headers bytes. You can use <see cref="NatsConnection" /> <see cref="NatsHeaderParser" /> to decode them.</param>
     /// <param name="payloadBuffer">Raw payload bytes.</param>
     /// <returns></returns>
-    protected abstract ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer);
+    protected abstract ValueTask ReceiveInternalAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer
+    );
 
     protected void SetException(Exception exception)
     {
@@ -281,7 +307,7 @@ public abstract class NatsSubBase
             _endSubscription = true;
         }
 
-        Interlocked.Exchange(ref _endReasonRaw, (int) reason);
+        Interlocked.Exchange(ref _endReasonRaw, (int)reason);
 
         // Stops timers and completes channel writer to exit any message iterators
         // synchronously, which is fine, however, we're not able to wait for

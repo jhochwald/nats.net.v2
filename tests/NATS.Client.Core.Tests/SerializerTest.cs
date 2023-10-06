@@ -32,10 +32,7 @@ public class SerializerTest
                 }
             };
 
-            await nats.PublishAsync(
-                "foo",
-                0,
-                opts: opts);
+            await nats.PublishAsync("foo", 0, opts: opts);
 
             throw await signal;
         });
@@ -45,7 +42,8 @@ public class SerializerTest
             await nats.PublishAsync(
                 "foo",
                 0,
-                opts: new NatsPubOpts { Serializer = new TestSerializer(), WaitUntilSent = true });
+                opts: new NatsPubOpts { Serializer = new TestSerializer(), WaitUntilSent = true }
+            );
         });
 
         // Check that our connection isn't affected by the exceptions
@@ -66,11 +64,11 @@ public class TestSerializer : INatsSerializer
 {
     public INatsSerializer? Next => default;
 
-    public int Serialize<T>(ICountableBufferWriter bufferWriter, T? value) => throw new TestSerializerException();
+    public int Serialize<T>(ICountableBufferWriter bufferWriter, T? value) =>
+        throw new TestSerializerException();
 
-    public T? Deserialize<T>(in ReadOnlySequence<byte> buffer) => throw new TestSerializerException();
+    public T? Deserialize<T>(in ReadOnlySequence<byte> buffer) =>
+        throw new TestSerializerException();
 }
 
-public class TestSerializerException : Exception
-{
-}
+public class TestSerializerException : Exception { }

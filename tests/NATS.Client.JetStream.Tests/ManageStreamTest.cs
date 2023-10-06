@@ -33,7 +33,8 @@ public class ManageStreamTest
         {
             var stream = await js.CreateStreamAsync(
                 new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" } },
-                cancellationToken);
+                cancellationToken
+            );
             Assert.Equal("events", stream.Info.Config.Name);
 
             var accountInfo = await js.GetAccountInfoAsync(cancellationToken);
@@ -52,7 +53,10 @@ public class ManageStreamTest
             var stream1 = await js.GetStreamAsync("events", cancellationToken);
             Assert.Equal(-1, stream1.Info.Config.MaxMsgs);
 
-            var stream2 = await js.UpdateStreamAsync(new StreamUpdateRequest { Name = "events", MaxMsgs = 10 }, cancellationToken);
+            var stream2 = await js.UpdateStreamAsync(
+                new StreamUpdateRequest { Name = "events", MaxMsgs = 10 },
+                cancellationToken
+            );
             Assert.Equal(10, stream2.Info.Config.MaxMsgs);
 
             var stream3 = await js.GetStreamAsync("events", cancellationToken);

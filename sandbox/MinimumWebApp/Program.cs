@@ -12,18 +12,21 @@ builder.Services.AddNats();
 
 var app = builder.Build();
 
-app.MapGet("/subscribe", async (INatsConnection command) =>
-{
-    var subscription = await command.SubscribeAsync<int>("foo");
-
-    _ = Task.Run(async () =>
+app.MapGet(
+    "/subscribe",
+    async (INatsConnection command) =>
     {
-        await foreach (var msg in subscription.Msgs.ReadAllAsync())
+        var subscription = await command.SubscribeAsync<int>("foo");
+
+        _ = Task.Run(async () =>
         {
-            Console.WriteLine($"Received {msg.Data}");
-        }
-    });
-});
+            await foreach (var msg in subscription.Msgs.ReadAllAsync())
+            {
+                Console.WriteLine($"Received {msg.Data}");
+            }
+        });
+    }
+);
 
 app.MapGet("/publish", async (INatsConnection command) => await command.PublishAsync("foo", 99));
 

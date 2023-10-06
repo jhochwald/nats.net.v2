@@ -7,7 +7,10 @@ using NATS.Client.Core;
 #endregion
 
 var subject = "foo.*";
-var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };
+var options = NatsOpts.Default with
+{
+    LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error)
+};
 
 Print("[CON] Connecting...\n");
 

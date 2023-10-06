@@ -19,7 +19,8 @@ internal class InboxSub : NatsSubBase
         string subject,
         NatsSubOpts? opts,
         NatsConnection connection,
-        ISubscriptionManager manager)
+        ISubscriptionManager manager
+    )
         : base(connection, manager, subject, default, opts)
     {
         _inbox = inbox;
@@ -27,21 +28,30 @@ internal class InboxSub : NatsSubBase
     }
 
     // Avoid base class error handling since inboxed subscribers will be responsible for that.
-    public override ValueTask ReceiveAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer) =>
-        _inbox.ReceivedAsync(subject, replyTo, headersBuffer, payloadBuffer, _connection);
+    public override ValueTask ReceiveAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer
+    ) => _inbox.ReceivedAsync(subject, replyTo, headersBuffer, payloadBuffer, _connection);
 
     // Not used. Dummy implementation to keep base happy.
-    protected override ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
-        => ValueTask.CompletedTask;
+    protected override ValueTask ReceiveInternalAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer
+    ) => ValueTask.CompletedTask;
 
-    protected override void TryComplete()
-    {
-    }
+    protected override void TryComplete() { }
 }
 
 internal class InboxSubBuilder : ISubscriptionManager
 {
-    private readonly ConcurrentDictionary<string, ConditionalWeakTable<NatsSubBase, object>> _bySubject = new();
+    private readonly ConcurrentDictionary<
+        string,
+        ConditionalWeakTable<NatsSubBase, object>
+    > _bySubject = new();
     private readonly ILogger<InboxSubBuilder> _logger;
 
     public InboxSubBuilder(ILogger<InboxSubBuilder> logger) => _logger = logger;
@@ -70,7 +80,12 @@ internal class InboxSubBuilder : ISubscriptionManager
         return ValueTask.CompletedTask;
     }
 
-    public InboxSub Build(string subject, NatsSubOpts? opts, NatsConnection connection, ISubscriptionManager manager) => new(this, subject, opts, connection, manager);
+    public InboxSub Build(
+        string subject,
+        NatsSubOpts? opts,
+        NatsConnection connection,
+        ISubscriptionManager manager
+    ) => new(this, subject, opts, connection, manager);
 
     public ValueTask RegisterAsync(NatsSubBase sub)
     {
@@ -85,7 +100,10 @@ internal class InboxSubBuilder : ISubscriptionManager
                     {
                         // if current subTable is empty, it may be in process of being removed
                         // return a new object
-                        return new ConditionalWeakTable<NatsSubBase, object> { { s, new object() } };
+                        return new ConditionalWeakTable<NatsSubBase, object>
+                        {
+                            { s, new object() }
+                        };
                     }
 
                     // the updateValueFactory delegate can be called multiple times
@@ -94,12 +112,19 @@ internal class InboxSubBuilder : ISubscriptionManager
                     return subTable;
                 }
             },
-            sub);
+            sub
+        );
 
         return sub.ReadyAsync();
     }
 
-    public async ValueTask ReceivedAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer, NatsConnection connection)
+    public async ValueTask ReceivedAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer,
+        NatsConnection connection
+    )
     {
         if (!_bySubject.TryGetValue(subject, out var subTable))
         {
@@ -109,7 +134,8 @@ internal class InboxSubBuilder : ISubscriptionManager
 
         foreach (var (sub, _) in subTable)
         {
-            await sub.ReceiveAsync(subject, replyTo, headersBuffer, payloadBuffer).ConfigureAwait(false);
+            await sub.ReceiveAsync(subject, replyTo, headersBuffer, payloadBuffer)
+                .ConfigureAwait(false);
         }
     }
 }

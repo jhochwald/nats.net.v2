@@ -20,11 +20,12 @@ public record NatsAuthOpts
 
     public string? NKeyFile { get; init; }
 
-    public bool IsAnonymous => string.IsNullOrEmpty(Username)
-                               && string.IsNullOrEmpty(Password)
-                               && string.IsNullOrEmpty(Token)
-                               && string.IsNullOrEmpty(Jwt)
-                               && string.IsNullOrEmpty(Seed)
-                               && string.IsNullOrEmpty(CredsFile)
-                               && string.IsNullOrEmpty(NKeyFile);
+    public bool IsAnonymous =>
+        string.IsNullOrEmpty(Username)
+        && string.IsNullOrEmpty(Password)
+        && string.IsNullOrEmpty(Token)
+        && string.IsNullOrEmpty(Jwt)
+        && string.IsNullOrEmpty(Seed)
+        && string.IsNullOrEmpty(CredsFile)
+        && string.IsNullOrEmpty(NKeyFile);
 }

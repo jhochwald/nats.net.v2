@@ -23,10 +23,21 @@ public partial class NatsJSContext
         string stream,
         string consumer,
         ConsumerConfigurationAckPolicy ackPolicy = ConsumerConfigurationAckPolicy.@explicit,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default
+    ) =>
         CreateConsumerAsync(
-            new ConsumerCreateRequest { StreamName = stream, Config = new ConsumerConfiguration { Name = consumer, DurableName = consumer, AckPolicy = ackPolicy } },
-            cancellationToken);
+            new ConsumerCreateRequest
+            {
+                StreamName = stream,
+                Config = new ConsumerConfiguration
+                {
+                    Name = consumer,
+                    DurableName = consumer,
+                    AckPolicy = ackPolicy
+                }
+            },
+            cancellationToken
+        );
 
     /// <summary>
     ///     Creates new consumer if it doesn't exists or returns an existing one with the same name.
@@ -38,24 +49,30 @@ public partial class NatsJSContext
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask<NatsJSConsumer> CreateConsumerAsync(
         ConsumerCreateRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (!string.IsNullOrEmpty(request.Config.DeliverSubject))
         {
-            throw new NatsJSException("This API only support pull consumers. " +
-                                      "'deliver_subject' option applies to push consumers");
+            throw new NatsJSException(
+                "This API only support pull consumers. "
+                    + "'deliver_subject' option applies to push consumers"
+            );
         }
 
         if (request.Config.AckPolicy == ConsumerConfigurationAckPolicy.none)
         {
-            throw new NatsJSException("This API only support pull consumers. " +
-                                      "'ack_policy' must be set to 'explicit' or 'all' for pull consumers");
+            throw new NatsJSException(
+                "This API only support pull consumers. "
+                    + "'ack_policy' must be set to 'explicit' or 'all' for pull consumers"
+            );
         }
 
         var response = await JSRequestResponseAsync<ConsumerCreateRequest, ConsumerInfo>(
             $"{Opts.Prefix}.CONSUMER.CREATE.{request.StreamName}.{request.Config.Name}",
             request,
-            cancellationToken);
+            cancellationToken
+        );
         return new NatsJSConsumer(this, response);
     }
 
@@ -68,12 +85,17 @@ public partial class NatsJSContext
     /// <returns>The NATS JetStream consumer object which can be used retrieving data from the stream.</returns>
     /// <exception cref="NatsJSException">There was an issue retrieving the response.</exception>
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
-    public async ValueTask<NatsJSConsumer> GetConsumerAsync(string stream, string consumer, CancellationToken cancellationToken = default)
+    public async ValueTask<NatsJSConsumer> GetConsumerAsync(
+        string stream,
+        string consumer,
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<object, ConsumerInfo>(
             $"{Opts.Prefix}.CONSUMER.INFO.{stream}.{consumer}",
             null,
-            cancellationToken);
+            cancellationToken
+        );
         return new NatsJSConsumer(this, response);
     }
 
@@ -90,12 +112,14 @@ public partial class NatsJSContext
     /// </remarks>
     public async IAsyncEnumerable<NatsJSConsumer> ListConsumersAsync(
         string stream,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<ConsumerListRequest, ConsumerListResponse>(
             $"{Opts.Prefix}.CONSUMER.LIST.{stream}",
             new ConsumerListRequest { Offset = 0 },
-            cancellationToken);
+            cancellationToken
+        );
         foreach (var consumer in response.Consumers)
             yield return new NatsJSConsumer(this, consumer);
     }
@@ -109,12 +133,17 @@ public partial class NatsJSContext
     /// <returns>Whether the deletion was successful.</returns>
     /// <exception cref="NatsJSException">There was an issue retrieving the response.</exception>
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
-    public async ValueTask<bool> DeleteConsumerAsync(string stream, string consumer, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> DeleteConsumerAsync(
+        string stream,
+        string consumer,
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<object, ConsumerDeleteResponse>(
             $"{Opts.Prefix}.CONSUMER.DELETE.{stream}.{consumer}",
             null,
-            cancellationToken);
+            cancellationToken
+        );
         return response.Success;
     }
 }

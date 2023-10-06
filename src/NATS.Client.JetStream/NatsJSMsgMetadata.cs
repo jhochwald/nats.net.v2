@@ -24,7 +24,15 @@ namespace NATS.Client.JetStream;
 /// <param name="Domain">
 ///     The domain the message was sent to.
 /// </param>
-public readonly record struct NatsJSMsgMetadata(NatsJSSequencePair Sequence, ulong NumDelivered, ulong NumPending, DateTimeOffset Timestamp, string Stream, string Consumer, string Domain);
+public readonly record struct NatsJSMsgMetadata(
+    NatsJSSequencePair Sequence,
+    ulong NumDelivered,
+    ulong NumPending,
+    DateTimeOffset Timestamp,
+    string Stream,
+    string Consumer,
+    string Domain
+);
 
 /// <summary>
 ///     The sequence pair for the message.

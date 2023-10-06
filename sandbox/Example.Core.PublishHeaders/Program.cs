@@ -6,7 +6,10 @@ using NATS.Client.Core;
 #endregion
 
 var subject = "bar.xyz";
-var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };
+var options = NatsOpts.Default with
+{
+    LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error)
+};
 
 Print("[CON] Connecting...\n");
 
@@ -18,7 +21,8 @@ for (var i = 0; i < 10; i++)
     await connection.PublishAsync(
         subject,
         new Bar { Id = i, Name = "Baz" },
-        new NatsHeaders { ["XFoo"] = $"bar{i}" });
+        new NatsHeaders { ["XFoo"] = $"bar{i}" }
+    );
 }
 
 void Print(string message)

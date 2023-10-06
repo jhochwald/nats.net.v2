@@ -25,7 +25,8 @@ public class ConsumerConsumeTest
                 .UseTransport(TransportType.Tcp)
                 .Trace()
                 .UseJetStream()
-                .Build());
+                .Build()
+        );
         var (nats, proxy) = server.CreateProxiedClientConnection();
         var js = new NatsJSContext(nats);
         await js.CreateStreamAsync("s1", new[] { "s1.*" }, cts.Token);
@@ -33,7 +34,11 @@ public class ConsumerConsumeTest
 
         for (var i = 0; i < 30; i++)
         {
-            var ack = await js.PublishAsync("s1.foo", new TestData { Test = i }, cancellationToken: cts.Token);
+            var ack = await js.PublishAsync(
+                "s1.foo",
+                new TestData { Test = i },
+                cancellationToken: cts.Token
+            );
             ack.EnsureSuccess();
         }
 
@@ -52,9 +57,9 @@ public class ConsumerConsumeTest
 
         int? PullCount()
         {
-            return proxy?
-                .ClientFrames
-                .Count(f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1"));
+            return proxy?.ClientFrames.Count(
+                f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1")
+            );
         }
 
         await Retry.Until(
@@ -66,10 +71,10 @@ public class ConsumerConsumeTest
                 return Task.CompletedTask;
             },
             retryDelay: TimeSpan.FromSeconds(3),
-            timeout: TimeSpan.FromSeconds(15));
+            timeout: TimeSpan.FromSeconds(15)
+        );
 
-        var msgNextRequests = proxy
-            .ClientFrames
+        var msgNextRequests = proxy.ClientFrames
             .Where(f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1"))
             .ToList();
 
@@ -97,19 +102,33 @@ public class ConsumerConsumeTest
         await js.CreateStreamAsync("s1", new[] { "s1.*" }, cts.Token);
         await js.CreateConsumerAsync("s1", "c1", cancellationToken: cts.Token);
 
-        var ack = await js.PublishAsync("s1.foo", new TestData { Test = 0 }, cancellationToken: cts.Token);
+        var ack = await js.PublishAsync(
+            "s1.foo",
+            new TestData { Test = 0 },
+            cancellationToken: cts.Token
+        );
         ack.EnsureSuccess();
 
         var signal = new WaitSignal(TimeSpan.FromSeconds(30));
         server.OnLog += log =>
         {
-            if (log is { Category: "NATS.Client.JetStream.Internal.NatsJSConsume", LogLevel: LogLevel.Debug })
+            if (
+                log is
+                {
+                    Category: "NATS.Client.JetStream.Internal.NatsJSConsume",
+                    LogLevel: LogLevel.Debug
+                }
+            )
             {
                 if (log.EventId == NatsJSLogEvents.IdleTimeout)
                     signal.Pulse();
             }
         };
-        var consumerOpts = new NatsJSConsumeOpts { MaxMsgs = 10, IdleHeartbeat = TimeSpan.FromSeconds(5) };
+        var consumerOpts = new NatsJSConsumeOpts
+        {
+            MaxMsgs = 10,
+            IdleHeartbeat = TimeSpan.FromSeconds(5)
+        };
         var consumer = await js.GetConsumerAsync("s1", "c1", cts.Token);
         var count = 0;
         var cc = await consumer.ConsumeAsync<TestData>(consumerOpts, cts.Token);
@@ -123,10 +142,13 @@ public class ConsumerConsumeTest
 
         await Retry.Until(
             "all pull requests are received",
-            () => proxy.ClientFrames.Count(f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1")) >= 2);
+            () =>
+                proxy.ClientFrames.Count(
+                    f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1")
+                ) >= 2
+        );
 
-        var msgNextRequests = proxy
-            .ClientFrames
+        var msgNextRequests = proxy.ClientFrames
             .Where(f => f.Message.StartsWith("PUB $JS.API.CONSUMER.MSG.NEXT.s1.c1"))
             .ToList();
 
@@ -194,13 +216,18 @@ public class ConsumerConsumeTest
 
         // Send a message before reconnect
         {
-            var ack = await js2.PublishAsync("s1.foo", new TestData { Test = 0 }, cancellationToken: cts.Token);
+            var ack = await js2.PublishAsync(
+                "s1.foo",
+                new TestData { Test = 0 },
+                cancellationToken: cts.Token
+            );
             ack.EnsureSuccess();
         }
 
         await Retry.Until(
             "acked",
-            () => proxy.ClientFrames.Any(f => f.Message.StartsWith("PUB $JS.ACK.s1.c1")));
+            () => proxy.ClientFrames.Any(f => f.Message.StartsWith("PUB $JS.ACK.s1.c1"))
+        );
 
         Assert.Contains(proxy.ClientFrames, f => f.Message.Contains("CONSUMER.MSG.NEXT"));
 
@@ -214,13 +241,18 @@ public class ConsumerConsumeTest
 
         // Send a message to be received after reconnect
         {
-            var ack = await js2.PublishAsync("s1.foo", new TestData { Test = 1 }, cancellationToken: cts.Token);
+            var ack = await js2.PublishAsync(
+                "s1.foo",
+                new TestData { Test = 1 },
+                cancellationToken: cts.Token
+            );
             ack.EnsureSuccess();
         }
 
         await Retry.Until(
             "acked",
-            () => proxy.ClientFrames.Any(f => f.Message.Contains("CONSUMER.MSG.NEXT")));
+            () => proxy.ClientFrames.Any(f => f.Message.Contains("CONSUMER.MSG.NEXT"))
+        );
 
         await readerTask;
         await nats.DisposeAsync();

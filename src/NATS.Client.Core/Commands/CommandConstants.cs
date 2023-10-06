@@ -8,7 +8,8 @@ internal static class CommandConstants
     public static ReadOnlySpan<byte> NewLine => new byte[] { 13, 10 };
 
     // string.Join(",", Encoding.ASCII.GetBytes("CONNECT "))
-    public static ReadOnlySpan<byte> ConnectWithPadding => new byte[] { 67, 79, 78, 78, 69, 67, 84, 32 };
+    public static ReadOnlySpan<byte> ConnectWithPadding =>
+        new byte[] { 67, 79, 78, 78, 69, 67, 84, 32 };
 
     // string.Join(",", Encoding.ASCII.GetBytes("PUB "))
     public static ReadOnlySpan<byte> PubWithPadding => new byte[] { 80, 85, 66, 32 };
@@ -32,5 +33,6 @@ internal static class CommandConstants
     public static ReadOnlySpan<byte> NatsHeaders10 => new byte[] { 78, 65, 84, 83, 47, 49, 46, 48 };
 
     // string.Join(",", Encoding.ASCII.GetBytes("NATS/1.0\r\n"))
-    public static ReadOnlySpan<byte> NatsHeaders10NewLine => new byte[] { 78, 65, 84, 83, 47, 49, 46, 48, 13, 10 };
+    public static ReadOnlySpan<byte> NatsHeaders10NewLine =>
+        new byte[] { 78, 65, 84, 83, 47, 49, 46, 48, 13, 10 };
 }

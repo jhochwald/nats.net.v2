@@ -43,8 +43,15 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         string consumer,
         string subject,
         string? queueGroup,
-        NatsSubOpts? opts)
-        : base(context.Connection, context.Connection.SubscriptionManager, subject, queueGroup, opts)
+        NatsSubOpts? opts
+    )
+        : base(
+            context.Connection,
+            context.Connection.SubscriptionManager,
+            subject,
+            queueGroup,
+            opts
+        )
     {
         _logger = Connection.Opts.LoggerFactory.CreateLogger<NatsJSFetch<TMsg>>();
         _debug = _logger.IsEnabled(LogLevel.Debug);
@@ -57,11 +64,13 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         _maxBytes = maxBytes;
         _expires = expires.ToNanos();
         _idle = idle.ToNanos();
-        _hbTimeout = (int) (idle * 2).TotalMilliseconds;
+        _hbTimeout = (int)(idle * 2).TotalMilliseconds;
         _pendingMsgs = _maxMsgs;
         _pendingBytes = _maxBytes;
 
-        _userMsgs = Channel.CreateBounded<NatsJSMsg<TMsg?>>(NatsSubUtils.GetChannelOpts(opts?.ChannelOpts));
+        _userMsgs = Channel.CreateBounded<NatsJSMsg<TMsg?>>(
+            NatsSubUtils.GetChannelOpts(opts?.ChannelOpts)
+        );
         Msgs = _userMsgs.Reader;
 
         if (_debug)
@@ -76,42 +85,47 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
                     expires,
                     idle,
                     _hbTimeout
-                });
+                }
+            );
         }
 
         _hbTimer = new Timer(
             static state =>
             {
-                var self = (NatsJSFetch<TMsg>) state!;
+                var self = (NatsJSFetch<TMsg>)state!;
                 self.EndSubscription(NatsSubEndReason.IdleHeartbeatTimeout);
                 if (self._debug)
                 {
                     self._logger.LogDebug(
                         NatsJSLogEvents.IdleTimeout,
                         "Idle heartbeat timed-out after {Timeout}ns",
-                        self._idle);
+                        self._idle
+                    );
                 }
             },
             this,
             Timeout.Infinite,
-            Timeout.Infinite);
+            Timeout.Infinite
+        );
 
         _expiresTimer = new Timer(
             static state =>
             {
-                var self = (NatsJSFetch<TMsg>) state!;
+                var self = (NatsJSFetch<TMsg>)state!;
                 self.EndSubscription(NatsSubEndReason.Timeout);
                 if (self._debug)
                 {
                     self._logger.LogDebug(
                         NatsJSLogEvents.Expired,
                         "JetStream pull request expired {Expires}ns",
-                        self._expires);
+                        self._expires
+                    );
                 }
             },
             this,
             expires + TimeSpan.FromSeconds(5),
-            Timeout.InfiniteTimeSpan);
+            Timeout.InfiniteTimeSpan
+        );
     }
 
     public ChannelReader<NatsJSMsg<TMsg?>> Msgs { get; }
@@ -125,14 +139,18 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         await _expiresTimer.DisposeAsync().ConfigureAwait(false);
     }
 
-    public ValueTask CallMsgNextAsync(ConsumerGetnextRequest request, CancellationToken cancellationToken = default) =>
+    public ValueTask CallMsgNextAsync(
+        ConsumerGetnextRequest request,
+        CancellationToken cancellationToken = default
+    ) =>
         Connection.PubModelAsync(
             $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
             request,
             NatsJsonSerializer.Default,
             Subject,
             default,
-            cancellationToken);
+            cancellationToken
+        );
 
     public void ResetHeartbeatTimer() => _hbTimer.Change(_hbTimeout, Timeout.Infinite);
 
@@ -141,7 +159,12 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         foreach (var command in base.GetReconnectCommands(sid))
             yield return command;
 
-        var request = new ConsumerGetnextRequest { Batch = _maxMsgs, IdleHeartbeat = _idle, Expires = _expires };
+        var request = new ConsumerGetnextRequest
+        {
+            Batch = _maxMsgs,
+            IdleHeartbeat = _idle,
+            Expires = _expires
+        };
 
         yield return PublishCommand<ConsumerGetnextRequest>.Create(
             Connection.ObjectPool,
@@ -151,14 +174,16 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
             request,
             NatsJsonSerializer.Default,
             default,
-            default);
+            default
+        );
     }
 
     protected override async ValueTask ReceiveInternalAsync(
         string subject,
         string? replyTo,
         ReadOnlySequence<byte>? headersBuffer,
-        ReadOnlySequence<byte> payloadBuffer)
+        ReadOnlySequence<byte> payloadBuffer
+    )
     {
         ResetHeartbeatTimer();
         if (subject == Subject)
@@ -166,22 +191,33 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
             if (headersBuffer.HasValue)
             {
                 var headers = new NatsHeaders();
-                if (Connection.HeaderParser.ParseHeaders(new SequenceReader<byte>(headersBuffer.Value), headers))
+                if (
+                    Connection.HeaderParser.ParseHeaders(
+                        new SequenceReader<byte>(headersBuffer.Value),
+                        headers
+                    )
+                )
                 {
                     if (headers is { Code: 408, Message: NatsHeaders.Messages.RequestTimeout })
                     {
                         EndSubscription(NatsSubEndReason.Timeout);
                     }
-                    else if (headers is { Code: 409, Message: NatsHeaders.Messages.MessageSizeExceedsMaxBytes })
+                    else if (
+                        headers is
+                        { Code: 409, Message: NatsHeaders.Messages.MessageSizeExceedsMaxBytes }
+                    )
                     {
                         EndSubscription(NatsSubEndReason.MaxBytes);
                     }
                     else if (headers is { Code: 100, Message: NatsHeaders.Messages.IdleHeartbeat })
-                    {
-                    }
+                    { }
                     else if (headers.HasTerminalJSError())
                     {
-                        _userMsgs.Writer.TryComplete(new NatsJSProtocolException($"JetStream server error: {headers.Code} {headers.MessageText}"));
+                        _userMsgs.Writer.TryComplete(
+                            new NatsJSProtocolException(
+                                $"JetStream server error: {headers.Code} {headers.MessageText}"
+                            )
+                        );
                         EndSubscription(NatsSubEndReason.JetStreamError);
                     }
                     else
@@ -192,7 +228,8 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
                                 NatsJSLogEvents.ProtocolMessage,
                                 "Protocol message: {Code} {Description}",
                                 headers.Code,
-                                headers.MessageText);
+                                headers.MessageText
+                            );
                         }
                     }
                 }
@@ -201,7 +238,8 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
                     _logger.LogError(
                         NatsJSLogEvents.Headers,
                         "Can't parse headers: {HeadersBuffer}",
-                        Encoding.ASCII.GetString(headersBuffer.Value.ToArray()));
+                        Encoding.ASCII.GetString(headersBuffer.Value.ToArray())
+                    );
                     throw new NatsJSException("Can't parse headers");
                 }
             }
@@ -220,8 +258,10 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
                     payloadBuffer,
                     Connection,
                     Connection.HeaderParser,
-                    _serializer),
-                _context);
+                    _serializer
+                ),
+                _context
+            );
 
             _pendingMsgs--;
             _pendingBytes -= msg.Size;

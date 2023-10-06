@@ -15,9 +15,7 @@ public partial class NatsJSContext
     /// <inheritdoc cref="NatsJSContext(NATS.Client.Core.NatsConnection,NATS.Client.JetStream.NatsJSOpts)" />
     /// >
     public NatsJSContext(NatsConnection connection)
-        : this(connection, new NatsJSOpts(connection.Opts))
-    {
-    }
+        : this(connection, new NatsJSOpts(connection.Opts)) { }
 
     /// <summary>
     ///     Creates a NATS JetStream context used to manage and access streams and consumers.
@@ -39,11 +37,14 @@ public partial class NatsJSContext
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> used to cancel the API call.</param>
     /// <returns>The account information based on the NATS connection credentials.</returns>
-    public ValueTask<AccountInfoResponse> GetAccountInfoAsync(CancellationToken cancellationToken = default) =>
+    public ValueTask<AccountInfoResponse> GetAccountInfoAsync(
+        CancellationToken cancellationToken = default
+    ) =>
         JSRequestResponseAsync<object, AccountInfoResponse>(
             $"{Opts.Prefix}.INFO",
             null,
-            cancellationToken);
+            cancellationToken
+        );
 
     /// <summary>
     ///     Sends data to a stream associated with the subject.
@@ -78,7 +79,8 @@ public partial class NatsJSContext
         string? msgId = default,
         NatsHeaders? headers = default,
         NatsPubOpts? opts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (msgId != null)
         {
@@ -86,13 +88,15 @@ public partial class NatsJSContext
             headers["Nats-Msg-Id"] = msgId;
         }
 
-        await using var sub = await Connection.RequestSubAsync<T, PubAckResponse>(
+        await using var sub = await Connection
+            .RequestSubAsync<T, PubAckResponse>(
                 subject,
                 data,
                 headers,
                 opts,
                 default,
-                cancellationToken)
+                cancellationToken
+            )
             .ConfigureAwait(false);
 
         if (await sub.Msgs.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
@@ -116,11 +120,16 @@ public partial class NatsJSContext
     internal async ValueTask<TResponse> JSRequestResponseAsync<TRequest, TResponse>(
         string subject,
         TRequest? request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
         where TRequest : class
         where TResponse : class
     {
-        var response = await JSRequestAsync<TRequest, TResponse>(subject, request, cancellationToken);
+        var response = await JSRequestAsync<TRequest, TResponse>(
+            subject,
+            request,
+            cancellationToken
+        );
         response.EnsureSuccess();
         return response.Response!;
     }
@@ -128,7 +137,8 @@ public partial class NatsJSContext
     internal async ValueTask<NatsJSResponse<TResponse>> JSRequestAsync<TRequest, TResponse>(
         string subject,
         TRequest? request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
         where TRequest : class
         where TResponse : class
     {
@@ -137,13 +147,15 @@ public partial class NatsJSContext
             Validator.ValidateObject(request, new ValidationContext(request));
         }
 
-        await using var sub = await Connection.RequestSubAsync<TRequest, TResponse>(
+        await using var sub = await Connection
+            .RequestSubAsync<TRequest, TResponse>(
                 subject,
                 request,
                 default,
                 default,
                 new NatsSubOpts { Serializer = NatsJSErrorAwareJsonSerializer.Default },
-                cancellationToken)
+                cancellationToken
+            )
             .ConfigureAwait(false);
 
         if (await sub.Msgs.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
@@ -161,7 +173,12 @@ public partial class NatsJSContext
 
         if (sub is NatsSubBase { EndReason: NatsSubEndReason.Exception, Exception: not null } sb)
         {
-            if (sb.Exception is NatsSubException { Exception.SourceException: NatsJSApiErrorException jsError })
+            if (
+                sb.Exception is NatsSubException
+                {
+                    Exception.SourceException: NatsJSApiErrorException jsError
+                }
+            )
             {
                 // Clear exception here so that subscription disposal won't throw it.
                 sb.ClearException();

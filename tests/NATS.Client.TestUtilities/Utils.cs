@@ -11,7 +11,13 @@ namespace NATS.Client.Core.Tests;
 
 public static class Retry
 {
-    public static async Task Until(string reason, Func<bool> condition, Func<Task>? action = null, TimeSpan? timeout = null, TimeSpan? retryDelay = null)
+    public static async Task Until(
+        string reason,
+        Func<bool> condition,
+        Func<Task>? action = null,
+        TimeSpan? timeout = null,
+        TimeSpan? retryDelay = null
+    )
     {
         timeout ??= TimeSpan.FromSeconds(10);
         var delay1 = retryDelay ?? TimeSpan.FromSeconds(.1);
@@ -38,7 +44,11 @@ public static class Net
         {
             try
             {
-                using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                using var socket = new Socket(
+                    AddressFamily.InterNetwork,
+                    SocketType.Stream,
+                    ProtocolType.Tcp
+                );
                 socket.Connect(IPAddress.Loopback, port);
             }
             catch (SocketException)
@@ -89,18 +99,19 @@ public static class BinaryUtils
         {
             switch (b)
             {
-            case >= ' ' and <= '~':
-                sb.Append(b);
-                break;
-            case '\r':
-                sb.Append('␍');
-                break;
-            case '\n':
-                sb.Append('␊');
-                break;
-            default:
-                sb.Append('.');
-                break;
+                case >= ' '
+                and <= '~':
+                    sb.Append(b);
+                    break;
+                case '\r':
+                    sb.Append('␍');
+                    break;
+                case '\n':
+                    sb.Append('␊');
+                    break;
+                default:
+                    sb.Append('.');
+                    break;
             }
         }
 

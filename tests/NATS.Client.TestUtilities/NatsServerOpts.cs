@@ -81,18 +81,22 @@ public sealed class NatsServerOptsBuilder
 
 public sealed class NatsServerOpts : IDisposable
 {
-    private static readonly Lazy<ConcurrentQueue<int>> PortFactory = new(() =>
-    {
-        const int start = 1024;
-        const int size = 4096;
-        var properties = IPGlobalProperties.GetIPGlobalProperties();
-        var activePorts = new HashSet<int>(properties.GetActiveTcpListeners()
-            .Where(m => m.Port is >= start and < start + size)
-            .Select(m => m.Port));
-        var freePorts = new HashSet<int>(Enumerable.Range(start, size));
-        freePorts.ExceptWith(activePorts);
-        return new ConcurrentQueue<int>(freePorts);
-    });
+    private static readonly Lazy<ConcurrentQueue<int>> PortFactory =
+        new(() =>
+        {
+            const int start = 1024;
+            const int size = 4096;
+            var properties = IPGlobalProperties.GetIPGlobalProperties();
+            var activePorts = new HashSet<int>(
+                properties
+                    .GetActiveTcpListeners()
+                    .Where(m => m.Port is >= start and < start + size)
+                    .Select(m => m.Port)
+            );
+            var freePorts = new HashSet<int>(Enumerable.Range(start, size));
+            freePorts.ExceptWith(activePorts);
+            return new ConcurrentQueue<int>(freePorts);
+        });
 
     private readonly Lazy<int?> _lazyClusteringPort;
 
@@ -224,7 +228,8 @@ public sealed class NatsServerOpts : IDisposable
         }
     }
 
-    public void SetRoutes(IEnumerable<NatsServerOpts> options) => _routes = string.Join(",", options.Select(o => $"nats://localhost:{o.ClusteringPort}"));
+    public void SetRoutes(IEnumerable<NatsServerOpts> options) =>
+        _routes = string.Join(",", options.Select(o => $"nats://localhost:{o.ClusteringPort}"));
 
     private static int LeasePort()
     {

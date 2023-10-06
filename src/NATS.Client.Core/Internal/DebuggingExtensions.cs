@@ -27,18 +27,19 @@ public static class DebuggingExtensions
         {
             switch (b)
             {
-            case >= ' ' and <= '~':
-                sb.Append(b);
-                break;
-            case '\r':
-                sb.Append("\\r");
-                break;
-            case '\n':
-                sb.Append("\\n");
-                break;
-            default:
-                sb.Append('.');
-                break;
+                case >= ' '
+                and <= '~':
+                    sb.Append(b);
+                    break;
+                case '\r':
+                    sb.Append("\\r");
+                    break;
+                case '\n':
+                    sb.Append("\\n");
+                    break;
+                default:
+                    sb.Append('.');
+                    break;
             }
         }
 

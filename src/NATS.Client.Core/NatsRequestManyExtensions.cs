@@ -22,7 +22,8 @@ public static class NatsRequestManyExtensions
         NatsMsg<TRequest> msg,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         NatsRequestExtensions.CheckMsgForRequestReply(msg);
 
@@ -32,6 +33,7 @@ public static class NatsRequestManyExtensions
             msg.Headers,
             requestOpts,
             replyOpts,
-            cancellationToken);
+            cancellationToken
+        );
     }
 }

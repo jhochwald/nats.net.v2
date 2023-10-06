@@ -19,9 +19,7 @@ internal sealed class ThreadPoolWorkItem<T> : IThreadPoolWorkItem
     private ThreadPoolWorkItem<T>? _nextNode;
     private T? _value;
 
-    private ThreadPoolWorkItem()
-    {
-    }
+    private ThreadPoolWorkItem() { }
 
     public ref ThreadPoolWorkItem<T>? NextNode => ref _nextNode;
 
@@ -46,14 +44,20 @@ internal sealed class ThreadPoolWorkItem<T> : IThreadPoolWorkItem
             {
                 if (_loggerFactory != null)
                 {
-                    _loggerFactory.CreateLogger<ThreadPoolWorkItem<T>>().LogError(ex, "Error occured during execute callback on ThreadPool.");
+                    _loggerFactory
+                        .CreateLogger<ThreadPoolWorkItem<T>>()
+                        .LogError(ex, "Error occured during execute callback on ThreadPool.");
                 }
             }
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ThreadPoolWorkItem<T> Create(Action<T?> continuation, T? value, ILoggerFactory loggerFactory)
+    public static ThreadPoolWorkItem<T> Create(
+        Action<T?> continuation,
+        T? value,
+        ILoggerFactory loggerFactory
+    )
     {
         if (!Pool.TryDequeue(out var item))
         {

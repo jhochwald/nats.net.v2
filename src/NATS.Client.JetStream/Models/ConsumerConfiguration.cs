@@ -59,7 +59,8 @@ public record ConsumerConfiguration
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     [Required(AllowEmptyStrings = true)]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public ConsumerConfigurationAckPolicy AckPolicy { get; set; } = ConsumerConfigurationAckPolicy.none;
+    public ConsumerConfigurationAckPolicy AckPolicy { get; set; } =
+        ConsumerConfigurationAckPolicy.none;
 
     /// <summary>
     ///     How long (in nanoseconds) to allow messages to remain un-acknowledged before attempting redelivery
@@ -95,7 +96,8 @@ public record ConsumerConfiguration
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     [Required(AllowEmptyStrings = true)]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public ConsumerConfigurationReplayPolicy ReplayPolicy { get; set; } = ConsumerConfigurationReplayPolicy.instant;
+    public ConsumerConfigurationReplayPolicy ReplayPolicy { get; set; } =
+        ConsumerConfigurationReplayPolicy.instant;
 
     [JsonPropertyName("sample_freq")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]

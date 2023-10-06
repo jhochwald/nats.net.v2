@@ -50,11 +50,16 @@ public class ConsumerStateTest
     {
         Assert.Equal(
             TimeSpan.FromSeconds(10),
-            NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(10)).IdleHeartbeat);
+            NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(10)).IdleHeartbeat
+        );
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(.1)));
+        Assert.Throws<NatsJSException>(
+            () => NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(.1))
+        );
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(60)));
+        Assert.Throws<NatsJSException>(
+            () => NatsJSOptsDefaults.SetTimeouts(idleHeartbeat: TimeSpan.FromSeconds(60))
+        );
     }
 
     [Fact]
@@ -62,11 +67,16 @@ public class ConsumerStateTest
     {
         Assert.Equal(
             TimeSpan.FromSeconds(10),
-            NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(10)).Expires);
+            NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(10)).Expires
+        );
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(.1)));
+        Assert.Throws<NatsJSException>(
+            () => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(.1))
+        );
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(300)));
+        Assert.Throws<NatsJSException>(
+            () => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(300))
+        );
     }
 
     [Theory]
@@ -83,7 +93,9 @@ public class ConsumerStateTest
         }
         else
         {
-            Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetMax(max, thresholdMsgs: threshold));
+            Assert.Throws<NatsJSException>(
+                () => NatsJSOptsDefaults.SetMax(max, thresholdMsgs: threshold)
+            );
         }
 
         // Bytes
@@ -94,7 +106,9 @@ public class ConsumerStateTest
         }
         else
         {
-            Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetMax(maxBytes: max, thresholdBytes: threshold));
+            Assert.Throws<NatsJSException>(
+                () => NatsJSOptsDefaults.SetMax(maxBytes: max, thresholdBytes: threshold)
+            );
         }
     }
 }

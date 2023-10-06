@@ -10,7 +10,9 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum StreamConfigurationStorage
 {
-    [EnumMember(Value = @"file")] file = 0,
+    [EnumMember(Value = @"file")]
+    file = 0,
 
-    [EnumMember(Value = @"memory")] memory = 1
+    [EnumMember(Value = @"memory")]
+    memory = 1
 }

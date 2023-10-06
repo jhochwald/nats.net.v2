@@ -15,10 +15,14 @@ internal class TlsCerts
             return;
         }
 
-        if ((tlsOpts.CertFile != default && tlsOpts.KeyFile == default) ||
-            (tlsOpts.KeyFile != default && tlsOpts.CertFile == default))
+        if (
+            (tlsOpts.CertFile != default && tlsOpts.KeyFile == default)
+            || (tlsOpts.KeyFile != default && tlsOpts.CertFile == default)
+        )
         {
-            throw new ArgumentException("NatsTlsOpts.CertFile and NatsTlsOpts.KeyFile must both be set");
+            throw new ArgumentException(
+                "NatsTlsOpts.CertFile and NatsTlsOpts.KeyFile must both be set"
+            );
         }
 
         if (tlsOpts.CaFile != default)
@@ -29,7 +33,9 @@ internal class TlsCerts
 
         if (tlsOpts.CertFile != default && tlsOpts.KeyFile != default)
         {
-            ClientCerts = new X509Certificate2Collection(X509Certificate2.CreateFromPemFile(tlsOpts.CertFile, tlsOpts.KeyFile));
+            ClientCerts = new X509Certificate2Collection(
+                X509Certificate2.CreateFromPemFile(tlsOpts.CertFile, tlsOpts.KeyFile)
+            );
         }
     }
 

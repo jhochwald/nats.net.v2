@@ -43,7 +43,8 @@ internal sealed class ClientOpts
     [JsonPropertyName("tls_required")]
     public bool TLSRequired { get; init; }
 
-    [JsonPropertyName("nkey")] public string? NKey { get; set; }
+    [JsonPropertyName("nkey")]
+    public string? NKey { get; set; }
 
     /// <summary>The JWT that identifies a user permissions and account.</summary>
     [JsonPropertyName("jwt")]
@@ -81,13 +82,17 @@ internal sealed class ClientOpts
     [JsonPropertyName("protocol")]
     public int Protocol { get; init; } = 1;
 
-    [JsonPropertyName("account")] public string? Account { get; init; } = null;
+    [JsonPropertyName("account")]
+    public string? Account { get; init; } = null;
 
-    [JsonPropertyName("new_account")] public bool? AccountNew { get; init; }
+    [JsonPropertyName("new_account")]
+    public bool? AccountNew { get; init; }
 
-    [JsonPropertyName("headers")] public bool Headers { get; init; }
+    [JsonPropertyName("headers")]
+    public bool Headers { get; init; }
 
-    [JsonPropertyName("no_responders")] public bool NoResponders { get; init; } = false;
+    [JsonPropertyName("no_responders")]
+    public bool NoResponders { get; init; } = false;
 
     public static ClientOpts Create(NatsOpts opts) => new(opts);
 

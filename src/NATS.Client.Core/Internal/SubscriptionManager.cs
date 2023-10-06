@@ -44,8 +44,16 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
         _cts = new CancellationTokenSource();
         _cleanupInterval = _connection.Opts.SubscriptionCleanUpInterval;
         _timer = Task.Run(CleanupAsync);
-        InboxSubBuilder = new InboxSubBuilder(connection.Opts.LoggerFactory.CreateLogger<InboxSubBuilder>());
-        _inboxSubSentinel = new InboxSub(InboxSubBuilder, nameof(_inboxSubSentinel), default, connection, this);
+        InboxSubBuilder = new InboxSubBuilder(
+            connection.Opts.LoggerFactory.CreateLogger<InboxSubBuilder>()
+        );
+        _inboxSubSentinel = new InboxSub(
+            InboxSubBuilder,
+            nameof(_inboxSubSentinel),
+            default,
+            connection,
+            this
+        );
         _inboxSub = _inboxSubSentinel;
     }
 
@@ -85,7 +93,13 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
         return _connection.UnsubscribeAsync(subMetadata.Sid);
     }
 
-    public async ValueTask SubscribeAsync(string subject, string? queueGroup, NatsSubOpts? opts, NatsSubBase sub, CancellationToken cancellationToken)
+    public async ValueTask SubscribeAsync(
+        string subject,
+        string? queueGroup,
+        NatsSubOpts? opts,
+        NatsSubBase sub,
+        CancellationToken cancellationToken
+    )
     {
         if (IsInboxSubject(subject))
         {
@@ -98,11 +112,18 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
         }
         else
         {
-            await SubscribeInternalAsync(subject, queueGroup, opts, sub, cancellationToken).ConfigureAwait(false);
+            await SubscribeInternalAsync(subject, queueGroup, opts, sub, cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 
-    public ValueTask PublishToClientHandlersAsync(string subject, string? replyTo, int sid, in ReadOnlySequence<byte>? headersBuffer, in ReadOnlySequence<byte> payloadBuffer)
+    public ValueTask PublishToClientHandlersAsync(
+        string subject,
+        string? replyTo,
+        int sid,
+        in ReadOnlySequence<byte>? headersBuffer,
+        in ReadOnlySequence<byte> payloadBuffer
+    )
     {
         int? orphanSid = null;
         lock (_gate)
@@ -131,7 +152,9 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"Error unsubscribing orphan SID during publish: {e.GetBaseException().Message}");
+                _logger.LogWarning(
+                    $"Error unsubscribing orphan SID during publish: {e.GetBaseException().Message}"
+                );
             }
         }
 
@@ -173,23 +196,36 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
         return this;
     }
 
-    private async ValueTask SubscribeInboxAsync(string subject, NatsSubOpts? opts, NatsSubBase sub, CancellationToken cancellationToken)
+    private async ValueTask SubscribeInboxAsync(
+        string subject,
+        NatsSubOpts? opts,
+        NatsSubBase sub,
+        CancellationToken cancellationToken
+    )
     {
-        if (Interlocked.CompareExchange(ref _inboxSub, _inboxSubSentinel, _inboxSubSentinel) == _inboxSubSentinel)
+        if (
+            Interlocked.CompareExchange(ref _inboxSub, _inboxSubSentinel, _inboxSubSentinel)
+            == _inboxSubSentinel
+        )
         {
             await _inboxSubLock.WaitAsync(CancellationToken.None).ConfigureAwait(false);
             try
             {
-                if (Interlocked.CompareExchange(ref _inboxSub, _inboxSubSentinel, _inboxSubSentinel) == _inboxSubSentinel)
+                if (
+                    Interlocked.CompareExchange(ref _inboxSub, _inboxSubSentinel, _inboxSubSentinel)
+                    == _inboxSubSentinel
+                )
                 {
                     var inboxSubject = $"{_inboxPrefix}*";
                     _inboxSub = InboxSubBuilder.Build(subject, opts, _connection, this);
                     await SubscribeInternalAsync(
-                        inboxSubject,
-                        default,
-                        default,
-                        _inboxSub,
-                        cancellationToken).ConfigureAwait(false);
+                            inboxSubject,
+                            default,
+                            default,
+                            _inboxSub,
+                            cancellationToken
+                        )
+                        .ConfigureAwait(false);
                 }
             }
             finally
@@ -201,7 +237,13 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
         await InboxSubBuilder.RegisterAsync(sub).ConfigureAwait(false);
     }
 
-    private async ValueTask SubscribeInternalAsync(string subject, string? queueGroup, NatsSubOpts? opts, NatsSubBase sub, CancellationToken cancellationToken)
+    private async ValueTask SubscribeInternalAsync(
+        string subject,
+        string? queueGroup,
+        NatsSubOpts? opts,
+        NatsSubBase sub,
+        CancellationToken cancellationToken
+    )
     {
         var sid = GetNextSid();
         lock (_gate)
@@ -212,7 +254,8 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
 
         try
         {
-            await _connection.SubscribeCoreAsync(sid, subject, queueGroup, opts?.MaxMsgs, cancellationToken)
+            await _connection
+                .SubscribeCoreAsync(sid, subject, queueGroup, opts?.MaxMsgs, cancellationToken)
                 .ConfigureAwait(false);
             await sub.ReadyAsync().ConfigureAwait(false);
         }
@@ -245,7 +288,9 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
                         continue;
 
                     // NatsSub object GCed
-                    _logger.LogWarning($"Subscription GCd but was never disposed {sidMetadata.Subject}/{sid}");
+                    _logger.LogWarning(
+                        $"Subscription GCd but was never disposed {sidMetadata.Subject}/{sid}"
+                    );
                     orphanSids ??= new List<int>();
                     orphanSids.Add(sid);
                 }
@@ -266,10 +311,13 @@ internal sealed class SubscriptionManager : ISubscriptionManager, IAsyncDisposab
             }
             catch (Exception e)
             {
-                _logger.LogWarning($"Error unsubscribing during cleanup: {e.GetBaseException().Message}");
+                _logger.LogWarning(
+                    $"Error unsubscribing during cleanup: {e.GetBaseException().Message}"
+                );
             }
         }
     }
 
-    private bool IsInboxSubject(string subject) => subject.StartsWith(_inboxPrefix, StringComparison.Ordinal);
+    private bool IsInboxSubject(string subject) =>
+        subject.StartsWith(_inboxPrefix, StringComparison.Ordinal);
 }

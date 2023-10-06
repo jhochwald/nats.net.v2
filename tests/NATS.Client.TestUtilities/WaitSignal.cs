@@ -45,14 +45,10 @@ public class WaitSignal
     private int _count;
 
     public WaitSignal()
-        : this(TimeSpan.FromSeconds(10))
-    {
-    }
+        : this(TimeSpan.FromSeconds(10)) { }
 
     public WaitSignal(int count)
-        : this(TimeSpan.FromSeconds(10), count)
-    {
-    }
+        : this(TimeSpan.FromSeconds(10), count) { }
 
     public WaitSignal(TimeSpan timeout, int count = 1)
     {
@@ -91,14 +87,10 @@ public class WaitSignal<T>
     private int _count;
 
     public WaitSignal()
-        : this(TimeSpan.FromSeconds(10))
-    {
-    }
+        : this(TimeSpan.FromSeconds(10)) { }
 
     public WaitSignal(int count)
-        : this(TimeSpan.FromSeconds(10), count)
-    {
-    }
+        : this(TimeSpan.FromSeconds(10), count) { }
 
     public WaitSignal(TimeSpan timeout, int count = 1)
     {

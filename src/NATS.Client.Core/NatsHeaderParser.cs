@@ -16,11 +16,11 @@ namespace NATS.Client.Core;
 
 public class NatsHeaderParser
 {
-    private const byte ByteCR = (byte) '\r';
-    private const byte ByteLF = (byte) '\n';
-    private const byte ByteColon = (byte) ':';
-    private const byte ByteSpace = (byte) ' ';
-    private const byte ByteTab = (byte) '\t';
+    private const byte ByteCR = (byte)'\r';
+    private const byte ByteLF = (byte)'\n';
+    private const byte ByteColon = (byte)':';
+    private const byte ByteSpace = (byte)' ';
+    private const byte ByteTab = (byte)'\t';
     private static readonly byte[] ByteCRLF = { ByteCR, ByteLF };
 
     private readonly Encoding _encoding;
@@ -141,7 +141,7 @@ public class NatsHeaderParser
         // If not found length with be -1; casting to uint will turn it to uint.MaxValue
         // which will be larger than any possible headerLine.Length. This also serves to eliminate
         // the bounds check for the next lookup of headerLine[nameEnd]
-        if ((uint) nameEnd >= (uint) headerLine.Length)
+        if ((uint)nameEnd >= (uint)headerLine.Length)
         {
             // Colon not found.
             return false;
@@ -165,7 +165,7 @@ public class NatsHeaderParser
         var valueStart = nameEnd + 1;
 
         // Generally there will only be one space, so we will check it directly
-        if ((uint) valueStart < (uint) headerLine.Length)
+        if ((uint)valueStart < (uint)headerLine.Length)
         {
             var ch = headerLine[valueStart];
             if (ch == ByteSpace || ch == ByteTab)
@@ -174,7 +174,7 @@ public class NatsHeaderParser
                 valueStart++;
 
                 // More header chars?
-                if ((uint) valueStart < (uint) headerLine.Length)
+                if ((uint)valueStart < (uint)headerLine.Length)
                 {
                     ch = headerLine[valueStart];
 
@@ -240,7 +240,8 @@ public class NatsHeaderParser
     }
 
     [StackTraceHidden]
-    private void RejectRequestHeader(ReadOnlySpan<byte> headerLine)
-        => throw new NatsException(
-            $"Protocol error: invalid request header line '{headerLine.Dump()}'");
+    private void RejectRequestHeader(ReadOnlySpan<byte> headerLine) =>
+        throw new NatsException(
+            $"Protocol error: invalid request header line '{headerLine.Dump()}'"
+        );
 }

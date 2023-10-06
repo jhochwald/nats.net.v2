@@ -10,9 +10,12 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum ConsumerConfigurationAckPolicy
 {
-    [EnumMember(Value = @"none")] none = 0,
+    [EnumMember(Value = @"none")]
+    none = 0,
 
-    [EnumMember(Value = @"all")] all = 1,
+    [EnumMember(Value = @"all")]
+    all = 1,
 
-    [EnumMember(Value = @"explicit")] @explicit = 2
+    [EnumMember(Value = @"explicit")]
+    @explicit = 2
 }

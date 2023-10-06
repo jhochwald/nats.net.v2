@@ -38,8 +38,7 @@ namespace NATS.Client.Core;
 /// <param name="WriterCommandBufferLimit"></param>
 /// <param name="HeaderEncoding"></param>
 /// <param name="WaitUntilSent"></param>
-public sealed record NatsOpts
-(
+public sealed record NatsOpts(
     string Url,
     string Name,
     bool Echo,
@@ -65,41 +64,47 @@ public sealed record NatsOpts
     TimeSpan SubscriptionCleanUpInterval,
     int? WriterCommandBufferLimit,
     Encoding HeaderEncoding,
-    bool WaitUntilSent)
+    bool WaitUntilSent
+)
 {
-    public static readonly NatsOpts Default = new(
-        "nats://localhost:4222",
-        "NATS .Net Client",
-        true,
-        false,
-        true,
-        NatsAuthOpts.Default,
-        NatsTlsOpts.Default,
-        NatsDefaultSerializer.Default,
-        NullLoggerFactory.Instance,
-        65534, // 32767
-        1048576,
-        false,
-        "_INBOX",
-        false,
-        TimeSpan.FromMinutes(2),
-        2,
-        TimeSpan.FromSeconds(2),
-        TimeSpan.FromMilliseconds(100),
-        TimeSpan.FromSeconds(2),
-        256,
-        TimeSpan.FromSeconds(5),
-        TimeSpan.FromMinutes(1),
-        TimeSpan.FromMinutes(5),
-        1_000,
-        Encoding.ASCII,
-        false);
+    public static readonly NatsOpts Default =
+        new(
+            "nats://localhost:4222",
+            "NATS .Net Client",
+            true,
+            false,
+            true,
+            NatsAuthOpts.Default,
+            NatsTlsOpts.Default,
+            NatsDefaultSerializer.Default,
+            NullLoggerFactory.Instance,
+            65534, // 32767
+            1048576,
+            false,
+            "_INBOX",
+            false,
+            TimeSpan.FromMinutes(2),
+            2,
+            TimeSpan.FromSeconds(2),
+            TimeSpan.FromMilliseconds(100),
+            TimeSpan.FromSeconds(2),
+            256,
+            TimeSpan.FromSeconds(5),
+            TimeSpan.FromMinutes(1),
+            TimeSpan.FromMinutes(5),
+            1_000,
+            Encoding.ASCII,
+            false
+        );
 
     internal NatsUri[] GetSeedUris()
     {
         var urls = Url.Split(',');
         return NoRandomize
             ? urls.Select(x => new NatsUri(x, true)).Distinct().ToArray()
-            : urls.Select(x => new NatsUri(x, true)).OrderBy(_ => Guid.NewGuid()).Distinct().ToArray();
+            : urls.Select(x => new NatsUri(x, true))
+                .OrderBy(_ => Guid.NewGuid())
+                .Distinct()
+                .ToArray();
     }
 }

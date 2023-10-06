@@ -43,7 +43,8 @@ public abstract partial class NatsConnectionTest
                         cts.Cancel();
                 }
             },
-            cts.Token);
+            cts.Token
+        );
 
         var sync2 = 0;
         var messages2 = new List<int>();
@@ -66,12 +67,14 @@ public abstract partial class NatsConnectionTest
                         cts.Cancel();
                 }
             },
-            cts.Token);
+            cts.Token
+        );
 
         await Retry.Until(
             "subscriptions are active",
             () => Volatile.Read(ref sync1) + Volatile.Read(ref sync2) == 2,
-            async () => await conn3.PublishAsync("foo.sync", 0));
+            async () => await conn3.PublishAsync("foo.sync", 0)
+        );
 
         for (var i = 0; i < messageCount; i++)
         {
@@ -82,9 +85,7 @@ public abstract partial class NatsConnectionTest
         {
             await signal;
         }
-        catch (TimeoutException)
-        {
-        }
+        catch (TimeoutException) { }
 
         var messages = new List<int>();
 
@@ -117,16 +118,12 @@ public abstract partial class NatsConnectionTest
         {
             await reader1;
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
 
         try
         {
             await reader2;
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
     }
 }

@@ -27,7 +27,9 @@ internal sealed class NatsJSErrorAwareJsonSerializer : INatsSerializer
         var jsonDocument = JsonDocument.Parse(buffer);
         if (jsonDocument.RootElement.TryGetProperty("error", out var errorElement))
         {
-            var error = errorElement.Deserialize<ApiError>() ?? throw new NatsJSException("Can't parse JetStream error JSON payload");
+            var error =
+                errorElement.Deserialize<ApiError>()
+                ?? throw new NatsJSException("Can't parse JetStream error JSON payload");
             throw new NatsJSApiErrorException(error);
         }
 

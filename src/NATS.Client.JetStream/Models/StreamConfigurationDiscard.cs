@@ -10,7 +10,9 @@ namespace NATS.Client.JetStream.Models;
 #pragma warning disable SA1300
 public enum StreamConfigurationDiscard
 {
-    [EnumMember(Value = @"old")] old = 0,
+    [EnumMember(Value = @"old")]
+    old = 0,
 
-    [EnumMember(Value = @"new")] @new = 1
+    [EnumMember(Value = @"new")]
+    @new = 1
 }

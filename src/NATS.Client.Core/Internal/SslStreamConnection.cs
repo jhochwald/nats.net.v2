@@ -18,7 +18,12 @@ internal sealed class SslStreamConnection : ISocketConnection
     private readonly TaskCompletionSource<Exception> _waitForClosedSource;
     private int _disposed;
 
-    public SslStreamConnection(SslStream sslStream, NatsTlsOpts tlsOpts, TlsCerts? tlsCerts, TaskCompletionSource<Exception> waitForClosedSource)
+    public SslStreamConnection(
+        SslStream sslStream,
+        NatsTlsOpts tlsOpts,
+        TlsCerts? tlsCerts,
+        TaskCompletionSource<Exception> waitForClosedSource
+    )
     {
         _sslStream = sslStream;
         _tlsOpts = tlsOpts;
@@ -37,9 +42,7 @@ internal sealed class SslStreamConnection : ISocketConnection
                 _closeCts.Cancel();
                 _waitForClosedSource.TrySetCanceled();
             }
-            catch
-            {
-            }
+            catch { }
 
             return _sslStream.DisposeAsync();
         }
@@ -55,7 +58,8 @@ internal sealed class SslStreamConnection : ISocketConnection
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<int> ReceiveAsync(Memory<byte> buffer) => _sslStream.ReadAsync(buffer, _closeCts.Token);
+    public ValueTask<int> ReceiveAsync(Memory<byte> buffer) =>
+        _sslStream.ReadAsync(buffer, _closeCts.Token);
 
     public async ValueTask AbortConnectionAsync(CancellationToken cancellationToken)
     {
@@ -65,7 +69,8 @@ internal sealed class SslStreamConnection : ISocketConnection
     }
 
     // when catch SocketClosedException, call this method.
-    public void SignalDisconnected(Exception exception) => _waitForClosedSource.TrySetResult(exception);
+    public void SignalDisconnected(Exception exception) =>
+        _waitForClosedSource.TrySetResult(exception);
 
     public async Task AuthenticateAsClientAsync(string target)
     {
@@ -78,19 +83,22 @@ internal sealed class SslStreamConnection : ISocketConnection
         string targetHost,
         X509CertificateCollection localCertificates,
         X509Certificate? remoteCertificate,
-        string[] acceptableIssuers) => localCertificates[0];
+        string[] acceptableIssuers
+    ) => localCertificates[0];
 
     private static bool RcsCbInsecureSkipVerify(
         object sender,
         X509Certificate? certificate,
         X509Chain? chain,
-        SslPolicyErrors sslPolicyErrors) => true;
+        SslPolicyErrors sslPolicyErrors
+    ) => true;
 
     private bool RcsCbCaCertChain(
         object sender,
         X509Certificate? certificate,
         X509Chain? chain,
-        SslPolicyErrors sslPolicyErrors)
+        SslPolicyErrors sslPolicyErrors
+    )
     {
         // validate >=1 ca certs
         if (_tlsCerts?.CaCerts == null || !_tlsCerts.CaCerts.Any())
@@ -98,22 +106,29 @@ internal sealed class SslStreamConnection : ISocketConnection
             return false;
         }
 
-        if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0
+        if (
+            (sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0
             && chain != default
-            && certificate != default)
+            && certificate != default
+        )
         {
-            chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+            chain.ChainPolicy.VerificationFlags =
+                X509VerificationFlags.AllowUnknownCertificateAuthority;
             chain.ChainPolicy.ExtraStore.AddRange(_tlsCerts.CaCerts);
-            if (chain.Build((X509Certificate2) certificate))
+            if (chain.Build((X509Certificate2)certificate))
             {
                 sslPolicyErrors &= ~SslPolicyErrors.RemoteCertificateChainErrors;
             }
         }
 
         // validate >= 1 chain elements and that last chain element was one of the supplied CA certs
-        if (chain == default
+        if (
+            chain == default
             || !chain.ChainElements.Any()
-            || !_tlsCerts.CaCerts.Any(c => c.RawData.SequenceEqual(chain.ChainElements.Last().Certificate.RawData)))
+            || !_tlsCerts.CaCerts.Any(
+                c => c.RawData.SequenceEqual(chain.ChainElements.Last().Certificate.RawData)
+            )
+        )
         {
             sslPolicyErrors |= SslPolicyErrors.RemoteCertificateChainErrors;
         }
@@ -125,7 +140,9 @@ internal sealed class SslStreamConnection : ISocketConnection
     {
         if (_tlsOpts.Disabled)
         {
-            throw new InvalidOperationException("TLS is not permitted when TlsOptions.Disabled is set");
+            throw new InvalidOperationException(
+                "TLS is not permitted when TlsOptions.Disabled is set"
+            );
         }
 
         LocalCertificateSelectionCallback? lcsCb = default;

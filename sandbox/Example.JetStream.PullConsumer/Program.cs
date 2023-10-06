@@ -16,7 +16,10 @@ Console.CancelKeyPress += (_, e) =>
     cts.Cancel();
 };
 
-var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };
+var options = NatsOpts.Default with
+{
+    LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error)
+};
 
 await using var nats = new NatsConnection(options);
 
@@ -57,7 +60,12 @@ var fetchOpts = new NatsJSFetchOpts
     Serializer = new RawDataSerializer()
 };
 
-var nextOpts = new NatsJSNextOpts { Expires = expires, IdleHeartbeat = idle, Serializer = new RawDataSerializer() };
+var nextOpts = new NatsJSNextOpts
+{
+    Expires = expires,
+    IdleHeartbeat = idle,
+    Serializer = new RawDataSerializer()
+};
 
 var stopwatch = Stopwatch.StartNew();
 var count = 0;
@@ -147,9 +155,7 @@ try
             try
             {
                 Console.WriteLine("___\nCONSUME");
-                await using var sub = await consumer.ConsumeAsync<RawData>(
-                    consumeOpts,
-                    cts.Token);
+                await using var sub = await consumer.ConsumeAsync<RawData>(consumeOpts, cts.Token);
 
                 await foreach (var msg in sub.Msgs.ReadAllAsync(cts.Token))
                 {
@@ -197,8 +203,6 @@ try
         Console.WriteLine("Usage: dotnet run -- <consume|consume-all|fetch|fetch-all|next>");
     }
 }
-catch (OperationCanceledException)
-{
-}
+catch (OperationCanceledException) { }
 
 Console.WriteLine("Bye");

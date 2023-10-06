@@ -22,7 +22,10 @@ public class SequenceBuilderTest
         GetSegmentCount(builder.ToReadOnlySequence()).ShouldBe(2);
 
         builder.Append(new byte[] { 103, 34, 16, 9 });
-        builder.ToReadOnlySequence().ToArray().ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9);
+        builder
+            .ToReadOnlySequence()
+            .ToArray()
+            .ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9);
         GetSegmentCount(builder.ToReadOnlySequence()).ShouldBe(3);
     }
 
@@ -42,11 +45,17 @@ public class SequenceBuilderTest
         GetSegmentCount(builder.ToReadOnlySequence()).ShouldBe(1);
 
         builder.Append(fullBuffer.AsMemory(9));
-        builder.ToReadOnlySequence().ToArray().ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9);
+        builder
+            .ToReadOnlySequence()
+            .ToArray()
+            .ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9);
         GetSegmentCount(builder.ToReadOnlySequence()).ShouldBe(1);
 
         builder.Append(new byte[] { 44, 33, 22, 11 });
-        builder.ToReadOnlySequence().ToArray().ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9, 44, 33, 22, 11);
+        builder
+            .ToReadOnlySequence()
+            .ToArray()
+            .ShouldEqual(1, 100, 2, 99, 83, 12, 43, 53, 7, 103, 34, 16, 9, 44, 33, 22, 11);
         GetSegmentCount(builder.ToReadOnlySequence()).ShouldBe(2);
     }
 

@@ -11,7 +11,12 @@ namespace NATS.Client.JetStream;
 /// </summary>
 public record NatsJSOpts
 {
-    public NatsJSOpts(NatsOpts opts, string? apiPrefix = default, string? domain = default, AckOpts? ackOpts = default)
+    public NatsJSOpts(
+        NatsOpts opts,
+        string? apiPrefix = default,
+        string? domain = default,
+        AckOpts? ackOpts = default
+    )
     {
         ApiPrefix = apiPrefix ?? "$JS.API";
         AckOpts = ackOpts ?? new AckOpts(opts.WaitUntilSent);

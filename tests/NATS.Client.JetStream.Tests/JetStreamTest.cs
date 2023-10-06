@@ -22,7 +22,8 @@ public class JetStreamTest
                 .UseTransport(TransportType.Tcp)
                 .Trace()
                 .UseJetStream()
-                .Build());
+                .Build()
+        );
         var nats = server.CreateClientConnection();
 
         // Happy user
@@ -34,7 +35,8 @@ public class JetStreamTest
             // Create stream
             var stream = await js.CreateStreamAsync(
                 new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" } },
-                cts1.Token);
+                cts1.Token
+            );
             Assert.Equal("events", stream.Info.Config.Name);
 
             // Create consumer
@@ -46,17 +48,21 @@ public class JetStreamTest
                     {
                         Name = "consumer1",
                         DurableName = "consumer1",
-
                         // Turn on ACK so we can test them below
                         AckPolicy = ConsumerConfigurationAckPolicy.@explicit
                     }
                 },
-                cts1.Token);
+                cts1.Token
+            );
             Assert.Equal("events", consumer.Info.StreamName);
             Assert.Equal("consumer1", consumer.Info.Config.Name);
 
             // Publish
-            var ack = await js.PublishAsync("events.foo", new TestData { Test = 1 }, cancellationToken: cts1.Token);
+            var ack = await js.PublishAsync(
+                "events.foo",
+                new TestData { Test = 1 },
+                cancellationToken: cts1.Token
+            );
             Assert.Null(ack.Error);
             Assert.Equal("events", ack.Stream);
             Assert.Equal(1, ack.Seq);
@@ -67,7 +73,8 @@ public class JetStreamTest
                 "events.foo",
                 new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "test2" } },
-                cancellationToken: cts1.Token);
+                cancellationToken: cts1.Token
+            );
             Assert.Null(ack.Error);
             Assert.Equal("events", ack.Stream);
             Assert.Equal(2, ack.Seq);
@@ -78,7 +85,8 @@ public class JetStreamTest
                 "events.foo",
                 new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "test2" } },
-                cancellationToken: cts1.Token);
+                cancellationToken: cts1.Token
+            );
             Assert.Null(ack.Error);
             Assert.Equal("events", ack.Stream);
             Assert.Equal(2, ack.Seq);
@@ -89,7 +97,8 @@ public class JetStreamTest
             var messages = new List<NatsJSMsg<TestData?>>();
             var cc = await consumer.ConsumeAsync<TestData>(
                 new NatsJSConsumeOpts { MaxMsgs = 100 },
-                cts2.Token);
+                cts2.Token
+            );
             await foreach (var msg in cc.Msgs.ReadAllAsync(cts2.Token))
             {
                 messages.Add(msg);
@@ -120,7 +129,8 @@ public class JetStreamTest
             {
                 await js.CreateStreamAsync(
                     new StreamConfiguration { Name = "events2", Subjects = new[] { "events.*" } },
-                    cts.Token);
+                    cts.Token
+                );
             });
             Assert.Equal(400, exception.Error.Code);
 

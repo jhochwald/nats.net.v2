@@ -25,7 +25,11 @@ public class PublishTest
 
         // Publish
         {
-            var ack = await js.PublishAsync("s1.foo", new TestData { Test = 1 }, cancellationToken: cts.Token);
+            var ack = await js.PublishAsync(
+                "s1.foo",
+                new TestData { Test = 1 },
+                cancellationToken: cts.Token
+            );
             Assert.Null(ack.Error);
             Assert.Equal(1, ack.Seq);
             Assert.Equal("s1", ack.Stream);
@@ -38,7 +42,8 @@ public class PublishTest
                 "s1.foo",
                 new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "2" } },
-                cancellationToken: cts.Token);
+                cancellationToken: cts.Token
+            );
             Assert.Null(ack1.Error);
             Assert.Equal(2, ack1.Seq);
             Assert.False(ack1.Duplicate);
@@ -47,7 +52,8 @@ public class PublishTest
                 "s1.foo",
                 new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "2" } },
-                cancellationToken: cts.Token);
+                cancellationToken: cts.Token
+            );
             Assert.Null(ack2.Error);
             Assert.True(ack2.Duplicate);
         }

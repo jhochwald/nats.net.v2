@@ -24,7 +24,9 @@ public interface ICountableBufferWriter : IBufferWriter<byte>
 
 public static class NatsDefaultSerializer
 {
-    public static readonly INatsSerializer Default = new NatsRawSerializer(NatsJsonSerializer.Default);
+    public static readonly INatsSerializer Default = new NatsRawSerializer(
+        NatsJsonSerializer.Default
+    );
 }
 
 public class NatsRawSerializer : INatsSerializer
@@ -67,7 +69,7 @@ public class NatsRawSerializer : INatsSerializer
                 }
             }
 
-            return (int) readOnlySequence.Length;
+            return (int)readOnlySequence.Length;
         }
 
         if (value is IMemoryOwner<byte> memoryOwner)
@@ -89,22 +91,22 @@ public class NatsRawSerializer : INatsSerializer
     {
         if (typeof(T) == typeof(byte[]))
         {
-            return (T) (object) buffer.ToArray();
+            return (T)(object)buffer.ToArray();
         }
 
         if (typeof(T) == typeof(Memory<byte>))
         {
-            return (T) (object) new Memory<byte>(buffer.ToArray());
+            return (T)(object)new Memory<byte>(buffer.ToArray());
         }
 
         if (typeof(T) == typeof(ReadOnlyMemory<byte>))
         {
-            return (T) (object) new ReadOnlyMemory<byte>(buffer.ToArray());
+            return (T)(object)new ReadOnlyMemory<byte>(buffer.ToArray());
         }
 
         if (typeof(T) == typeof(ReadOnlySequence<byte>))
         {
-            return (T) (object) new ReadOnlySequence<byte>(buffer.ToArray());
+            return (T)(object)new ReadOnlySequence<byte>(buffer.ToArray());
         }
 
         if (Next != null)
@@ -116,16 +118,23 @@ public class NatsRawSerializer : INatsSerializer
 
 public sealed class NatsJsonSerializer : INatsSerializer
 {
-    private static readonly JsonWriterOptions JsonWriterOpts = new() { Indented = false, SkipValidation = true };
+    private static readonly JsonWriterOptions JsonWriterOpts =
+        new() { Indented = false, SkipValidation = true };
 
-    [ThreadStatic] private static Utf8JsonWriter? _jsonWriter;
+    [ThreadStatic]
+    private static Utf8JsonWriter? _jsonWriter;
 
     private readonly JsonSerializerOptions _opts;
 
     public NatsJsonSerializer(JsonSerializerOptions opts) => _opts = opts;
 
     public static NatsJsonSerializer Default { get; } =
-        new(new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+        new(
+            new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }
+        );
 
     public INatsSerializer? Next => default;
 
@@ -144,7 +153,7 @@ public sealed class NatsJsonSerializer : INatsSerializer
 
         JsonSerializer.Serialize(writer, value, _opts);
 
-        var bytesCommitted = (int) writer.BytesCommitted;
+        var bytesCommitted = (int)writer.BytesCommitted;
         writer.Reset(NullBufferWriter.Instance);
         return bytesCommitted;
     }
@@ -159,9 +168,7 @@ public sealed class NatsJsonSerializer : INatsSerializer
     {
         internal static readonly IBufferWriter<byte> Instance = new NullBufferWriter();
 
-        public void Advance(int count)
-        {
-        }
+        public void Advance(int count) { }
 
         public Memory<byte> GetMemory(int sizeHint = 0) => Array.Empty<byte>();
 

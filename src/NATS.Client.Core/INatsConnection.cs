@@ -20,7 +20,14 @@ public interface INatsConnection
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> used to cancel the command.</param>
     /// <typeparam name="T">Specifies the type of data that may be sent to the NATS Server.</typeparam>
     /// <returns>A <see cref="ValueTask" /> that represents the asynchronous send operation.</returns>
-    ValueTask PublishAsync<T>(string subject, T data, NatsHeaders? headers = default, string? replyTo = default, NatsPubOpts? opts = default, CancellationToken cancellationToken = default);
+    ValueTask PublishAsync<T>(
+        string subject,
+        T data,
+        NatsHeaders? headers = default,
+        string? replyTo = default,
+        NatsPubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Publishes an empty message payload to the given subject name, optionally supplying a reply subject.
@@ -35,7 +42,13 @@ public interface INatsConnection
     ///     Publishing a sentinel usually means a signal to the given subject which could be used to trigger an action
     ///     or indicate an event for example and of messages.
     /// </remarks>
-    ValueTask PublishAsync(string subject, NatsHeaders? headers = default, string? replyTo = default, NatsPubOpts? opts = default, CancellationToken cancellationToken = default);
+    ValueTask PublishAsync(
+        string subject,
+        NatsHeaders? headers = default,
+        string? replyTo = default,
+        NatsPubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Publishes a serializable message payload to the given subject name, optionally supplying a reply subject.
@@ -45,7 +58,11 @@ public interface INatsConnection
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> used to cancel the command.</param>
     /// <typeparam name="T">Specifies the type of data that may be sent to the NATS Server.</typeparam>
     /// <returns>A <see cref="ValueTask" /> that represents the asynchronous send operation.</returns>
-    ValueTask PublishAsync<T>(in NatsMsg<T> msg, NatsPubOpts? opts = default, CancellationToken cancellationToken = default);
+    ValueTask PublishAsync<T>(
+        in NatsMsg<T> msg,
+        NatsPubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Initiates a subscription to a subject, optionally joining a distributed queue group.
@@ -61,7 +78,12 @@ public interface INatsConnection
     ///     and only one randomly chosen subscriber of the queue group will
     ///     consume a message each time a message is received by the queue group.
     /// </remarks>
-    ValueTask<INatsSub<T>> SubscribeAsync<T>(string subject, string? queueGroup = default, NatsSubOpts? opts = default, CancellationToken cancellationToken = default);
+    ValueTask<INatsSub<T>> SubscribeAsync<T>(
+        string subject,
+        string? queueGroup = default,
+        NatsSubOpts? opts = default,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Create a new inbox subject with the form {Inbox Prefix}.{Unique Connection ID}.{Unique Inbox ID}
@@ -93,7 +115,8 @@ public interface INatsConnection
         NatsHeaders? headers = default,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Request and receive zero or more replies from a responder.
@@ -117,5 +140,6 @@ public interface INatsConnection
         NatsHeaders? headers = default,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

@@ -10,9 +10,7 @@ internal sealed class UnsubscribeCommand : CommandBase<UnsubscribeCommand>
 {
     private int _sid;
 
-    private UnsubscribeCommand()
-    {
-    }
+    private UnsubscribeCommand() { }
 
     // Unsubscribe is fire-and-forget, don't use CancellationTimer.
     public static UnsubscribeCommand Create(ObjectPool pool, int sid)

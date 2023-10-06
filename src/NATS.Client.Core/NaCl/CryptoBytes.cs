@@ -59,7 +59,8 @@ namespace NATS.Client.Core.NaCl
         public static bool ConstantTimeEquals(ArraySegment<byte> x, ArraySegment<byte> y)
         {
             // Contract.Requires<ArgumentNullException>(x.Array != null && y.Array != null);
-            if (x.Array == null || y.Array == null) throw new ArgumentNullException();
+            if (x.Array == null || y.Array == null)
+                throw new ArgumentNullException();
             if (x.Count != y.Count)
                 return false;
             return InternalConstantTimeEquals(x.Array, x.Offset, y.Array, y.Offset, x.Count) != 0;
@@ -79,21 +80,37 @@ namespace NATS.Client.Core.NaCl
         /// <param name="yOffset">Offset of byte sequence in the y array</param>
         /// <param name="length">Lengh of byte sequence</param>
         /// <returns>True if sequences are equal</returns>
-        public static bool ConstantTimeEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)
+        public static bool ConstantTimeEquals(
+            byte[] x,
+            int xOffset,
+            byte[] y,
+            int yOffset,
+            int length
+        )
         {
             // Contract.Requires<ArgumentNullException>(x != null && y != null);
-            if (x == null || y == null) throw new ArgumentNullException();
+            if (x == null || y == null)
+                throw new ArgumentNullException();
             // Contract.Requires<ArgumentOutOfRangeException>(xOffset >= 0 && yOffset >= 0 && length >= 0);
-            if (xOffset < 0 || yOffset < 0 || length < 0) throw new ArgumentException();
+            if (xOffset < 0 || yOffset < 0 || length < 0)
+                throw new ArgumentException();
             // Contract.Requires<ArgumentException>(xOffset + length <= x.Length);
-            if (xOffset + length > x.Length) throw new ArgumentException();
+            if (xOffset + length > x.Length)
+                throw new ArgumentException();
             // Contract.Requires<ArgumentException>(yOffset + length <= y.Length);
-            if (yOffset + length > y.Length) throw new ArgumentException();
+            if (yOffset + length > y.Length)
+                throw new ArgumentException();
 
             return InternalConstantTimeEquals(x, xOffset, y, yOffset, length) != 0;
         }
 
-        private static uint InternalConstantTimeEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)
+        private static uint InternalConstantTimeEquals(
+            byte[] x,
+            int xOffset,
+            byte[] y,
+            int yOffset,
+            int length
+        )
         {
             int differentbits = 0;
             for (int i = 0; i < length; i++)
@@ -108,7 +125,8 @@ namespace NATS.Client.Core.NaCl
         public static void Wipe(byte[] data)
         {
             // Contract.Requires<ArgumentNullException>(data != null);
-            if (data == null) throw new ArgumentNullException();
+            if (data == null)
+                throw new ArgumentNullException();
             InternalWipe(data, 0, data.Length);
         }
 
@@ -121,11 +139,14 @@ namespace NATS.Client.Core.NaCl
         public static void Wipe(byte[] data, int offset, int length)
         {
             // Contract.Requires<ArgumentNullException>(data != null);
-            if (data == null) throw new ArgumentNullException();
+            if (data == null)
+                throw new ArgumentNullException();
             // Contract.Requires<ArgumentOutOfRangeException>(offset >= 0 && length >= 0);
-            if (offset< 0 || length < 0) throw new ArgumentOutOfRangeException();
+            if (offset < 0 || length < 0)
+                throw new ArgumentOutOfRangeException();
             // Contract.Requires<ArgumentException>(offset + length <= data.Length);
-            if (offset + length > data.Length) throw new ArgumentException();
+            if (offset + length > data.Length)
+                throw new ArgumentException();
 
             InternalWipe(data, offset, length);
         }

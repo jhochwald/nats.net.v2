@@ -42,23 +42,23 @@ public partial class Benchmark
 
         switch (_btype)
         {
-        case BenchType.SUITE:
-            RunSuite();
-            break;
-        case BenchType.PUB:
-            RunPub("PUB", _count, _payloadSize);
-            break;
-        case BenchType.PUBSUB:
-            RunPubSub("PUBSUB", _count, _payloadSize);
-            break;
-        case BenchType.REQREPLY:
-            RunReqReply("REQREP", _count, _payloadSize);
-            break;
-        case BenchType.REQREPLYASYNC:
-            RunReqReplyAsync("REQREPASYNC", _count, _payloadSize).Wait();
-            break;
-        default:
-            throw new Exception("Invalid Type.");
+            case BenchType.SUITE:
+                RunSuite();
+                break;
+            case BenchType.PUB:
+                RunPub("PUB", _count, _payloadSize);
+                break;
+            case BenchType.PUBSUB:
+                RunPubSub("PUBSUB", _count, _payloadSize);
+                break;
+            case BenchType.REQREPLY:
+                RunReqReply("REQREP", _count, _payloadSize);
+                break;
+            case BenchType.REQREPLYASYNC:
+                RunReqReplyAsync("REQREPASYNC", _count, _payloadSize).Wait();
+                break;
+            default:
+                throw new Exception("Invalid Type.");
         }
     }
 
@@ -66,29 +66,32 @@ public partial class Benchmark
     {
         switch (value)
         {
-        case "PUB":
-            _btype = BenchType.PUB;
-            break;
-        case "PUBSUB":
-            _btype = BenchType.PUBSUB;
-            break;
-        case "REQREP":
-            _btype = BenchType.REQREPLY;
-            break;
-        case "REQREPASYNC":
-            _btype = BenchType.REQREPLYASYNC;
-            break;
-        case "SUITE":
-            _btype = BenchType.SUITE;
-            break;
-        default:
-            _btype = BenchType.PUB;
-            Console.WriteLine("No type specified.  Defaulting to PUB.");
-            break;
+            case "PUB":
+                _btype = BenchType.PUB;
+                break;
+            case "PUBSUB":
+                _btype = BenchType.PUBSUB;
+                break;
+            case "REQREP":
+                _btype = BenchType.REQREPLY;
+                break;
+            case "REQREPASYNC":
+                _btype = BenchType.REQREPLYASYNC;
+                break;
+            case "SUITE":
+                _btype = BenchType.SUITE;
+                break;
+            default:
+                _btype = BenchType.PUB;
+                Console.WriteLine("No type specified.  Defaulting to PUB.");
+                break;
         }
     }
 
-    private void Usage() => Console.WriteLine("benchmark [-h] -type <PUB|PUBSUB|REQREP|REQREPASYNC|SUITE> -url <server url> -count <test count> -creds <creds file> -size <payload size (bytes)>");
+    private void Usage() =>
+        Console.WriteLine(
+            "benchmark [-h] -type <PUB|PUBSUB|REQREP|REQREPASYNC|SUITE> -url <server url> -count <test count> -creds <creds file> -size <payload size (bytes)>"
+        );
 
     private string GetValue(IDictionary<string, string> values, string key, string defaultValue)
     {
@@ -113,8 +116,7 @@ public partial class Benchmark
                 if (i + 1 > args.Length)
                     throw new Exception("Missing argument after " + args[i]);
 
-                if ("-h".Equals(args[i].ToLower()) ||
-                    "/?".Equals(args[i].ToLower()))
+                if ("-h".Equals(args[i].ToLower()) || "/?".Equals(args[i].ToLower()))
                 {
                     Usage();
                     return false;
@@ -150,14 +152,15 @@ public partial class Benchmark
 
     private void PrintResults(string testPrefix, Stopwatch sw, long testCount, long msgSize)
     {
-        var msgRate = (int) (testCount / sw.Elapsed.TotalSeconds);
+        var msgRate = (int)(testCount / sw.Elapsed.TotalSeconds);
 
         Console.WriteLine(
             "{0}\t{1,10}\t{2,10} msgs/s\t{3,8} kb/s",
             testPrefix,
             testCount,
             msgRate,
-            msgRate * msgSize / 1024);
+            msgRate * msgSize / 1024
+        );
     }
 
     private byte[] GeneratePayload(long size)
@@ -170,7 +173,7 @@ public partial class Benchmark
         data = new byte[size];
         for (var i = 0; i < size; i++)
         {
-            data[i] = (byte) 'a';
+            data[i] = (byte)'a';
         }
 
         return data;
@@ -231,18 +234,21 @@ public partial class Benchmark
         var subConn = cf.CreateConnection(o);
         var pubConn = cf.CreateConnection(o);
 
-        var s = subConn.SubscribeAsync(_subject, (sender, args) =>
-        {
-            subCount++;
-            if (subCount == testCount)
+        var s = subConn.SubscribeAsync(
+            _subject,
+            (sender, args) =>
             {
-                lock (pubSubLock)
+                subCount++;
+                if (subCount == testCount)
                 {
-                    finished = true;
-                    Monitor.Pulse(pubSubLock);
+                    lock (pubSubLock)
+                    {
+                        finished = true;
+                        Monitor.Pulse(pubSubLock);
+                    }
                 }
             }
-        });
+        );
         s.SetPendingLimits(10000000, 1000000000);
         subConn.Flush();
 
@@ -272,16 +278,17 @@ public partial class Benchmark
         subConn.Close();
     }
 
-    private double ConvertTicksToMicros(long ticks) => ConvertTicksToMicros((double) ticks);
+    private double ConvertTicksToMicros(long ticks) => ConvertTicksToMicros((double)ticks);
 
-    private double ConvertTicksToMicros(double ticks) => ticks / TimeSpan.TicksPerMillisecond * 1000.0;
+    private double ConvertTicksToMicros(double ticks) =>
+        ticks / TimeSpan.TicksPerMillisecond * 1000.0;
 
     private void RunPubSubLatency(string testName, long testCount, long testSize)
     {
         var subcriberLock = new object();
         var subscriberDone = false;
 
-        var measurements = new List<long>((int) testCount);
+        var measurements = new List<long>((int)testCount);
 
         var payload = GeneratePayload(testSize);
 
@@ -298,18 +305,21 @@ public partial class Benchmark
 
         var sw = new Stopwatch();
 
-        var subs = subConn.SubscribeAsync(_subject, (sender, args) =>
-        {
-            sw.Stop();
-
-            measurements.Add(sw.ElapsedTicks);
-
-            lock (subcriberLock)
+        var subs = subConn.SubscribeAsync(
+            _subject,
+            (sender, args) =>
             {
-                Monitor.Pulse(subcriberLock);
-                subscriberDone = true;
+                sw.Stop();
+
+                measurements.Add(sw.ElapsedTicks);
+
+                lock (subcriberLock)
+                {
+                    Monitor.Pulse(subcriberLock);
+                    subscriberDone = true;
+                }
             }
-        });
+        );
 
         subConn.Flush();
 
@@ -339,9 +349,7 @@ public partial class Benchmark
 
         var latencyAvg = measurements.Average();
 
-        var stddev = Math.Sqrt(
-            measurements.Average(
-                v => Math.Pow(v - latencyAvg, 2)));
+        var stddev = Math.Sqrt(measurements.Average(v => Math.Pow(v - latencyAvg, 2)));
 
         Console.WriteLine(
             "{0} (us)\t{1} msgs, {2:F2} avg, {3:F2} min, {4:F2} max, {5:F2} stddev",
@@ -350,7 +358,8 @@ public partial class Benchmark
             ConvertTicksToMicros(latencyAvg),
             ConvertTicksToMicros(measurements.Min()),
             ConvertTicksToMicros(measurements.Max()),
-            ConvertTicksToMicros(stddev));
+            ConvertTicksToMicros(stddev)
+        );
 
         pubConn.Close();
         subConn.Close();

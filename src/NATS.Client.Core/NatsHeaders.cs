@@ -11,11 +11,31 @@ namespace NATS.Client.Core;
 /// <summary>
 ///     Represents a wrapper for RequestHeaders and ResponseHeaders.
 /// </summary>
-[SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "Keep class format as is for reference")]
-[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1504:All accessors should be single-line or multi-line", Justification = "Keep class format as is for reference")]
-[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1516:Elements should be separated by blank line", Justification = "Keep class format as is for reference")]
-[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Keep class format as is for reference")]
-[SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1214:Readonly fields should appear before non-readonly fields", Justification = "Keep class format as is for reference")]
+[SuppressMessage(
+    "StyleCop.CSharp.OrderingRules",
+    "SA1201:Elements should appear in the correct order",
+    Justification = "Keep class format as is for reference"
+)]
+[SuppressMessage(
+    "StyleCop.CSharp.LayoutRules",
+    "SA1504:All accessors should be single-line or multi-line",
+    Justification = "Keep class format as is for reference"
+)]
+[SuppressMessage(
+    "StyleCop.CSharp.LayoutRules",
+    "SA1516:Elements should be separated by blank line",
+    Justification = "Keep class format as is for reference"
+)]
+[SuppressMessage(
+    "StyleCop.CSharp.LayoutRules",
+    "SA1513:Closing brace should be followed by blank line",
+    Justification = "Keep class format as is for reference"
+)]
+[SuppressMessage(
+    "StyleCop.CSharp.OrderingRules",
+    "SA1214:Readonly fields should appear before non-readonly fields",
+    Justification = "Keep class format as is for reference"
+)]
 public class NatsHeaders : IDictionary<string, StringValues>
 {
     public enum Messages
@@ -36,13 +56,15 @@ public class NatsHeaders : IDictionary<string, StringValues>
     internal static readonly string MessageConsumerIsPushBasedStr = "Consumer is push based";
     internal static readonly string MessageNoMessagesStr = "No Messages";
     internal static readonly string MessageRequestTimeoutStr = "Request Timeout";
-    internal static readonly string MessageMessageSizeExceedsMaxBytesStr = "Message Size Exceeds MaxBytes";
+    internal static readonly string MessageMessageSizeExceedsMaxBytesStr =
+        "Message Size Exceeds MaxBytes";
 
     private static readonly string[] EmptyKeys = Array.Empty<string>();
     private static readonly StringValues[] EmptyValues = Array.Empty<StringValues>();
 
     // Pre-box
-    private static readonly IEnumerator<KeyValuePair<string, StringValues>> EmptyIEnumeratorType = default(Enumerator);
+    private static readonly IEnumerator<KeyValuePair<string, StringValues>> EmptyIEnumeratorType =
+        default(Enumerator);
     private static readonly IEnumerator EmptyIEnumerator = default(Enumerator);
 
     private int _readonly;
@@ -50,9 +72,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
     /// <summary>
     ///     Initializes a new instance of <see cref="NatsHeaders" />.
     /// </summary>
-    public NatsHeaders()
-    {
-    }
+    public NatsHeaders() { }
 
     /// <summary>
     ///     Initializes a new instance of <see cref="NatsHeaders" />.
@@ -68,25 +88,87 @@ public class NatsHeaders : IDictionary<string, StringValues>
 
     // Uses C# compiler's optimization for static byte[] data
     // string.Join(",", Encoding.ASCII.GetBytes("Idle Heartbeat"))
-    internal static ReadOnlySpan<byte> MessageIdleHeartbeat => new byte[] { 73, 100, 108, 101, 32, 72, 101, 97, 114, 116, 98, 101, 97, 116 };
+    internal static ReadOnlySpan<byte> MessageIdleHeartbeat =>
+        new byte[] { 73, 100, 108, 101, 32, 72, 101, 97, 114, 116, 98, 101, 97, 116 };
 
     // Bad Request
-    internal static ReadOnlySpan<byte> MessageBadRequest => new byte[] { 66, 97, 100, 32, 82, 101, 113, 117, 101, 115, 116 };
+    internal static ReadOnlySpan<byte> MessageBadRequest =>
+        new byte[] { 66, 97, 100, 32, 82, 101, 113, 117, 101, 115, 116 };
 
     // Consumer Deleted
-    internal static ReadOnlySpan<byte> MessageConsumerDeleted => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 68, 101, 108, 101, 116, 101, 100 };
+    internal static ReadOnlySpan<byte> MessageConsumerDeleted =>
+        new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 68, 101, 108, 101, 116, 101, 100 };
 
     // Consumer is push based
-    internal static ReadOnlySpan<byte> MessageConsumerIsPushBased => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 105, 115, 32, 112, 117, 115, 104, 32, 98, 97, 115, 101, 100 };
+    internal static ReadOnlySpan<byte> MessageConsumerIsPushBased =>
+        new byte[]
+        {
+            67,
+            111,
+            110,
+            115,
+            117,
+            109,
+            101,
+            114,
+            32,
+            105,
+            115,
+            32,
+            112,
+            117,
+            115,
+            104,
+            32,
+            98,
+            97,
+            115,
+            101,
+            100
+        };
 
     // No Messages
-    internal static ReadOnlySpan<byte> MessageNoMessages => new byte[] { 78, 111, 32, 77, 101, 115, 115, 97, 103, 101, 115 };
+    internal static ReadOnlySpan<byte> MessageNoMessages =>
+        new byte[] { 78, 111, 32, 77, 101, 115, 115, 97, 103, 101, 115 };
 
     // Request Timeout
-    internal static ReadOnlySpan<byte> MessageRequestTimeout => new byte[] { 82, 101, 113, 117, 101, 115, 116, 32, 84, 105, 109, 101, 111, 117, 116 };
+    internal static ReadOnlySpan<byte> MessageRequestTimeout =>
+        new byte[] { 82, 101, 113, 117, 101, 115, 116, 32, 84, 105, 109, 101, 111, 117, 116 };
 
     // Message Size Exceeds MaxBytes
-    internal static ReadOnlySpan<byte> MessageMessageSizeExceedsMaxBytes => new byte[] { 77, 101, 115, 115, 97, 103, 101, 32, 83, 105, 122, 101, 32, 69, 120, 99, 101, 101, 100, 115, 32, 77, 97, 120, 66, 121, 116, 101, 115 };
+    internal static ReadOnlySpan<byte> MessageMessageSizeExceedsMaxBytes =>
+        new byte[]
+        {
+            77,
+            101,
+            115,
+            115,
+            97,
+            103,
+            101,
+            32,
+            83,
+            105,
+            122,
+            101,
+            32,
+            69,
+            120,
+            99,
+            101,
+            101,
+            100,
+            115,
+            32,
+            77,
+            97,
+            120,
+            66,
+            121,
+            116,
+            101,
+            115
+        };
 
     public int Version => 1;
 
@@ -243,9 +325,11 @@ public class NatsHeaders : IDictionary<string, StringValues>
     /// <returns>true if the specified object occurs within this collection; otherwise, false.</returns>
     public bool Contains(KeyValuePair<string, StringValues> item)
     {
-        if (Store == null ||
-            !Store.TryGetValue(item.Key, out var value) ||
-            !StringValues.Equals(value, item.Value))
+        if (
+            Store == null
+            || !Store.TryGetValue(item.Key, out var value)
+            || !StringValues.Equals(value, item.Value)
+        )
         {
             return false;
         }
@@ -345,7 +429,9 @@ public class NatsHeaders : IDictionary<string, StringValues>
     ///     Returns an enumerator that iterates through a collection.
     /// </summary>
     /// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
-    IEnumerator<KeyValuePair<string, StringValues>> IEnumerable<KeyValuePair<string, StringValues>>.GetEnumerator()
+    IEnumerator<KeyValuePair<string, StringValues>> IEnumerable<
+        KeyValuePair<string, StringValues>
+    >.GetEnumerator()
     {
         if (Store == null || Store.Count == 0)
         {
@@ -376,7 +462,10 @@ public class NatsHeaders : IDictionary<string, StringValues>
     {
         if (Store == null)
         {
-            Store = new Dictionary<string, StringValues>(capacity, StringComparer.OrdinalIgnoreCase);
+            Store = new Dictionary<string, StringValues>(
+                capacity,
+                StringComparer.OrdinalIgnoreCase
+            );
         }
     }
 
@@ -401,7 +490,9 @@ public class NatsHeaders : IDictionary<string, StringValues>
     {
         if (IsReadOnly)
         {
-            throw new InvalidOperationException("The response headers cannot be modified because the response has already started.");
+            throw new InvalidOperationException(
+                "The response headers cannot be modified because the response has already started."
+            );
         }
     }
 
@@ -454,9 +545,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
         }
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
 
         object IEnumerator.Current => Current;
 
@@ -464,7 +553,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             if (_notEmpty)
             {
-                ((IEnumerator) _dictionaryEnumerator).Reset();
+                ((IEnumerator)_dictionaryEnumerator).Reset();
             }
         }
     }

@@ -71,11 +71,20 @@ Console.WriteLine();
 Console.WriteLine($"{totalMsgs:n0} msgs/sec ~ {totalSizeMb:n2} MB/sec");
 
 var r = totalMsgs / natsBenchTotalMsgs;
-Result.Add($"nats bench comparison: {r:n2} (> {t.MaxNatsBenchRatio})", () => r > t.MaxNatsBenchRatio);
-Result.Add($"memory usage: {memoryMb:n2} MB (< {t.MaxMemoryMb} MB)", () => memoryMb < t.MaxMemoryMb);
+Result.Add(
+    $"nats bench comparison: {r:n2} (> {t.MaxNatsBenchRatio})",
+    () => r > t.MaxNatsBenchRatio
+);
+Result.Add(
+    $"memory usage: {memoryMb:n2} MB (< {t.MaxMemoryMb} MB)",
+    () => memoryMb < t.MaxMemoryMb
+);
 
 var allocatedMb = GC.GetTotalAllocatedBytes() / meg;
-Result.Add($"allocations: {allocatedMb:n2} MB (< {t.MaxAllocatedMb} MB)", () => allocatedMb < t.MaxAllocatedMb);
+Result.Add(
+    $"allocations: {allocatedMb:n2} MB (< {t.MaxAllocatedMb} MB)",
+    () => allocatedMb < t.MaxAllocatedMb
+);
 
 Console.WriteLine();
 return Result.Eval();
@@ -87,7 +96,8 @@ double RunNatsBench(string url, TestParams testParams)
         StartInfo = new ProcessStartInfo
         {
             FileName = "nats",
-            Arguments = $"bench {testParams.Subject} --pub 1 --sub 1 --size={testParams.Size} --msgs={testParams.Msgs} --no-progress",
+            Arguments =
+                $"bench {testParams.Subject} --pub 1 --sub 1 --size={testParams.Size} --msgs={testParams.Msgs} --no-progress",
             RedirectStandardOutput = true,
             UseShellExecute = false,
             Environment = { { "NATS_URL", $"{url}" } }
@@ -96,7 +106,11 @@ double RunNatsBench(string url, TestParams testParams)
     process.Start();
     process.WaitForExit();
     var output = process.StandardOutput.ReadToEnd();
-    var match = Regex.Match(output, @"^\s*NATS Pub/Sub stats: (\S+) msgs/sec ~ (\S+) (\w+)/sec", RegexOptions.Multiline);
+    var match = Regex.Match(
+        output,
+        @"^\s*NATS Pub/Sub stats: (\S+) msgs/sec ~ (\S+) (\w+)/sec",
+        RegexOptions.Multiline
+    );
     var total = double.Parse(match.Groups[1].Value);
 
     Console.WriteLine(output);

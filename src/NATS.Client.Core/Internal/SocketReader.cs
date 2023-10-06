@@ -22,7 +22,12 @@ internal sealed class SocketReader
 
     private Memory<byte> _availableMemory;
 
-    public SocketReader(ISocketConnection socketConnection, int minimumBufferSize, ConnectionStatsCounter counter, ILoggerFactory loggerFactory)
+    public SocketReader(
+        ISocketConnection socketConnection,
+        int minimumBufferSize,
+        ConnectionStatsCounter counter,
+        ILoggerFactory loggerFactory
+    )
     {
         _socketConnection = socketConnection;
         _minimumBufferSize = minimumBufferSize;
@@ -57,7 +62,11 @@ internal sealed class SocketReader
             _stopwatch.Stop();
             if (_isTraceLogging)
             {
-                _logger.LogTrace("Socket.ReceiveAsync Size: {0} Elapsed: {1}ms", read, _stopwatch.Elapsed.TotalMilliseconds);
+                _logger.LogTrace(
+                    "Socket.ReceiveAsync Size: {0} Elapsed: {1}ms",
+                    read,
+                    _stopwatch.Elapsed.TotalMilliseconds
+                );
             }
 
             if (read == 0)
@@ -101,7 +110,11 @@ internal sealed class SocketReader
             _stopwatch.Stop();
             if (_isTraceLogging)
             {
-                _logger.LogTrace("Socket.ReceiveAsync Size: {0} Elapsed: {1}ms", read, _stopwatch.Elapsed.TotalMilliseconds);
+                _logger.LogTrace(
+                    "Socket.ReceiveAsync Size: {0} Elapsed: {1}ms",
+                    read,
+                    _stopwatch.Elapsed.TotalMilliseconds
+                );
             }
 
             if (read == 0)
@@ -116,7 +129,7 @@ internal sealed class SocketReader
             _seqeunceBuilder.Append(appendMemory);
             _availableMemory = _availableMemory.Slice(read);
 
-            if (appendMemory.Span.Contains((byte) '\n'))
+            if (appendMemory.Span.Contains((byte)'\n'))
             {
                 break;
             }

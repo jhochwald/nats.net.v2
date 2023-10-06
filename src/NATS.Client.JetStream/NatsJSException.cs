@@ -17,9 +17,7 @@ public class NatsJSException : NatsException
     /// </summary>
     /// <param name="message">Error message.</param>
     public NatsJSException(string message)
-        : base(message)
-    {
-    }
+        : base(message) { }
 
     /// <summary>
     ///     Create JetStream generic exception.
@@ -27,9 +25,7 @@ public class NatsJSException : NatsException
     /// <param name="message">Error message.</param>
     /// <param name="exception">Inner exception.</param>
     public NatsJSException(string message, Exception exception)
-        : base(message, exception)
-    {
-    }
+        : base(message, exception) { }
 }
 
 /// <summary>
@@ -42,9 +38,7 @@ public class NatsJSProtocolException : NatsJSException
     /// </summary>
     /// <param name="message">Error message.</param>
     public NatsJSProtocolException(string message)
-        : base(message)
-    {
-    }
+        : base(message) { }
 
     /// <summary>
     ///     Create JetStream protocol exception.
@@ -52,9 +46,7 @@ public class NatsJSProtocolException : NatsJSException
     /// <param name="message">Error message.</param>
     /// <param name="exception">Inner exception.</param>
     public NatsJSProtocolException(string message, Exception exception)
-        : base(message, exception)
-    {
-    }
+        : base(message, exception) { }
 }
 
 /// <summary>
@@ -67,8 +59,7 @@ public class NatsJSDuplicateMessageException : NatsJSException
     /// </summary>
     /// <param name="sequence">The duplicate sequence number.</param>
     public NatsJSDuplicateMessageException(long sequence)
-        : base($"Duplicate of {sequence}") =>
-        Sequence = sequence;
+        : base($"Duplicate of {sequence}") => Sequence = sequence;
 
     /// <summary>
     ///     The duplicate sequence number.
@@ -86,8 +77,7 @@ public class NatsJSApiException : NatsJSException
     /// </summary>
     /// <param name="error">Error response received from the server.</param>
     public NatsJSApiException(ApiError error)
-        : base(error.Description) =>
-        Error = error;
+        : base(error.Description) => Error = error;
 
     /// <summary>
     ///     API error response received from the server.

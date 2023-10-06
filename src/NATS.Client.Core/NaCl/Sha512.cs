@@ -31,7 +31,7 @@ namespace NATS.Client.Core.NaCl
         /// </summary>
         public Sha512()
         {
-            _buffer = new byte[BlockSize];//todo: remove allocation
+            _buffer = new byte[BlockSize]; //todo: remove allocation
             Init();
         }
 
@@ -62,11 +62,14 @@ namespace NATS.Client.Core.NaCl
         public void Update(byte[] data, int index, int length)
         {
             // Contract.Requires<ArgumentNullException>(data != null);
-            if (data == null) throw new ArgumentNullException();
+            if (data == null)
+                throw new ArgumentNullException();
             // Contract.Requires<ArgumentOutOfRangeException>(index >=0 && length >= 0);
-            if (index < 0 || length < 0) throw new ArgumentOutOfRangeException();
+            if (index < 0 || length < 0)
+                throw new ArgumentOutOfRangeException();
             // Contract.Requires<ArgumentException>((index + length) <= data.Length);
-            if ((index + length) > data.Length) throw new ArgumentException();
+            if ((index + length) > data.Length)
+                throw new ArgumentException();
 
             Array16<ulong> block;
             int bytesInBuffer = (int)_totalBytes & (BlockSize - 1);
@@ -112,9 +115,11 @@ namespace NATS.Client.Core.NaCl
         public void Finalize(ArraySegment<byte> output)
         {
             // Contract.Requires<ArgumentNullException>(output.Array != null);
-            if (output.Array == null) throw new ArgumentNullException();
+            if (output.Array == null)
+                throw new ArgumentNullException();
             // Contract.Requires<ArgumentException>(output.Count == 64);
-            if (output.Count != 64) throw new ArgumentException();
+            if (output.Count != 64)
+                throw new ArgumentException();
 
             Update(_padding, 0, _padding.Length);
             Array16<ulong> block;
@@ -159,7 +164,8 @@ namespace NATS.Client.Core.NaCl
         public static byte[] Hash(byte[] data)
         {
             // Contract.Requires<ArgumentNullException>(data != null);
-            if (data == null) throw new ArgumentNullException();
+            if (data == null)
+                throw new ArgumentNullException();
             return Hash(data, 0, data.Length);
         }
 
@@ -173,11 +179,14 @@ namespace NATS.Client.Core.NaCl
         public static byte[] Hash(byte[] data, int index, int length)
         {
             // Contract.Requires<ArgumentNullException>(data != null);
-            if (data == null) throw new ArgumentNullException();
+            if (data == null)
+                throw new ArgumentNullException();
             // Contract.Requires<ArgumentOutOfRangeException>(index >= 0 && length >= 0);
-            if (index < 0 || length < 0) throw new ArgumentOutOfRangeException();
+            if (index < 0 || length < 0)
+                throw new ArgumentOutOfRangeException();
             // Contract.Requires<ArgumentException>((index + length) <= data.Length);
-            if ((index + length) > data.Length) throw new ArgumentException();
+            if ((index + length) > data.Length)
+                throw new ArgumentException();
 
             var hasher = new Sha512();
             hasher.Update(data, index, length);

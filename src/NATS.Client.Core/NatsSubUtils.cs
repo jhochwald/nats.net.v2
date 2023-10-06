@@ -19,11 +19,11 @@ public sealed class NatsSub<T> : NatsSubBase, INatsSub<T>
         string subject,
         string? queueGroup,
         NatsSubOpts? opts,
-        INatsSerializer serializer)
+        INatsSerializer serializer
+    )
         : base(connection, manager, subject, queueGroup, opts)
     {
-        _msgs = Channel.CreateBounded<NatsMsg<T?>>(
-            NatsSubUtils.GetChannelOpts(opts?.ChannelOpts));
+        _msgs = Channel.CreateBounded<NatsMsg<T?>>(NatsSubUtils.GetChannelOpts(opts?.ChannelOpts));
 
         Serializer = serializer;
     }
@@ -32,7 +32,12 @@ public sealed class NatsSub<T> : NatsSubBase, INatsSub<T>
 
     public ChannelReader<NatsMsg<T?>> Msgs => _msgs.Reader;
 
-    protected override async ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
+    protected override async ValueTask ReceiveInternalAsync(
+        string subject,
+        string? replyTo,
+        ReadOnlySequence<byte>? headersBuffer,
+        ReadOnlySequence<byte> payloadBuffer
+    )
     {
         var natsMsg = NatsMsg<T?>.Build(
             subject,
@@ -41,7 +46,8 @@ public sealed class NatsSub<T> : NatsSubBase, INatsSub<T>
             payloadBuffer,
             Connection,
             Connection.HeaderParser,
-            Serializer);
+            Serializer
+        );
 
         await _msgs.Writer.WriteAsync(natsMsg).ConfigureAwait(false);
 
@@ -53,7 +59,12 @@ public sealed class NatsSub<T> : NatsSubBase, INatsSub<T>
 
 public class NatsSubException : NatsException
 {
-    public NatsSubException(string message, ExceptionDispatchInfo exception, Memory<byte> payload, Memory<byte> headers)
+    public NatsSubException(
+        string message,
+        ExceptionDispatchInfo exception,
+        Memory<byte> payload,
+        Memory<byte> headers
+    )
         : base(message)
     {
         Exception = exception;
@@ -71,20 +82,22 @@ public class NatsSubException : NatsException
 internal sealed class NatsSubUtils
 {
     private static readonly BoundedChannelOptions DefaultChannelOpts =
-        new(1_000) { FullMode = BoundedChannelFullMode.Wait, SingleWriter = true, SingleReader = false, AllowSynchronousContinuations = false };
+        new(1_000)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleWriter = true,
+            SingleReader = false,
+            AllowSynchronousContinuations = false
+        };
 
-    internal static BoundedChannelOptions GetChannelOpts(
-        NatsSubChannelOpts? subChannelOpts)
+    internal static BoundedChannelOptions GetChannelOpts(NatsSubChannelOpts? subChannelOpts)
     {
         if (subChannelOpts is { } overrideOpts)
         {
-            return new BoundedChannelOptions(overrideOpts.Capacity ??
-                                             DefaultChannelOpts.Capacity)
+            return new BoundedChannelOptions(overrideOpts.Capacity ?? DefaultChannelOpts.Capacity)
             {
-                AllowSynchronousContinuations =
-                    DefaultChannelOpts.AllowSynchronousContinuations,
-                FullMode =
-                    overrideOpts.FullMode ?? DefaultChannelOpts.FullMode,
+                AllowSynchronousContinuations = DefaultChannelOpts.AllowSynchronousContinuations,
+                FullMode = overrideOpts.FullMode ?? DefaultChannelOpts.FullMode,
                 SingleWriter = DefaultChannelOpts.SingleWriter,
                 SingleReader = DefaultChannelOpts.SingleReader
             };

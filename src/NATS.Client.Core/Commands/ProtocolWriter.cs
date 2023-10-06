@@ -42,7 +42,12 @@ internal sealed class ProtocolWriter
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#pub
     // PUB <subject> [reply-to] <#bytes>\r\n[payload]\r\n
-    public void WritePublish(string subject, string? replyTo, NatsHeaders? headers, ReadOnlySequence<byte> payload)
+    public void WritePublish(
+        string subject,
+        string? replyTo,
+        NatsHeaders? headers,
+        ReadOnlySequence<byte> payload
+    )
     {
         // We use a separate buffer to write the headers so that we can calculate the
         // size before we write to the output buffer '_writer'.
@@ -54,7 +59,9 @@ internal sealed class ProtocolWriter
 
         // Start writing the message to buffer:
         // PUP / HPUB
-        _writer.WriteSpan(headers == null ? CommandConstants.PubWithPadding : CommandConstants.HPubWithPadding);
+        _writer.WriteSpan(
+            headers == null ? CommandConstants.PubWithPadding : CommandConstants.HPubWithPadding
+        );
         _writer.WriteASCIIAndSpace(subject);
 
         if (replyTo != null)
@@ -71,7 +78,8 @@ internal sealed class ProtocolWriter
             var headersLength = _bufferHeaders.WrittenSpan.Length;
             _writer.WriteNumber(CommandConstants.NatsHeaders10NewLine.Length + headersLength);
             _writer.WriteSpace();
-            var total = CommandConstants.NatsHeaders10NewLine.Length + headersLength + payload.Length;
+            var total =
+                CommandConstants.NatsHeaders10NewLine.Length + headersLength + payload.Length;
             _writer.WriteNumber(total);
         }
 
@@ -92,7 +100,13 @@ internal sealed class ProtocolWriter
         _writer.WriteNewLine();
     }
 
-    public void WritePublish<T>(string subject, string? replyTo, NatsHeaders? headers, T? value, INatsSerializer serializer)
+    public void WritePublish<T>(
+        string subject,
+        string? replyTo,
+        NatsHeaders? headers,
+        T? value,
+        INatsSerializer serializer
+    )
     {
         _bufferPayload.Reset();
 
@@ -114,11 +128,13 @@ internal sealed class ProtocolWriter
     {
         var offset = 0;
 
-        var maxLength = CommandConstants.SubWithPadding.Length
-                        + subject.Length + 1
-                        + (queueGroup == null ? 0 : queueGroup.Length + 1)
-                        + MaxIntStringLength
-                        + NewLineLength; // newline
+        var maxLength =
+            CommandConstants.SubWithPadding.Length
+            + subject.Length
+            + 1
+            + (queueGroup == null ? 0 : queueGroup.Length + 1)
+            + MaxIntStringLength
+            + NewLineLength; // newline
 
         var writableSpan = _writer.GetSpan(maxLength);
         CommandConstants.SubWithPadding.CopyTo(writableSpan);
@@ -126,14 +142,14 @@ internal sealed class ProtocolWriter
 
         subject.WriteASCIIBytes(writableSpan.Slice(offset));
         offset += subject.Length;
-        writableSpan.Slice(offset)[0] = (byte) ' ';
+        writableSpan.Slice(offset)[0] = (byte)' ';
         offset += 1;
 
         if (queueGroup != null)
         {
             queueGroup.WriteASCIIBytes(writableSpan.Slice(offset));
             offset += queueGroup.Length;
-            writableSpan.Slice(offset)[0] = (byte) ' ';
+            writableSpan.Slice(offset)[0] = (byte)' ';
             offset += 1;
         }
 
@@ -163,10 +179,11 @@ internal sealed class ProtocolWriter
     public void WriteUnsubscribe(int sid, int? maxMessages)
     {
         var offset = 0;
-        var maxLength = CommandConstants.UnsubWithPadding.Length
-                        + MaxIntStringLength
-                        + (maxMessages != null ? 1 + MaxIntStringLength : 0)
-                        + NewLineLength;
+        var maxLength =
+            CommandConstants.UnsubWithPadding.Length
+            + MaxIntStringLength
+            + (maxMessages != null ? 1 + MaxIntStringLength : 0)
+            + NewLineLength;
 
         var writableSpan = _writer.GetSpan(maxLength);
         CommandConstants.UnsubWithPadding.CopyTo(writableSpan);
@@ -181,9 +198,11 @@ internal sealed class ProtocolWriter
 
         if (maxMessages != null)
         {
-            writableSpan.Slice(offset)[0] = (byte) ' ';
+            writableSpan.Slice(offset)[0] = (byte)' ';
             offset += 1;
-            if (!Utf8Formatter.TryFormat(maxMessages.Value, writableSpan.Slice(offset), out written))
+            if (
+                !Utf8Formatter.TryFormat(maxMessages.Value, writableSpan.Slice(offset), out written)
+            )
             {
                 throw new NatsException("Can not format integer.");
             }

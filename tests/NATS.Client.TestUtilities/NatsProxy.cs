@@ -64,14 +64,10 @@ public class NatsProxy : IDisposable
 
                     Task.Run(() =>
                     {
-                        while (NatsProtoDump(n, "C", sr1, sw2, ClientInterceptor))
-                        {
-                        }
+                        while (NatsProtoDump(n, "C", sr1, sw2, ClientInterceptor)) { }
                     });
 
-                    while (NatsProtoDump(n, "S", sr2, sw1, ServerInterceptor))
-                    {
-                    }
+                    while (NatsProtoDump(n, "S", sr2, sw1, ServerInterceptor)) { }
                 });
             }
         });
@@ -86,9 +82,7 @@ public class NatsProxy : IDisposable
                 Log($"Server started on localhost:{Port}");
                 return;
             }
-            catch (SocketException)
-            {
-            }
+            catch (SocketException) { }
         }
 
         throw new TimeoutException("Proxy server didn't start");
@@ -98,7 +92,7 @@ public class NatsProxy : IDisposable
 
     public List<Func<string?, string?>> ServerInterceptors { get; } = new();
 
-    public int Port => ((IPEndPoint) _tcpListener.Server.LocalEndPoint!).Port;
+    public int Port => ((IPEndPoint)_tcpListener.Server.LocalEndPoint!).Port;
 
     public IReadOnlyList<Frame> AllFrames
     {
@@ -159,7 +153,8 @@ public class NatsProxy : IDisposable
 
         await Retry.Until(
             "flush sync frame",
-            () => AllFrames.Any(f => f.Message == $"PUB {subject} 0␍␊"));
+            () => AllFrames.Any(f => f.Message == $"PUB {subject} 0␍␊")
+        );
 
         lock (_frames)
             _frames.Clear();
@@ -174,18 +169,19 @@ public class NatsProxy : IDisposable
         {
             switch (c)
             {
-            case >= ' ' and <= '~':
-                sb.Append(c);
-                break;
-            case '\n':
-                sb.Append('␊');
-                break;
-            case '\r':
-                sb.Append('␍');
-                break;
-            default:
-                sb.Append('.');
-                break;
+                case >= ' '
+                and <= '~':
+                    sb.Append(c);
+                    break;
+                case '\n':
+                    sb.Append('␊');
+                    break;
+                case '\r':
+                    sb.Append('␍');
+                    break;
+                default:
+                    sb.Append('.');
+                    break;
             }
         }
 
@@ -212,7 +208,13 @@ public class NatsProxy : IDisposable
         return message;
     }
 
-    private bool NatsProtoDump(int client, string origin, TextReader sr, TextWriter sw, Func<string?, string?>? interceptor)
+    private bool NatsProtoDump(
+        int client,
+        string origin,
+        TextReader sr,
+        TextWriter sw,
+        Func<string?, string?>? interceptor
+    )
     {
         void Write(string? rawFrame)
         {
@@ -303,7 +305,8 @@ public class NatsProxy : IDisposable
             _frames.Add(frame);
     }
 
-    private void Log(string text) => _outputHelper.WriteLine($"[PROXY] {DateTime.Now:HH:mm:ss.fff} {text}");
+    private void Log(string text) =>
+        _outputHelper.WriteLine($"[PROXY] {DateTime.Now:HH:mm:ss.fff} {text}");
 
     public record Frame(TimeSpan Timestamp, int Client, string Origin, string Message);
 }

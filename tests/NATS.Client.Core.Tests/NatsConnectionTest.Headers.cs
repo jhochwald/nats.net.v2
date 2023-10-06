@@ -30,9 +30,14 @@ public abstract partial class NatsConnectionTest
         await Retry.Until(
             "subscription is active",
             () => Volatile.Read(ref sync) == 1,
-            async () => await nats.PublishAsync("foo", 1));
+            async () => await nats.PublishAsync("foo", 1)
+        );
 
-        var headers = new NatsHeaders { ["Test-Header-Key"] = "test-header-value", ["Multi"] = new[] { "multi-value-0", "multi-value-1" } };
+        var headers = new NatsHeaders
+        {
+            ["Test-Header-Key"] = "test-header-value",
+            ["Multi"] = new[] { "multi-value-0", "multi-value-1" }
+        };
         Assert.False(headers.IsReadOnly);
 
         // Send with headers

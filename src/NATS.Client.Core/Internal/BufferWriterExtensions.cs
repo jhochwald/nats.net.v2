@@ -37,7 +37,7 @@ internal static class BufferWriterExtensions
     public static void WriteSpace(this FixedArrayBufferWriter writer)
     {
         var span = writer.GetSpan(1);
-        span[0] = (byte) ' ';
+        span[0] = (byte)' ';
         writer.Advance(1);
     }
 
@@ -50,9 +50,12 @@ internal static class BufferWriterExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void WriteSequence(this FixedArrayBufferWriter writer, ReadOnlySequence<byte> sequence)
+    public static void WriteSequence(
+        this FixedArrayBufferWriter writer,
+        ReadOnlySequence<byte> sequence
+    )
     {
-        var len = (int) sequence.Length;
+        var len = (int)sequence.Length;
         var span = writer.GetSpan(len);
         sequence.CopyTo(span);
         writer.Advance(len);
@@ -63,7 +66,7 @@ internal static class BufferWriterExtensions
     {
         var span = writer.GetSpan(ascii.Length + 1);
         ascii.WriteASCIIBytes(span);
-        span[ascii.Length] = (byte) ' ';
+        span[ascii.Length] = (byte)' ';
         writer.Advance(ascii.Length + 1);
     }
 }

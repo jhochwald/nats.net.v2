@@ -58,7 +58,12 @@ public class DefaultBench
 
         var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
         var logger = loggerFactory.CreateLogger<ILogger<DefaultBench>>();
-        var options = NatsOpts.Default with { LoggerFactory = loggerFactory, Echo = true, Verbose = false };
+        var options = NatsOpts.Default with
+        {
+            LoggerFactory = loggerFactory,
+            Echo = true,
+            Verbose = false
+        };
 
         _connection = new NatsConnection(options);
         _subject = "foobar";
@@ -88,7 +93,9 @@ public class DefaultBench
     {
         for (var i = 0; i < 1; i++)
         {
-            await _redis.GetDatabase().PublishAsync(_subject, JsonSerializer.Serialize(default(MyVector3)));
+            await _redis
+                .GetDatabase()
+                .PublishAsync(_subject, JsonSerializer.Serialize(default(MyVector3)));
         }
     }
 

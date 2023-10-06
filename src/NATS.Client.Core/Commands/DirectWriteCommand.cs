@@ -41,9 +41,7 @@ internal sealed class DirectWriteCommand : ICommand
 
     bool ICommand.IsCanceled => false;
 
-    void ICommand.Return(ObjectPool pool)
-    {
-    }
+    void ICommand.Return(ObjectPool pool) { }
 
     void ICommand.Write(ProtocolWriter writer) => writer.WriteRaw(_protocol);
 

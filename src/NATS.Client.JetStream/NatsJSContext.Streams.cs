@@ -18,8 +18,15 @@ public partial class NatsJSContext
     /// <returns>The NATS JetStream stream object which can be used to manage the stream.</returns>
     /// <exception cref="NatsJSException">There was an issue retrieving the response.</exception>
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
-    public ValueTask<NatsJSStream> CreateStreamAsync(string stream, string[] subjects, CancellationToken cancellationToken = default) =>
-        CreateStreamAsync(new StreamCreateRequest { Name = stream, Subjects = subjects }, cancellationToken);
+    public ValueTask<NatsJSStream> CreateStreamAsync(
+        string stream,
+        string[] subjects,
+        CancellationToken cancellationToken = default
+    ) =>
+        CreateStreamAsync(
+            new StreamCreateRequest { Name = stream, Subjects = subjects },
+            cancellationToken
+        );
 
     /// <summary>
     ///     Creates a new stream if it doesn't exist or returns an existing stream with the same name.
@@ -31,12 +38,14 @@ public partial class NatsJSContext
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask<NatsJSStream> CreateStreamAsync(
         StreamConfiguration request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<StreamConfiguration, StreamInfo>(
             $"{Opts.Prefix}.STREAM.CREATE.{request.Name}",
             request,
-            cancellationToken);
+            cancellationToken
+        );
         return new NatsJSStream(this, response);
     }
 
@@ -50,12 +59,14 @@ public partial class NatsJSContext
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask<bool> DeleteStreamAsync(
         string stream,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<object, StreamMsgDeleteResponse>(
             $"{Opts.Prefix}.STREAM.DELETE.{stream}",
             null,
-            cancellationToken);
+            cancellationToken
+        );
         return response.Success;
     }
 
@@ -69,12 +80,14 @@ public partial class NatsJSContext
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask<NatsJSStream> GetStreamAsync(
         string stream,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<object, StreamInfoResponse>(
             $"{Opts.Prefix}.STREAM.INFO.{stream}",
             null,
-            cancellationToken);
+            cancellationToken
+        );
         return new NatsJSStream(this, response);
     }
 
@@ -88,12 +101,14 @@ public partial class NatsJSContext
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask<NatsJSStream> UpdateStreamAsync(
         StreamUpdateRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<object, StreamUpdateResponse>(
             $"{Opts.Prefix}.STREAM.UPDATE.{request.Name}",
             request,
-            cancellationToken);
+            cancellationToken
+        );
         return new NatsJSStream(this, response);
     }
 
@@ -110,12 +125,14 @@ public partial class NatsJSContext
     /// </remarks>
     public async IAsyncEnumerable<NatsJSStream> ListStreamsAsync(
         string? subject = default,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         var response = await JSRequestResponseAsync<StreamListRequest, StreamListResponse>(
             $"{Opts.Prefix}.STREAM.LIST",
             new StreamListRequest { Offset = 0, Subject = subject! },
-            cancellationToken);
+            cancellationToken
+        );
         foreach (var stream in response.Streams)
             yield return new NatsJSStream(this, stream);
     }

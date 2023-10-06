@@ -18,10 +18,13 @@ public partial class NatsConnection
         }
         else
         {
-            WithConnect(command, static (self, command) =>
-            {
-                self.EnqueueCommandSync(command);
-            });
+            WithConnect(
+                command,
+                static (self, command) =>
+                {
+                    self.EnqueueCommandSync(command);
+                }
+            );
         }
     }
 
@@ -34,10 +37,14 @@ public partial class NatsConnection
         }
         else
         {
-            WithConnect(protocol, repeatCount, static (self, protocol, repeatCount) =>
-            {
-                self.EnqueueCommandSync(new DirectWriteCommand(protocol, repeatCount));
-            });
+            WithConnect(
+                protocol,
+                repeatCount,
+                static (self, protocol, repeatCount) =>
+                {
+                    self.EnqueueCommandSync(new DirectWriteCommand(protocol, repeatCount));
+                }
+            );
         }
     }
 
@@ -49,10 +56,13 @@ public partial class NatsConnection
         }
         else
         {
-            WithConnect(protocol, static (self, protocol) =>
-            {
-                self.EnqueueCommandSync(new DirectWriteCommand(protocol));
-            });
+            WithConnect(
+                protocol,
+                static (self, protocol) =>
+                {
+                    self.EnqueueCommandSync(new DirectWriteCommand(protocol));
+                }
+            );
         }
     }
 
@@ -64,15 +74,21 @@ public partial class NatsConnection
         }
         else
         {
-            WithConnect(command, static (self, command) =>
-            {
-                self.EnqueueCommandSync(command);
-            });
+            WithConnect(
+                command,
+                static (self, command) =>
+                {
+                    self.EnqueueCommandSync(command);
+                }
+            );
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal CancellationTimer GetCancellationTimer(CancellationToken cancellationToken, TimeSpan timeout = default)
+    internal CancellationTimer GetCancellationTimer(
+        CancellationToken cancellationToken,
+        TimeSpan timeout = default
+    )
     {
         if (timeout == default)
             timeout = Opts.CommandTimeout;

@@ -12,9 +12,7 @@ namespace NATS.Client.Core.Internal;
 internal sealed class SocketClosedException : Exception
 {
     public SocketClosedException(Exception? innerException)
-        : base("Socket has been closed.", innerException)
-    {
-    }
+        : base("Socket has been closed.", innerException) { }
 }
 
 internal sealed class TcpConnection : ISocketConnection
@@ -25,7 +23,11 @@ internal sealed class TcpConnection : ISocketConnection
 
     public TcpConnection()
     {
-        _socket = new Socket(Socket.OSSupportsIPv6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        _socket = new Socket(
+            Socket.OSSupportsIPv6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork,
+            SocketType.Stream,
+            ProtocolType.Tcp
+        );
         if (Socket.OSSupportsIPv6)
         {
             _socket.DualMode = true;
@@ -43,12 +45,15 @@ internal sealed class TcpConnection : ISocketConnection
     public Task<Exception> WaitForClosed => _waitForClosedSource.Task;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<int> SendAsync(ReadOnlyMemory<byte> buffer) => _socket.SendAsync(buffer, SocketFlags.None, CancellationToken.None);
+    public ValueTask<int> SendAsync(ReadOnlyMemory<byte> buffer) =>
+        _socket.SendAsync(buffer, SocketFlags.None, CancellationToken.None);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<int> ReceiveAsync(Memory<byte> buffer) => _socket.ReceiveAsync(buffer, SocketFlags.None, CancellationToken.None);
+    public ValueTask<int> ReceiveAsync(Memory<byte> buffer) =>
+        _socket.ReceiveAsync(buffer, SocketFlags.None, CancellationToken.None);
 
-    public ValueTask AbortConnectionAsync(CancellationToken cancellationToken) => _socket.DisconnectAsync(false, cancellationToken);
+    public ValueTask AbortConnectionAsync(CancellationToken cancellationToken) =>
+        _socket.DisconnectAsync(false, cancellationToken);
 
     public ValueTask DisposeAsync()
     {
@@ -58,9 +63,7 @@ internal sealed class TcpConnection : ISocketConnection
             {
                 _waitForClosedSource.TrySetCanceled();
             }
-            catch
-            {
-            }
+            catch { }
 
             _socket.Dispose();
         }
@@ -69,7 +72,8 @@ internal sealed class TcpConnection : ISocketConnection
     }
 
     // when catch SocketClosedException, call this method.
-    public void SignalDisconnected(Exception exception) => _waitForClosedSource.TrySetResult(exception);
+    public void SignalDisconnected(Exception exception) =>
+        _waitForClosedSource.TrySetResult(exception);
 
     // CancellationToken is not used, operation lifetime is completely same as socket.
 
@@ -81,7 +85,8 @@ internal sealed class TcpConnection : ISocketConnection
 
     // return ValueTask directly for performance, not care exception and signal-disconnected.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask ConnectAsync(string host, int port, CancellationToken cancellationToken) => _socket.ConnectAsync(host, port, cancellationToken);
+    public ValueTask ConnectAsync(string host, int port, CancellationToken cancellationToken) =>
+        _socket.ConnectAsync(host, port, cancellationToken);
 
     /// <summary>
     ///     Connect with Timeout. When failed, Dispose this connection.
@@ -115,7 +120,8 @@ internal sealed class TcpConnection : ISocketConnection
                 new SslStream(new NetworkStream(_socket, true)),
                 tlsOpts,
                 tlsCerts,
-                _waitForClosedSource);
+                _waitForClosedSource
+            );
         }
 
         throw new ObjectDisposedException(nameof(TcpConnection));

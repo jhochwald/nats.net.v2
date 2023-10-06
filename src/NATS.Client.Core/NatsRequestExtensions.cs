@@ -24,7 +24,8 @@ public static class NatsRequestExtensions
         in NatsMsg<TRequest> msg,
         NatsPubOpts? requestOpts = default,
         NatsSubOpts? replyOpts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         CheckMsgForRequestReply(msg);
 
@@ -34,10 +35,12 @@ public static class NatsRequestExtensions
             msg.Headers,
             requestOpts,
             replyOpts,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
-    internal static void CheckMsgForRequestReply<T>(in NatsMsg<T> msg) => CheckForRequestReply(msg.ReplyTo);
+    internal static void CheckMsgForRequestReply<T>(in NatsMsg<T> msg) =>
+        CheckForRequestReply(msg.ReplyTo);
 
     private static void CheckForRequestReply(string? replyTo)
     {

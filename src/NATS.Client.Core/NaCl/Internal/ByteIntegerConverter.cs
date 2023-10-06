@@ -9,8 +9,7 @@ namespace NATS.Client.Core.NaCl.Internal
     {
         public static ulong LoadBigEndian64(byte[] buf, int offset)
         {
-            return
-                (ulong)(buf[offset + 7])
+            return (ulong)(buf[offset + 7])
                 | (((ulong)(buf[offset + 6])) << 8)
                 | (((ulong)(buf[offset + 5])) << 16)
                 | (((ulong)(buf[offset + 4])) << 24)
@@ -32,7 +31,11 @@ namespace NATS.Client.Core.NaCl.Internal
             buf[offset + 0] = unchecked((byte)(value >> 56));
         }
 
-        public static void Array16LoadBigEndian64(out Array16<ulong> output, byte[] input, int inputOffset)
+        public static void Array16LoadBigEndian64(
+            out Array16<ulong> output,
+            byte[] input,
+            int inputOffset
+        )
         {
             output.x0 = LoadBigEndian64(input, inputOffset + 0);
             output.x1 = LoadBigEndian64(input, inputOffset + 8);

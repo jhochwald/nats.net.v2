@@ -23,7 +23,12 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
     private readonly Task _writeLoop;
     private int _disposed;
 
-    public NatsPipeliningWriteProtocolProcessor(ISocketConnection socketConnection, WriterState state, ObjectPool pool, ConnectionStatsCounter counter)
+    public NatsPipeliningWriteProtocolProcessor(
+        ISocketConnection socketConnection,
+        WriterState state,
+        ObjectPool pool,
+        ConnectionStatsCounter counter
+    )
     {
         _socketConnection = socketConnection;
         _state = state;
@@ -84,11 +89,18 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
                         while (memory.Length > 0)
                         {
                             _stopwatch.Restart();
-                            var sent = await _socketConnection.SendAsync(memory).ConfigureAwait(false);
+                            var sent = await _socketConnection
+                                .SendAsync(memory)
+                                .ConfigureAwait(false);
                             _stopwatch.Stop();
                             if (isEnabledTraceLogging)
                             {
-                                logger.LogTrace("Socket.SendAsync. Size: {0} BatchSize: {1} Elapsed: {2}ms", sent, count, _stopwatch.Elapsed.TotalMilliseconds);
+                                logger.LogTrace(
+                                    "Socket.SendAsync. Size: {0} BatchSize: {1} Elapsed: {2}ms",
+                                    sent,
+                                    count,
+                                    _stopwatch.Elapsed.TotalMilliseconds
+                                );
                             }
 
                             Interlocked.Add(ref _counter.SentBytes, sent);
@@ -120,12 +132,20 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
             _state.PendingPromises.Clear();
 
             // main writer loop
-            while (_bufferWriter.WrittenCount != 0 || await reader.WaitToReadAsync(_cancellationTokenSource.Token).ConfigureAwait(false))
+            while (
+                _bufferWriter.WrittenCount != 0
+                || await reader
+                    .WaitToReadAsync(_cancellationTokenSource.Token)
+                    .ConfigureAwait(false)
+            )
             {
                 try
                 {
                     var count = 0;
-                    while (_bufferWriter.WrittenCount < writerBufferSize && reader.TryRead(out var command))
+                    while (
+                        _bufferWriter.WrittenCount < writerBufferSize
+                        && reader.TryRead(out var command)
+                    )
                     {
                         Interlocked.Decrement(ref _counter.PendingMessages);
                         if (command.IsCanceled)
@@ -172,11 +192,18 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
                         while (memory.Length != 0)
                         {
                             _stopwatch.Restart();
-                            var sent = await _socketConnection.SendAsync(memory).ConfigureAwait(false);
+                            var sent = await _socketConnection
+                                .SendAsync(memory)
+                                .ConfigureAwait(false);
                             _stopwatch.Stop();
                             if (isEnabledTraceLogging)
                             {
-                                logger.LogTrace("Socket.SendAsync. Size: {0} BatchSize: {1} Elapsed: {2}ms", sent, count, _stopwatch.Elapsed.TotalMilliseconds);
+                                logger.LogTrace(
+                                    "Socket.SendAsync. Size: {0} BatchSize: {1} Elapsed: {2}ms",
+                                    sent,
+                                    count,
+                                    _stopwatch.Elapsed.TotalMilliseconds
+                                );
                             }
 
                             if (sent == 0)
@@ -221,27 +248,23 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
                     {
                         logger.LogError(ex, "Internal error occured on WriteLoop.");
                     }
-                    catch
-                    {
-                    }
+                    catch { }
                 }
             }
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
         finally
         {
             try
             {
                 if (_bufferWriter.WrittenMemory.Length != 0)
                 {
-                    await _socketConnection.SendAsync(_bufferWriter.WrittenMemory).ConfigureAwait(false);
+                    await _socketConnection
+                        .SendAsync(_bufferWriter.WrittenMemory)
+                        .ConfigureAwait(false);
                 }
             }
-            catch
-            {
-            }
+            catch { }
         }
     }
 }

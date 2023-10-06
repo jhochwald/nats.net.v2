@@ -11,9 +11,14 @@ public class ReplyToDateTimeAndSeqTest
     [Fact]
     public void ShouldParseV1ReplyToDateTimeAndSeq()
     {
-        var natsJSMsgMetadata = ReplyToDateTimeAndSeq.Parse("$JS.ACK.UnitTest.GetEvents_0.1.100.1.1696023331771188000.0");
+        var natsJSMsgMetadata = ReplyToDateTimeAndSeq.Parse(
+            "$JS.ACK.UnitTest.GetEvents_0.1.100.1.1696023331771188000.0"
+        );
 
-        natsJSMsgMetadata!.Value.Timestamp.ToString("O").Should().Be("2023-09-29T21:35:31.7710000+00:00");
+        natsJSMsgMetadata!.Value.Timestamp
+            .ToString("O")
+            .Should()
+            .Be("2023-09-29T21:35:31.7710000+00:00");
         natsJSMsgMetadata.Value.Sequence.Stream.Should().Be(100);
         natsJSMsgMetadata.Value.Sequence.Consumer.Should().Be(1);
         natsJSMsgMetadata.Value.NumDelivered.Should().Be(1);
@@ -26,9 +31,14 @@ public class ReplyToDateTimeAndSeqTest
     [Fact]
     public void ShouldParseV2ReplyToDateTimeAndSeq()
     {
-        var natsJSMsgMetadata = ReplyToDateTimeAndSeq.Parse("$JS.ACK.MyDomain.1234.UnitTest.GetEvents_0.1.100.1.1696023331771188000.0");
+        var natsJSMsgMetadata = ReplyToDateTimeAndSeq.Parse(
+            "$JS.ACK.MyDomain.1234.UnitTest.GetEvents_0.1.100.1.1696023331771188000.0"
+        );
 
-        natsJSMsgMetadata!.Value.Timestamp.ToString("O").Should().Be("2023-09-29T21:35:31.7710000+00:00");
+        natsJSMsgMetadata!.Value.Timestamp
+            .ToString("O")
+            .Should()
+            .Be("2023-09-29T21:35:31.7710000+00:00");
         natsJSMsgMetadata.Value.Sequence.Stream.Should().Be(100);
         natsJSMsgMetadata.Value.Sequence.Consumer.Should().Be(1);
         natsJSMsgMetadata.Value.NumDelivered.Should().Be(1);

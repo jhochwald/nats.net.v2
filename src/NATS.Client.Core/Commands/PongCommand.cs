@@ -8,9 +8,7 @@ namespace NATS.Client.Core.Commands;
 
 internal sealed class PongCommand : CommandBase<PongCommand>
 {
-    private PongCommand()
-    {
-    }
+    private PongCommand() { }
 
     public static PongCommand Create(ObjectPool pool, CancellationTimer timer)
     {
@@ -26,7 +24,5 @@ internal sealed class PongCommand : CommandBase<PongCommand>
 
     public override void Write(ProtocolWriter writer) => writer.WritePong();
 
-    protected override void Reset()
-    {
-    }
+    protected override void Reset() { }
 }

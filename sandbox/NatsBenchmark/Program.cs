@@ -51,7 +51,12 @@ namespace NatsBenchmark
 {
     public partial class Benchmark
     {
-        private void RunPubSubBenchmark(string testName, long testCount, long testSize, bool disableShow = false)
+        private void RunPubSubBenchmark(
+            string testName,
+            long testCount,
+            long testSize,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -67,7 +72,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -82,20 +89,23 @@ namespace NatsBenchmark
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
+                    Interlocked.Increment(ref subCount);
+
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
                     {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
-                }
-            });
+                });
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -124,7 +134,12 @@ namespace NatsBenchmark
             subConn.DisposeAsync().AsTask().Wait();
         }
 
-        private void RunPubSubBenchmarkBatch(string testName, long testCount, long testSize, bool disableShow = false)
+        private void RunPubSubBenchmarkBatch(
+            string testName,
+            long testCount,
+            long testSize,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -140,7 +155,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -155,24 +172,25 @@ namespace NatsBenchmark
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
-                    {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
-                    }
-                }
-            });
+                    Interlocked.Increment(ref subCount);
 
-            var data = Enumerable.Range(0, 1000)
-                .Select(x => (_subject, payload))
-                .ToArray();
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
+                    {
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
+                    }
+                });
+
+            var data = Enumerable.Range(0, 1000).Select(x => (_subject, payload)).ToArray();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -206,7 +224,12 @@ namespace NatsBenchmark
             subConn.DisposeAsync().AsTask().Wait();
         }
 
-        private void ProfilingRunPubSubBenchmarkAsync(string testName, long testCount, long testSize, bool disableShow = false)
+        private void ProfilingRunPubSubBenchmarkAsync(
+            string testName,
+            long testCount,
+            long testSize,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -222,7 +245,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -237,20 +262,23 @@ namespace NatsBenchmark
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
+                    Interlocked.Increment(ref subCount);
+
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
                     {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
-                }
-            });
+                });
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -284,7 +312,13 @@ namespace NatsBenchmark
             subConn.DisposeAsync().AsTask().Wait();
         }
 
-        private void RunPubSubBenchmarkBatchRaw(string testName, long testCount, long testSize, int batchSize = 1000, bool disableShow = false)
+        private void RunPubSubBenchmarkBatchRaw(
+            string testName,
+            long testCount,
+            long testSize,
+            int batchSize = 1000,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -300,7 +334,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -315,20 +351,23 @@ namespace NatsBenchmark
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
+                    Interlocked.Increment(ref subCount);
+
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
                     {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
-                }
-            });
+                });
 
             var command = new DirectWriteCommand(BuildCommand(testSize), batchSize);
 
@@ -380,7 +419,12 @@ namespace NatsBenchmark
             return sb.ToString();
         }
 
-        private void RunPubSubBenchmarkPubSub2(string testName, long testCount, long testSize, bool disableShow = false)
+        private void RunPubSubBenchmarkPubSub2(
+            string testName,
+            long testCount,
+            long testSize,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -396,7 +440,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -418,34 +464,40 @@ namespace NatsBenchmark
             pubConn2.ConnectAsync().AsTask().Wait();
             subConn2.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
-                    {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
-                    }
-                }
-            });
-            var d2 = subConn2.SubscribeAsync<byte[]>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount2);
+                    Interlocked.Increment(ref subCount);
 
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount2 == testCount)
-                {
-                    lock (pubSubLock2)
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
                     {
-                        finished2 = true;
-                        Monitor.Pulse(pubSubLock2);
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
-                }
-            });
+                });
+            var d2 = subConn2
+                .SubscribeAsync<byte[]>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
+                {
+                    Interlocked.Increment(ref subCount2);
+
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount2 == testCount)
+                    {
+                        lock (pubSubLock2)
+                        {
+                            finished2 = true;
+                            Monitor.Pulse(pubSubLock2);
+                        }
+                    }
+                });
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -495,7 +547,11 @@ namespace NatsBenchmark
             subConn.DisposeAsync().AsTask().Wait();
         }
 
-        private void RunPubSubBenchmarkVector3(string testName, long testCount, bool disableShow = false)
+        private void RunPubSubBenchmarkVector3(
+            string testName,
+            long testCount,
+            bool disableShow = false
+        )
         {
             var provider = new ServiceCollection()
                 .AddLogging(x =>
@@ -511,7 +567,9 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false, Echo = false, Verbose = false
+                UseThreadPoolCallback = false,
+                Echo = false,
+                Verbose = false
             };
 
             var pubSubLock = new object();
@@ -525,22 +583,25 @@ namespace NatsBenchmark
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
 
-            var d = subConn.SubscribeAsync<Vector3>(_subject).AsTask().Result.Register(_ =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here:{0}", subCount);
-                if (subCount == testCount)
+            var d = subConn
+                .SubscribeAsync<Vector3>(_subject)
+                .AsTask()
+                .Result.Register(_ =>
                 {
-                    lock (pubSubLock)
-                    {
-                        finished = true;
+                    Interlocked.Increment(ref subCount);
 
-                        // JetBrains.Profiler.Api.MemoryProfiler.GetSnapshot("After");
-                        Monitor.Pulse(pubSubLock);
+                    // logger.LogInformation("here:{0}", subCount);
+                    if (subCount == testCount)
+                    {
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+
+                            // JetBrains.Profiler.Api.MemoryProfiler.GetSnapshot("After");
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
-                }
-            });
+                });
 
             MessagePackSerializer.Serialize(default(Vector3));
 
@@ -602,20 +663,23 @@ namespace NatsBenchmark
             var subConn = cf.CreateConnection(o);
             var pubConn = cf.CreateConnection(o);
 
-            var s = subConn.SubscribeAsync(_subject, (sender, args) =>
-            {
-                MessagePackSerializer.Deserialize<Vector3>(args.Message.Data);
-
-                subCount++;
-                if (subCount == testCount)
+            var s = subConn.SubscribeAsync(
+                _subject,
+                (sender, args) =>
                 {
-                    lock (pubSubLock)
+                    MessagePackSerializer.Deserialize<Vector3>(args.Message.Data);
+
+                    subCount++;
+                    if (subCount == testCount)
                     {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
+                        lock (pubSubLock)
+                        {
+                            finished = true;
+                            Monitor.Pulse(pubSubLock);
+                        }
                     }
                 }
-            });
+            );
             s.SetPendingLimits(10000000, 1000000000);
             subConn.Flush();
 
@@ -670,26 +734,33 @@ namespace NatsBenchmark
             var pubConn = ConnectionMultiplexer.Connect("localhost");
             var subConn = ConnectionMultiplexer.Connect("localhost");
 
-            subConn.GetSubscriber().Subscribe(_subject, (channel, v) =>
-            {
-                Interlocked.Increment(ref subCount);
-
-                // logger.LogInformation("here?:" + subCount);
-                if (subCount == testCount)
-                {
-                    lock (pubSubLock)
+            subConn
+                .GetSubscriber()
+                .Subscribe(
+                    _subject,
+                    (channel, v) =>
                     {
-                        finished = true;
-                        Monitor.Pulse(pubSubLock);
+                        Interlocked.Increment(ref subCount);
+
+                        // logger.LogInformation("here?:" + subCount);
+                        if (subCount == testCount)
+                        {
+                            lock (pubSubLock)
+                            {
+                                finished = true;
+                                Monitor.Pulse(pubSubLock);
+                            }
+                        }
                     }
-                }
-            });
+                );
 
             var sw = Stopwatch.StartNew();
 
             for (var i = 0; i < testCount; i++)
             {
-                _ = pubConn.GetDatabase().PublishAsync(_subject, payload, CommandFlags.FireAndForget);
+                _ = pubConn
+                    .GetDatabase()
+                    .PublishAsync(_subject, payload, CommandFlags.FireAndForget);
             }
 
             lock (pubSubLock)
@@ -796,9 +867,14 @@ namespace NatsBenchmark
 [MessagePackObject]
 public struct Vector3
 {
-    [Key(0)] public float X;
-    [Key(1)] public float Y;
-    [Key(2)] public float Z;
+    [Key(0)]
+    public float X;
+
+    [Key(1)]
+    public float Y;
+
+    [Key(2)]
+    public float Z;
 }
 
 internal static class NatsMsgTestUtils

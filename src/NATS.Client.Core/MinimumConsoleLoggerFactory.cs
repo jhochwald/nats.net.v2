@@ -12,15 +12,11 @@ public class MinimumConsoleLoggerFactory : ILoggerFactory
 
     public MinimumConsoleLoggerFactory(LogLevel logLevel) => _logLevel = logLevel;
 
-    public void AddProvider(ILoggerProvider provider)
-    {
-    }
+    public void AddProvider(ILoggerProvider provider) { }
 
     public ILogger CreateLogger(string categoryName) => new Logger(_logLevel);
 
-    public void Dispose()
-    {
-    }
+    public void Dispose() { }
 
     private class Logger : ILogger
     {
@@ -32,7 +28,13 @@ public class MinimumConsoleLoggerFactory : ILoggerFactory
 
         public bool IsEnabled(LogLevel logLevel) => _logLevel <= logLevel;
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter
+        )
         {
             if (IsEnabled(logLevel))
             {
@@ -49,12 +51,8 @@ public class MinimumConsoleLoggerFactory : ILoggerFactory
     {
         public static readonly IDisposable Instance = new NullDisposable();
 
-        private NullDisposable()
-        {
-        }
+        private NullDisposable() { }
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
     }
 }

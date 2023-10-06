@@ -19,7 +19,9 @@ builder.ConfigureServices(services =>
 await using var conn = new NatsConnection();
 conn.OnConnectingAsync = async x =>
 {
-    var health = await new HttpClient().GetFromJsonAsync<NatsHealth>($"http://{x.Host}:8222/healthz");
+    var health = await new HttpClient().GetFromJsonAsync<NatsHealth>(
+        $"http://{x.Host}:8222/healthz"
+    );
     if (health == null || health.Status != "ok")
         throw new Exception();
 
@@ -57,7 +59,13 @@ _ = Task.Run(async () =>
 await conn.PublishAsync("foo", new Person(30, "bar"));
 
 // Options can configure `with` expression
-var options = NatsOpts.Default with { Url = "nats://127.0.0.1:9999", LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Information), Echo = true, AuthOpts = NatsAuthOpts.Default with { Username = "foo", Password = "bar" } };
+var options = NatsOpts.Default with
+{
+    Url = "nats://127.0.0.1:9999",
+    LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Information),
+    Echo = true,
+    AuthOpts = NatsAuthOpts.Default with { Username = "foo", Password = "bar" }
+};
 
 var app = builder.Build();
 

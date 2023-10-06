@@ -131,7 +131,8 @@ public abstract partial class NatsConnectionTest
             "reply handle is ready",
             () => Volatile.Read(ref sync) == 1,
             async () => await pubConnection.PublishAsync(subject, 1, replyTo: "ignore"),
-            retryDelay: TimeSpan.FromSeconds(1));
+            retryDelay: TimeSpan.FromSeconds(1)
+        );
 
         var v = await pubConnection.RequestAsync<int, string>(subject, 9999);
         v?.Data.Should().Be(text + 9999);
@@ -141,7 +142,11 @@ public abstract partial class NatsConnectionTest
         Assert.Null(response?.Data);
 
         // timeout check
-        var noReply = await pubConnection.RequestAsync<int, string>("foo", 10, replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(1) });
+        var noReply = await pubConnection.RequestAsync<int, string>(
+            "foo",
+            10,
+            replyOpts: new NatsSubOpts { Timeout = TimeSpan.FromSeconds(1) }
+        );
         Assert.Null(noReply);
 
         await sub.DisposeAsync();
@@ -151,7 +156,12 @@ public abstract partial class NatsConnectionTest
     [Fact]
     public async Task ReconnectSingleTest()
     {
-        using var options = new NatsServerOpts { TransportType = _transportType, EnableWebSocket = _transportType == TransportType.WebSocket, ServerDisposeReturnsPorts = false };
+        using var options = new NatsServerOpts
+        {
+            TransportType = _transportType,
+            EnableWebSocket = _transportType == TransportType.WebSocket,
+            ServerDisposeReturnsPorts = false
+        };
         await using var server = NatsServer.Start(_output, options);
         var subject = Guid.NewGuid().ToString();
 
@@ -189,7 +199,8 @@ public abstract partial class NatsConnectionTest
         await Retry.Until(
             "subscription is active (1)",
             () => Volatile.Read(ref sync) == 1,
-            async () => await pubConnection.PublishAsync(subject, 1));
+            async () => await pubConnection.PublishAsync(subject, 1)
+        );
 
         await pubConnection.PublishAsync(subject, 100);
         await pubConnection.PublishAsync(subject, 200);
@@ -215,7 +226,8 @@ public abstract partial class NatsConnectionTest
         await Retry.Until(
             "subscription is active (2)",
             () => Volatile.Read(ref sync) == 2,
-            async () => await pubConnection.PublishAsync(subject, 2));
+            async () => await pubConnection.PublishAsync(subject, 2)
+        );
 
         _output.WriteLine("RECONNECT COMPLETE, PUBLISH 400 and 500");
         await pubConnection.PublishAsync(subject, 400);
@@ -244,16 +256,43 @@ public abstract partial class NatsConnectionTest
         await connection2.ConnectAsync();
         await connection3.ConnectAsync();
 
-        _output.WriteLine("Server1 ClientConnectUrls:" +
-                          string.Join(", ", connection1.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
-        _output.WriteLine("Server2 ClientConnectUrls:" +
-                          string.Join(", ", connection2.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
-        _output.WriteLine("Server3 ClientConnectUrls:" +
-                          string.Join(", ", connection3.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
+        _output.WriteLine(
+            "Server1 ClientConnectUrls:"
+                + string.Join(
+                    ", ",
+                    connection1.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()
+                )
+        );
+        _output.WriteLine(
+            "Server2 ClientConnectUrls:"
+                + string.Join(
+                    ", ",
+                    connection2.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()
+                )
+        );
+        _output.WriteLine(
+            "Server3 ClientConnectUrls:"
+                + string.Join(
+                    ", ",
+                    connection3.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()
+                )
+        );
 
-        connection1.ServerInfo!.ClientConnectUrls!.Select(x => new NatsUri(x, true).Port).Distinct().Count().ShouldBe(3);
-        connection2.ServerInfo!.ClientConnectUrls!.Select(x => new NatsUri(x, true).Port).Distinct().Count().ShouldBe(3);
-        connection3.ServerInfo!.ClientConnectUrls!.Select(x => new NatsUri(x, true).Port).Distinct().Count().ShouldBe(3);
+        connection1.ServerInfo!.ClientConnectUrls!
+            .Select(x => new NatsUri(x, true).Port)
+            .Distinct()
+            .Count()
+            .ShouldBe(3);
+        connection2.ServerInfo!.ClientConnectUrls!
+            .Select(x => new NatsUri(x, true).Port)
+            .Distinct()
+            .Count()
+            .ShouldBe(3);
+        connection3.ServerInfo!.ClientConnectUrls!
+            .Select(x => new NatsUri(x, true).Port)
+            .Distinct()
+            .Count()
+            .ShouldBe(3);
 
         var list = new List<int>();
         var sync = 0;
@@ -285,7 +324,8 @@ public abstract partial class NatsConnectionTest
             "subscription is active (1)",
             () => Volatile.Read(ref sync) == 1,
             async () => await connection2.PublishAsync(subject, 1),
-            retryDelay: TimeSpan.FromSeconds(.5));
+            retryDelay: TimeSpan.FromSeconds(.5)
+        );
 
         await connection2.PublishAsync(subject, 100);
         await connection2.PublishAsync(subject, 200);
@@ -302,13 +342,16 @@ public abstract partial class NatsConnectionTest
 
         await connection1.ConnectAsync(); // wait for reconnect complete.
 
-        connection1.ServerInfo!.Port.Should().BeOneOf(cluster.Server2.ConnectionPort, cluster.Server3.ConnectionPort);
+        connection1.ServerInfo!.Port
+            .Should()
+            .BeOneOf(cluster.Server2.ConnectionPort, cluster.Server3.ConnectionPort);
 
         await Retry.Until(
             "subscription is active (2)",
             () => Volatile.Read(ref sync) == 2,
             async () => await connection2.PublishAsync(subject, 2),
-            retryDelay: TimeSpan.FromSeconds(.5));
+            retryDelay: TimeSpan.FromSeconds(.5)
+        );
 
         await connection2.PublishAsync(subject, 400);
         await connection2.PublishAsync(subject, 500);
@@ -365,7 +408,7 @@ public class SampleClass : IEquatable<SampleClass>
             return false;
         }
 
-        return Equals((SampleClass) obj);
+        return Equals((SampleClass)obj);
     }
 
     public override int GetHashCode() => HashCode.Combine(Id, Name);

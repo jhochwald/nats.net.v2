@@ -21,14 +21,23 @@ internal sealed class WebSocketConnection : ISocketConnection
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask<int> SendAsync(ReadOnlyMemory<byte> buffer)
     {
-        await _socket.SendAsync(buffer, WebSocketMessageType.Binary, WebSocketMessageFlags.EndOfMessage, CancellationToken.None).ConfigureAwait(false);
+        await _socket
+            .SendAsync(
+                buffer,
+                WebSocketMessageType.Binary,
+                WebSocketMessageFlags.EndOfMessage,
+                CancellationToken.None
+            )
+            .ConfigureAwait(false);
         return buffer.Length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask<int> ReceiveAsync(Memory<byte> buffer)
     {
-        var wsRead = await _socket.ReceiveAsync(buffer, CancellationToken.None).ConfigureAwait(false);
+        var wsRead = await _socket
+            .ReceiveAsync(buffer, CancellationToken.None)
+            .ConfigureAwait(false);
         return wsRead.Count;
     }
 
@@ -48,9 +57,7 @@ internal sealed class WebSocketConnection : ISocketConnection
             {
                 _waitForClosedSource.TrySetCanceled();
             }
-            catch
-            {
-            }
+            catch { }
 
             _socket.Dispose();
         }
@@ -59,7 +66,8 @@ internal sealed class WebSocketConnection : ISocketConnection
     }
 
     // when catch SocketClosedException, call this method.
-    public void SignalDisconnected(Exception exception) => _waitForClosedSource.TrySetResult(exception);
+    public void SignalDisconnected(Exception exception) =>
+        _waitForClosedSource.TrySetResult(exception);
 
     // CancellationToken is not used, operation lifetime is completely same as socket.
 
@@ -71,7 +79,8 @@ internal sealed class WebSocketConnection : ISocketConnection
 
     // return ValueTask directly for performance, not care exception and signal-disconnected.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Task ConnectAsync(Uri uri, CancellationToken cancellationToken) => _socket.ConnectAsync(uri, cancellationToken);
+    public Task ConnectAsync(Uri uri, CancellationToken cancellationToken) =>
+        _socket.ConnectAsync(uri, cancellationToken);
 
     /// <summary>
     ///     Connect with Timeout. When failed, Dispose this connection.

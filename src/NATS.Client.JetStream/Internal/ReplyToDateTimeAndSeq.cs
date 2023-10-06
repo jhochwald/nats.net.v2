@@ -63,12 +63,16 @@ internal static class ReplyToDateTimeAndSeq
         var dateTime = new DateTimeOffset(offset.Ticks, TimeSpan.Zero);
 
         return new NatsJSMsgMetadata(
-            new NatsJSSequencePair(ulong.Parse(tokens[AckStreamSeqTokenPos]), ulong.Parse(tokens[AckConsumerSeqTokenPos])),
+            new NatsJSSequencePair(
+                ulong.Parse(tokens[AckStreamSeqTokenPos]),
+                ulong.Parse(tokens[AckConsumerSeqTokenPos])
+            ),
             ulong.Parse(tokens[AckNumDeliveredTokenPos]),
             ulong.Parse(tokens[AckNumPendingTokenPos]),
             dateTime,
             tokens[AckStreamTokenPos],
             tokens[AckConsumerTokenPos],
-            tokens[AckDomainTokenPos]);
+            tokens[AckDomainTokenPos]
+        );
     }
 }

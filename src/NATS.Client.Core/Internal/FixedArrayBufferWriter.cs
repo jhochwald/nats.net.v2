@@ -62,5 +62,6 @@ internal sealed class FixedArrayBufferWriter : ICountableBufferWriter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Reset() => WrittenCount = 0;
 
-    private void Resize(int sizeHint) => Array.Resize(ref _buffer, Math.Max(sizeHint, _buffer.Length * 2));
+    private void Resize(int sizeHint) =>
+        Array.Resize(ref _buffer, Math.Max(sizeHint, _buffer.Length * 2));
 }

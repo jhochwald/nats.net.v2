@@ -59,7 +59,8 @@ public class NatsJSConsumer
     /// <exception cref="NatsJSProtocolException">Consumer is deleted, it's push based or request sent to server is invalid.</exception>
     public async IAsyncEnumerable<NatsJSMsg<T?>> ConsumeAllAsync<T>(
         NatsJSConsumeOpts? opts = default,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         opts ??= _context.Opts.DefaultConsumeOpts;
         await using var cc = await ConsumeAsync<T>(opts, cancellationToken);
@@ -78,7 +79,10 @@ public class NatsJSConsumer
     /// <returns>A consume object to manage the operation and retrieve messages.</returns>
     /// <exception cref="NatsJSProtocolException">Consumer is deleted, it's push based or request sent to server is invalid.</exception>
     /// <exception cref="NatsJSException">There is an error sending the message or this consumer object isn't valid anymore because it was deleted earlier.</exception>
-    public async ValueTask<INatsJSConsume<T>> ConsumeAsync<T>(NatsJSConsumeOpts? opts = default, CancellationToken cancellationToken = default)
+    public async ValueTask<INatsJSConsume<T>> ConsumeAsync<T>(
+        NatsJSConsumeOpts? opts = default,
+        CancellationToken cancellationToken = default
+    )
     {
         ThrowIfDeleted();
 
@@ -86,7 +90,12 @@ public class NatsJSConsumer
 
         var inbox = _context.NewInbox();
 
-        var max = NatsJSOptsDefaults.SetMax(opts.MaxMsgs, opts.MaxBytes, opts.ThresholdMsgs, opts.ThresholdBytes);
+        var max = NatsJSOptsDefaults.SetMax(
+            opts.MaxMsgs,
+            opts.MaxBytes,
+            opts.ThresholdMsgs,
+            opts.ThresholdBytes
+        );
         var timeouts = NatsJSOptsDefaults.SetTimeouts(opts.Expires, opts.IdleHeartbeat);
 
         var requestOpts = new NatsSubOpts
@@ -97,7 +106,8 @@ public class NatsJSConsumer
                 // Keep capacity at 1 to make sure message acknowledgements are sent
                 // right after the message is processed and messages aren't queued up
                 // which might cause timeouts for acknowledgments.
-                Capacity = 1, FullMode = BoundedChannelFullMode.Wait
+                Capacity = 1,
+                FullMode = BoundedChannelFullMode.Wait
             }
         };
 
@@ -113,20 +123,23 @@ public class NatsJSConsumer
             thresholdMsgs: max.ThresholdMsgs,
             thresholdBytes: max.ThresholdBytes,
             expires: timeouts.Expires,
-            idle: timeouts.IdleHeartbeat);
+            idle: timeouts.IdleHeartbeat
+        );
 
-        await _context.Connection.SubAsync(
-            inbox,
-            default,
-            requestOpts,
-            sub,
-            cancellationToken);
+        await _context.Connection.SubAsync(inbox, default, requestOpts, sub, cancellationToken);
 
         // Start consuming with the first Pull Request
         await sub.CallMsgNextAsync(
             "init",
-            new ConsumerGetnextRequest { Batch = max.MaxMsgs, MaxBytes = max.MaxBytes, IdleHeartbeat = timeouts.IdleHeartbeat.ToNanos(), Expires = timeouts.Expires.ToNanos() },
-            cancellationToken);
+            new ConsumerGetnextRequest
+            {
+                Batch = max.MaxMsgs,
+                MaxBytes = max.MaxBytes,
+                IdleHeartbeat = timeouts.IdleHeartbeat.ToNanos(),
+                Expires = timeouts.Expires.ToNanos()
+            },
+            cancellationToken
+        );
 
         sub.ResetHeartbeatTimer();
 
@@ -163,14 +176,24 @@ public class NatsJSConsumer
     /// }
     /// </code>
     /// </example>
-    public async ValueTask<NatsJSMsg<T?>?> NextAsync<T>(NatsJSNextOpts? opts = default, CancellationToken cancellationToken = default)
+    public async ValueTask<NatsJSMsg<T?>?> NextAsync<T>(
+        NatsJSNextOpts? opts = default,
+        CancellationToken cancellationToken = default
+    )
     {
         ThrowIfDeleted();
         opts ??= _context.Opts.DefaultNextOpts;
 
         await using var f = await FetchAsync<T>(
-            new NatsJSFetchOpts { MaxMsgs = 1, IdleHeartbeat = opts.IdleHeartbeat, Expires = opts.Expires, Serializer = opts.Serializer },
-            cancellationToken);
+            new NatsJSFetchOpts
+            {
+                MaxMsgs = 1,
+                IdleHeartbeat = opts.IdleHeartbeat,
+                Expires = opts.Expires,
+                Serializer = opts.Serializer
+            },
+            cancellationToken
+        );
 
         await foreach (var natsJSMsg in f.Msgs.ReadAllAsync(cancellationToken))
         {
@@ -191,7 +214,8 @@ public class NatsJSConsumer
     /// <exception cref="NatsJSException">There is an error sending the message or this consumer object isn't valid anymore because it was deleted earlier.</exception>
     public async IAsyncEnumerable<NatsJSMsg<T?>> FetchAllAsync<T>(
         NatsJSFetchOpts? opts = default,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
     {
         ThrowIfDeleted();
         opts ??= _context.Opts.DefaultFetchOpts;
@@ -214,7 +238,8 @@ public class NatsJSConsumer
     /// <exception cref="NatsJSException">There is an error sending the message or this consumer object isn't valid anymore because it was deleted earlier.</exception>
     public async ValueTask<INatsJSFetch<T>> FetchAsync<T>(
         NatsJSFetchOpts? opts = default,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ThrowIfDeleted();
         opts ??= _context.Opts.DefaultFetchOpts;
@@ -232,7 +257,8 @@ public class NatsJSConsumer
                 // Keep capacity at 1 to make sure message acknowledgements are sent
                 // right after the message is processed and messages aren't queued up
                 // which might cause timeouts for acknowledgments.
-                Capacity = 1, FullMode = BoundedChannelFullMode.Wait
+                Capacity = 1,
+                FullMode = BoundedChannelFullMode.Wait
             }
         };
 
@@ -246,18 +272,21 @@ public class NatsJSConsumer
             maxMsgs: max.MaxMsgs,
             maxBytes: max.MaxBytes,
             expires: timeouts.Expires,
-            idle: timeouts.IdleHeartbeat);
+            idle: timeouts.IdleHeartbeat
+        );
 
-        await _context.Connection.SubAsync(
-            inbox,
-            default,
-            requestOpts,
-            sub,
-            cancellationToken);
+        await _context.Connection.SubAsync(inbox, default, requestOpts, sub, cancellationToken);
 
         await sub.CallMsgNextAsync(
-            new ConsumerGetnextRequest { Batch = max.MaxMsgs, MaxBytes = max.MaxBytes, IdleHeartbeat = timeouts.IdleHeartbeat.ToNanos(), Expires = timeouts.Expires.ToNanos() },
-            cancellationToken);
+            new ConsumerGetnextRequest
+            {
+                Batch = max.MaxMsgs,
+                MaxBytes = max.MaxBytes,
+                IdleHeartbeat = timeouts.IdleHeartbeat.ToNanos(),
+                Expires = timeouts.Expires.ToNanos()
+            },
+            cancellationToken
+        );
 
         sub.ResetHeartbeatTimer();
 
@@ -271,10 +300,13 @@ public class NatsJSConsumer
     /// <exception cref="NatsJSException">There was an issue retrieving the response.</exception>
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     public async ValueTask RefreshAsync(CancellationToken cancellationToken = default) =>
-        Info = await _context.JSRequestResponseAsync<object, ConsumerInfo>(
-            $"{_context.Opts.Prefix}.CONSUMER.INFO.{_stream}.{_consumer}",
-            null,
-            cancellationToken).ConfigureAwait(false);
+        Info = await _context
+            .JSRequestResponseAsync<object, ConsumerInfo>(
+                $"{_context.Opts.Prefix}.CONSUMER.INFO.{_stream}.{_consumer}",
+                null,
+                cancellationToken
+            )
+            .ConfigureAwait(false);
 
     private void ThrowIfDeleted()
     {

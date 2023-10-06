@@ -21,12 +21,14 @@ namespace NATS.Client.Core.NaCl.Internal.Ed25519Ref10
     {
         static byte equal(byte b, byte c)
         {
-
             byte ub = b;
             byte uc = c;
             byte x = (byte)(ub ^ uc); /* 0: yes; 1..255: no */
             uint y = x; /* 0: yes; 1..255: no */
-            unchecked { y -= 1; } /* 4294967295: yes; 0..254: no */
+            unchecked
+            {
+                y -= 1;
+            } /* 4294967295: yes; 0..254: no */
             y >>= 31; /* 1: yes; 0: no */
             return (byte)y;
         }
@@ -109,20 +111,25 @@ namespace NATS.Client.Core.NaCl.Internal.Ed25519Ref10
             for (int i = 1; i < 64; i += 2)
             {
                 select(out t, i / 2, e[i]);
-                ge_madd(out r, ref h, ref t); ge_p1p1_to_p3(out h, ref r);
+                ge_madd(out r, ref h, ref t);
+                ge_p1p1_to_p3(out h, ref r);
             }
 
-            ge_p3_dbl(out r, ref h); ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s); ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s); ge_p1p1_to_p2(out s, ref r);
-            ge_p2_dbl(out r, ref s); ge_p1p1_to_p3(out h, ref r);
+            ge_p3_dbl(out r, ref h);
+            ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s);
+            ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s);
+            ge_p1p1_to_p2(out s, ref r);
+            ge_p2_dbl(out r, ref s);
+            ge_p1p1_to_p3(out h, ref r);
 
             for (int i = 0; i < 64; i += 2)
             {
                 select(out t, i / 2, e[i]);
-                ge_madd(out r, ref h, ref t); ge_p1p1_to_p3(out h, ref r);
+                ge_madd(out r, ref h, ref t);
+                ge_p1p1_to_p3(out h, ref r);
             }
         }
-
     }
 }
