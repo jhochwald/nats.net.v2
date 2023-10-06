@@ -14,4 +14,11 @@
     <ProjectReference Include="..\..\src\NATS.Client.Core\NATS.Client.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Stylecop.Analyzers" Version="1.2.0-beta.507">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

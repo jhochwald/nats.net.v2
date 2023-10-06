@@ -10,12 +10,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MessagePack" Version="2.3.85" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-        <PackageReference Include="StackExchange.Redis" Version="2.5.43" />
-        <PackageReference Include="ZLogger" Version="1.6.1" />
-        <PackageReference Include="NATS.Client" Version="0.14.5" />
-        <PackageReference Include="JetBrains.Profiler.Api" Version="1.1.8" />
+        <PackageReference Include="MessagePack" Version="2.6.100-alpha" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.1.23419.4" />
+        <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
+        <PackageReference Include="ZLogger" Version="1.7.1" />
+        <PackageReference Include="NATS.Client" Version="1.1.0" />
+        <PackageReference Include="JetBrains.Profiler.Api" Version="1.4.0" />
+        <PackageReference Update="Stylecop.Analyzers" Version="1.2.0-beta.507">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

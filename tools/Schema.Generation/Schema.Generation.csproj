@@ -10,7 +10,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.9.0" />
+      <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.0-preview003" />
+      <PackageReference Update="Stylecop.Analyzers" Version="1.2.0-beta.507">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>
