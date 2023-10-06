@@ -1,7 +1,11 @@
+#region
+
 using System.Buffers;
 using System.Text.Json;
 using NATS.Client.Core;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream.Internal;
 

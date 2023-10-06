@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
@@ -23,13 +27,7 @@ internal sealed class AsyncConnectCommand : AsyncCommandBase<AsyncConnectCommand
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WriteConnect(_clientOpts!);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WriteConnect(_clientOpts!);
 
-    protected override void Reset()
-    {
-        _clientOpts = null;
-    }
+    protected override void Reset() => _clientOpts = null;
 }

@@ -1,9 +1,14 @@
+#region
+
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core.Commands;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core;
 
@@ -12,44 +17,34 @@ public enum NatsConnectionState
     Closed,
     Open,
     Connecting,
-    Reconnecting,
+    Reconnecting
 }
 
 public partial class NatsConnection : IAsyncDisposable, INatsConnection
 {
-#pragma warning disable SA1401
-    /// <summary>
-    /// Hook before TCP connection open.
-    /// </summary>
-    public Func<(string Host, int Port), ValueTask<(string Host, int Port)>>? OnConnectingAsync;
-
-    internal readonly ConnectionStatsCounter Counter; // allow to call from external sources
-    internal ServerInfo? WritableServerInfo;
-#pragma warning restore SA1401
-    private readonly object _gate = new object();
-    private readonly WriterState _writerState;
-    private readonly ChannelWriter<ICommand> _commandWriter;
-    private readonly ILogger<NatsConnection> _logger;
-    private readonly ObjectPool _pool;
     private readonly CancellationTimerPool _cancellationTimerPool;
+    private readonly ClientOpts _clientOpts;
+    private readonly ChannelWriter<ICommand> _commandWriter;
     private readonly CancellationTokenSource _disposedCancellationTokenSource;
+    private readonly object _gate = new();
+    private readonly ILogger<NatsConnection> _logger;
     private readonly string _name;
     private readonly TimeSpan _socketComponentDisposeTimeout = TimeSpan.FromSeconds(5);
+    private readonly WriterState _writerState;
+    private NatsUri? _currentConnectUri;
+    private bool _isDisposed;
+    private NatsUri? _lastSeedConnectUri;
+    private CancellationTokenSource? _pingTimerCancellationTokenSource;
 
     private int _pongCount;
-    private bool _isDisposed;
 
     // when reconnect, make new instance.
     private ISocketConnection? _socket;
-    private CancellationTokenSource? _pingTimerCancellationTokenSource;
-    private NatsUri? _currentConnectUri;
-    private NatsUri? _lastSeedConnectUri;
     private NatsReadProtocolProcessor? _socketReader;
     private NatsPipeliningWriteProtocolProcessor? _socketWriter;
-    private TaskCompletionSource _waitForOpenConnection;
     private TlsCerts? _tlsCerts;
-    private ClientOpts _clientOpts;
     private UserCredentials? _userCredentials;
+    private TaskCompletionSource _waitForOpenConnection;
 
     public NatsConnection()
         : this(NatsOpts.Default)
@@ -62,8 +57,8 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         ConnectionState = NatsConnectionState.Closed;
         _waitForOpenConnection = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _disposedCancellationTokenSource = new CancellationTokenSource();
-        _pool = new ObjectPool(opts.ObjectPoolSize);
-        _cancellationTimerPool = new CancellationTimerPool(_pool, _disposedCancellationTokenSource.Token);
+        ObjectPool = new ObjectPool(opts.ObjectPoolSize);
+        _cancellationTimerPool = new CancellationTimerPool(ObjectPool, _disposedCancellationTokenSource.Token);
         _name = opts.Name;
         Counter = new ConnectionStatsCounter();
         _writerState = new WriterState(opts);
@@ -74,13 +69,6 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         _clientOpts = ClientOpts.Create(Opts);
         HeaderParser = new NatsHeaderParser(opts.HeaderEncoding);
     }
-
-    // events
-    public event EventHandler<string>? ConnectionDisconnected;
-
-    public event EventHandler<string>? ConnectionOpened;
-
-    public event EventHandler<string>? ReconnectFailed;
 
     public NatsOpts Opts { get; }
 
@@ -94,10 +82,37 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
 
     internal string InboxPrefix { get; }
 
-    internal ObjectPool ObjectPool => _pool;
+    internal ObjectPool ObjectPool { get; }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_isDisposed)
+        {
+            _isDisposed = true;
+            _logger.Log(LogLevel.Information, $"Disposing connection {_name}.");
+
+            await DisposeSocketAsync(false).ConfigureAwait(false);
+            _pingTimerCancellationTokenSource?.Cancel();
+            foreach (var item in _writerState.PendingPromises)
+            {
+                item.SetCanceled();
+            }
+
+            await SubscriptionManager.DisposeAsync().ConfigureAwait(false);
+            _waitForOpenConnection.TrySetCanceled();
+            _disposedCancellationTokenSource.Cancel();
+        }
+    }
+
+    // events
+    public event EventHandler<string>? ConnectionDisconnected;
+
+    public event EventHandler<string>? ConnectionOpened;
+
+    public event EventHandler<string>? ReconnectFailed;
 
     /// <summary>
-    /// Connect socket and write CONNECT command to nats server.
+    ///     Connect socket and write CONNECT command to nats server.
     /// </summary>
     public async ValueTask ConnectAsync()
     {
@@ -124,34 +139,12 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
             await waiter.Task.ConfigureAwait(false);
             return;
         }
-        else
-        {
-            // Only Closed(initial) state, can run initial connect.
-            await InitialConnectAsync().ConfigureAwait(false);
-        }
+
+        // Only Closed(initial) state, can run initial connect.
+        await InitialConnectAsync().ConfigureAwait(false);
     }
 
     public NatsStats GetStats() => Counter.ToStats();
-
-    public async ValueTask DisposeAsync()
-    {
-        if (!_isDisposed)
-        {
-            _isDisposed = true;
-            _logger.Log(LogLevel.Information, $"Disposing connection {_name}.");
-
-            await DisposeSocketAsync(false).ConfigureAwait(false);
-            _pingTimerCancellationTokenSource?.Cancel();
-            foreach (var item in _writerState.PendingPromises)
-            {
-                item.SetCanceled();
-            }
-
-            await SubscriptionManager.DisposeAsync().ConfigureAwait(false);
-            _waitForOpenConnection.TrySetCanceled();
-            _disposedCancellationTokenSource.Cancel();
-        }
-    }
 
     internal void EnqueuePing(AsyncPingCommand pingCommand)
     {
@@ -169,15 +162,9 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         pingCommand.SetCanceled();
     }
 
-    internal ValueTask PublishToClientHandlersAsync(string subject, string? replyTo, int sid, in ReadOnlySequence<byte>? headersBuffer, in ReadOnlySequence<byte> payloadBuffer)
-    {
-        return SubscriptionManager.PublishToClientHandlersAsync(subject, replyTo, sid, headersBuffer, payloadBuffer);
-    }
+    internal ValueTask PublishToClientHandlersAsync(string subject, string? replyTo, int sid, in ReadOnlySequence<byte>? headersBuffer, in ReadOnlySequence<byte> payloadBuffer) => SubscriptionManager.PublishToClientHandlersAsync(subject, replyTo, sid, headersBuffer, payloadBuffer);
 
-    internal void ResetPongCount()
-    {
-        Interlocked.Exchange(ref _pongCount, 0);
-    }
+    internal void ResetPongCount() => Interlocked.Exchange(ref _pongCount, 0);
 
     internal async ValueTask<T> EnqueueAndAwaitCommandAsync<T>(IAsyncCommand<T> command)
     {
@@ -185,15 +172,12 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         return await command.AsValueTask().ConfigureAwait(false);
     }
 
-    internal ValueTask PostPongAsync()
-    {
-        return EnqueueCommandAsync(PongCommand.Create(_pool, GetCancellationTimer(CancellationToken.None)));
-    }
+    internal ValueTask PostPongAsync() => EnqueueCommandAsync(PongCommand.Create(ObjectPool, GetCancellationTimer(CancellationToken.None)));
 
     // called only internally
     internal ValueTask SubscribeCoreAsync(int sid, string subject, string? queueGroup, int? maxMsgs, CancellationToken cancellationToken)
     {
-        var command = AsyncSubscribeCommand.Create(_pool, GetCancellationTimer(cancellationToken), sid, subject, queueGroup, maxMsgs);
+        var command = AsyncSubscribeCommand.Create(ObjectPool, GetCancellationTimer(cancellationToken), sid, subject, queueGroup, maxMsgs);
         return EnqueueAndAwaitCommandAsync(command);
     }
 
@@ -201,7 +185,7 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
     {
         try
         {
-            return EnqueueCommandAsync(UnsubscribeCommand.Create(_pool, sid));
+            return EnqueueCommandAsync(UnsubscribeCommand.Create(ObjectPool, sid));
         }
         catch (Exception ex)
         {
@@ -383,9 +367,9 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
 
             // add CONNECT and PING command to priority lane
             _writerState.PriorityCommands.Clear();
-            var connectCommand = AsyncConnectCommand.Create(_pool, _clientOpts, GetCancellationTimer(CancellationToken.None));
+            var connectCommand = AsyncConnectCommand.Create(ObjectPool, _clientOpts, GetCancellationTimer(CancellationToken.None));
             _writerState.PriorityCommands.Add(connectCommand);
-            _writerState.PriorityCommands.Add(PingCommand.Create(_pool, GetCancellationTimer(CancellationToken.None)));
+            _writerState.PriorityCommands.Add(PingCommand.Create(ObjectPool, GetCancellationTimer(CancellationToken.None)));
 
             if (reconnect)
             {
@@ -394,7 +378,7 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
             }
 
             // create the socket writer
-            _socketWriter = new NatsPipeliningWriteProtocolProcessor(_socket!, _writerState, _pool, Counter);
+            _socketWriter = new NatsPipeliningWriteProtocolProcessor(_socket!, _writerState, ObjectPool, Counter);
 
             // wait for COMMAND to send
             await connectCommand.AsValueTask().ConfigureAwait(false);
@@ -434,9 +418,9 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
 
             var defaultScheme = _currentConnectUri!.Uri.Scheme;
             var urls = (Opts.NoRandomize
-                ? WritableServerInfo?.ClientConnectUrls?.Select(x => new NatsUri(x, false, defaultScheme)).Distinct().ToArray()
-                : WritableServerInfo?.ClientConnectUrls?.Select(x => new NatsUri(x, false, defaultScheme)).OrderBy(_ => Guid.NewGuid()).Distinct().ToArray())
-                    ?? Array.Empty<NatsUri>();
+                           ? WritableServerInfo?.ClientConnectUrls?.Select(x => new NatsUri(x, false, defaultScheme)).Distinct().ToArray()
+                           : WritableServerInfo?.ClientConnectUrls?.Select(x => new NatsUri(x, false, defaultScheme)).OrderBy(_ => Guid.NewGuid()).Distinct().ToArray())
+                       ?? Array.Empty<NatsUri>();
             if (urls.Length == 0)
                 urls = Opts.GetSeedUris();
 
@@ -446,7 +430,7 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
             _currentConnectUri = null;
             var urlEnumerator = urls.AsEnumerable().GetEnumerator();
             NatsUri? url = null;
-        CONNECT_AGAIN:
+            CONNECT_AGAIN:
             try
             {
                 if (urlEnumerator.MoveNext())
@@ -556,13 +540,10 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         }
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private CancellationTimer GetRequestCommandTimer(CancellationToken cancellationToken)
-    {
-        return _cancellationTimerPool.Start(Opts.RequestTimeout, cancellationToken);
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private CancellationTimer GetRequestCommandTimer(CancellationToken cancellationToken) => _cancellationTimerPool.Start(Opts.RequestTimeout, cancellationToken);
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EnqueueCommandSync(ICommand command)
     {
         if (_commandWriter.TryWrite(command))
@@ -577,7 +558,7 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
 
     private async ValueTask EnqueueCommandAsync(ICommand command)
     {
-    RETRY:
+        RETRY:
         if (_commandWriter.TryWrite(command))
         {
             Interlocked.Increment(ref Counter.PendingMessages);
@@ -788,6 +769,15 @@ public partial class NatsConnection : IAsyncDisposable, INatsConnection
         await ConnectAsync().ConfigureAwait(false);
         return await coreAsync(this, item1, item2, item3, item4, item5).ConfigureAwait(false);
     }
+#pragma warning disable SA1401
+    /// <summary>
+    ///     Hook before TCP connection open.
+    /// </summary>
+    public Func<(string Host, int Port), ValueTask<(string Host, int Port)>>? OnConnectingAsync;
+
+    internal readonly ConnectionStatsCounter Counter; // allow to call from external sources
+    internal ServerInfo? WritableServerInfo;
+#pragma warning restore SA1401
 }
 
 // This writer state is reused when reconnecting.
@@ -804,7 +794,7 @@ internal sealed class WriterState
             {
                 AllowSynchronousContinuations = false, // always should be in async loop.
                 SingleWriter = false,
-                SingleReader = true,
+                SingleReader = true
             });
         }
         else
@@ -814,7 +804,7 @@ internal sealed class WriterState
                 FullMode = BoundedChannelFullMode.Wait,
                 AllowSynchronousContinuations = false, // always should be in async loop.
                 SingleWriter = false,
-                SingleReader = true,
+                SingleReader = true
             });
         }
 

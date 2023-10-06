@@ -1,14 +1,18 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
 internal class HeaderWriter
 {
-    private const byte ByteCr = (byte)'\r';
-    private const byte ByteLf = (byte)'\n';
-    private const byte ByteColon = (byte)':';
-    private const byte ByteSpace = (byte)' ';
+    private const byte ByteCr = (byte) '\r';
+    private const byte ByteLf = (byte) '\n';
+    private const byte ByteColon = (byte) ':';
+    private const byte ByteSpace = (byte) ' ';
     private const byte ByteDel = 127;
     private readonly Encoding _encoding;
 

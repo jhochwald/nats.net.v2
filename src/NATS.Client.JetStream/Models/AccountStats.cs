@@ -1,57 +1,64 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 public record AccountStats
 {
     /// <summary>
-    /// Memory Storage being used for Stream Message storage
+    ///     Memory Storage being used for Stream Message storage
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("memory")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("memory")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Memory { get; set; } = default!;
 
     /// <summary>
-    /// File Storage being used for Stream Message storage
+    ///     File Storage being used for Stream Message storage
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("storage")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("storage")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Storage { get; set; } = default!;
 
     /// <summary>
-    /// Number of active Streams
+    ///     Number of active Streams
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("streams")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("streams")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Streams { get; set; } = default!;
 
     /// <summary>
-    /// Number of active Consumers
+    ///     Number of active Consumers
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("consumers")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("consumers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Consumers { get; set; } = default!;
 
     /// <summary>
-    /// The JetStream domain this account is in
+    ///     The JetStream domain this account is in
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("domain")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("domain")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Domain { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("limits")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public AccountLimits Limits { get; set; } = new AccountLimits();
+    [JsonPropertyName("limits")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public AccountLimits Limits { get; set; } = new();
 
-    [System.Text.Json.Serialization.JsonPropertyName("tiers")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.IDictionary<string, object> Tiers { get; set; } = default!;
+    [JsonPropertyName("tiers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IDictionary<string, object> Tiers { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("api")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public ApiStats Api { get; set; } = new ApiStats();
+    [JsonPropertyName("api")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public ApiStats Api { get; set; } = new();
 }

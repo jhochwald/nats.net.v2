@@ -1,8 +1,8 @@
 namespace NATS.Client.Core;
 
 /// <summary>
-/// Immutable options for TlsOptions, you can configure via `with` operator.
-/// These options are ignored in WebSocket connections
+///     Immutable options for TlsOptions, you can configure via `with` operator.
+///     These options are ignored in WebSocket connections
 /// </summary>
 public sealed record NatsTlsOpts
 {

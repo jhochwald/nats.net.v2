@@ -1,8 +1,11 @@
+#region
+
 using BlazorWasm.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using NATS.Client.Core;
 using NATS.Client.Hosting;
+
+#endregion
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

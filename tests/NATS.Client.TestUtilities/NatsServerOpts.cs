@@ -1,6 +1,10 @@
+#region
+
 using System.Collections.Concurrent;
 using System.Net.NetworkInformation;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -8,24 +12,23 @@ public enum TransportType
 {
     Tcp,
     Tls,
-    WebSocket,
+    WebSocket
 }
 
 public sealed class NatsServerOptsBuilder
 {
     private readonly List<string> _extraConfigs = new();
-    private bool _enableWebSocket;
-    private bool _enableTls;
     private bool _enableJetStream;
+    private bool _enableTls;
+    private bool _enableWebSocket;
+    private string? _tlsCaFile;
     private string? _tlsServerCertFile;
     private string? _tlsServerKeyFile;
-    private string? _tlsCaFile;
-    private TransportType? _transportType;
     private bool _trace;
+    private TransportType? _transportType;
 
-    public NatsServerOpts Build()
-    {
-        return new NatsServerOpts
+    public NatsServerOpts Build() =>
+        new()
         {
             EnableWebSocket = _enableWebSocket,
             EnableTls = _enableTls,
@@ -35,9 +38,8 @@ public sealed class NatsServerOptsBuilder
             TlsCaFile = _tlsCaFile,
             ExtraConfigs = _extraConfigs,
             TransportType = _transportType ?? TransportType.Tcp,
-            Trace = _trace,
+            Trace = _trace
         };
-    }
 
     public NatsServerOptsBuilder Trace()
     {
@@ -92,9 +94,9 @@ public sealed class NatsServerOpts : IDisposable
         return new ConcurrentQueue<int>(freePorts);
     });
 
-    private readonly Lazy<int> _lazyServerPort;
-
     private readonly Lazy<int?> _lazyClusteringPort;
+
+    private readonly Lazy<int> _lazyServerPort;
 
     private readonly Lazy<int?> _lazyWebSocketPort;
 
@@ -151,7 +153,7 @@ public sealed class NatsServerOpts : IDisposable
 
             if (Trace)
             {
-                sb.AppendLine($"trace: true");
+                sb.AppendLine("trace: true");
             }
 
             if (EnableWebSocket)
@@ -203,11 +205,6 @@ public sealed class NatsServerOpts : IDisposable
         }
     }
 
-    public void SetRoutes(IEnumerable<NatsServerOpts> options)
-    {
-        _routes = string.Join(",", options.Select(o => $"nats://localhost:{o.ClusteringPort}"));
-    }
-
     public void Dispose()
     {
         if (Interlocked.Increment(ref _disposed) != 1)
@@ -227,6 +224,8 @@ public sealed class NatsServerOpts : IDisposable
         }
     }
 
+    public void SetRoutes(IEnumerable<NatsServerOpts> options) => _routes = string.Join(",", options.Select(o => $"nats://localhost:{o.ClusteringPort}"));
+
     private static int LeasePort()
     {
         if (PortFactory.Value.TryDequeue(out var port))
@@ -237,8 +236,5 @@ public sealed class NatsServerOpts : IDisposable
         throw new Exception("unable to allocate port");
     }
 
-    private static void ReturnPort(int port)
-    {
-        PortFactory.Value.Enqueue(port);
-    }
+    private static void ReturnPort(int port) => PortFactory.Value.Enqueue(port);
 }

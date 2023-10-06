@@ -4,7 +4,9 @@
   "description": "A request to the JetStream $JS.API.CONSUMER.LIST API",
   "title": "io.nats.jetstream.api.v1.consumer_list_request",
   "type": "object",
-  "allOf": [{
-    "$ref": "definitions.json#/definitions/iterable_request"
-  }]
+  "allOf": [
+    {
+      "$ref": "definitions.json#/definitions/iterable_request"
+    }
+  ]
 }

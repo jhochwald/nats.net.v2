@@ -1,3 +1,5 @@
+#region
+
 using System.Buffers;
 using System.Text;
 using System.Threading.Channels;
@@ -6,28 +8,30 @@ using NATS.Client.Core;
 using NATS.Client.Core.Commands;
 using NATS.Client.JetStream.Models;
 
+#endregion
+
 namespace NATS.Client.JetStream.Internal;
 
 internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
 {
-    private readonly ILogger _logger;
-    private readonly bool _debug;
-    private readonly Channel<NatsJSMsg<TMsg?>> _userMsgs;
-    private readonly NatsJSContext _context;
-    private readonly string _stream;
     private readonly string _consumer;
-    private readonly INatsSerializer _serializer;
-    private readonly Timer _hbTimer;
+    private readonly NatsJSContext _context;
+    private readonly bool _debug;
+    private readonly long _expires;
     private readonly Timer _expiresTimer;
+    private readonly long _hbTimeout;
+    private readonly Timer _hbTimer;
+    private readonly long _idle;
+    private readonly ILogger _logger;
+    private readonly long _maxBytes;
 
     private readonly long _maxMsgs;
-    private readonly long _maxBytes;
-    private readonly long _expires;
-    private readonly long _idle;
-    private readonly long _hbTimeout;
+    private readonly INatsSerializer _serializer;
+    private readonly string _stream;
+    private readonly Channel<NatsJSMsg<TMsg?>> _userMsgs;
+    private long _pendingBytes;
 
     private long _pendingMsgs;
-    private long _pendingBytes;
 
     public NatsJSFetch(
         long maxMsgs,
@@ -53,7 +57,7 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         _maxBytes = maxBytes;
         _expires = expires.ToNanos();
         _idle = idle.ToNanos();
-        _hbTimeout = (int)(idle * 2).TotalMilliseconds;
+        _hbTimeout = (int) (idle * 2).TotalMilliseconds;
         _pendingMsgs = _maxMsgs;
         _pendingBytes = _maxBytes;
 
@@ -71,14 +75,14 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
                     maxBytes,
                     expires,
                     idle,
-                    _hbTimeout,
+                    _hbTimeout
                 });
         }
 
         _hbTimer = new Timer(
             static state =>
             {
-                var self = (NatsJSFetch<TMsg>)state!;
+                var self = (NatsJSFetch<TMsg>) state!;
                 self.EndSubscription(NatsSubEndReason.IdleHeartbeatTimeout);
                 if (self._debug)
                 {
@@ -95,7 +99,7 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         _expiresTimer = new Timer(
             static state =>
             {
-                var self = (NatsJSFetch<TMsg>)state!;
+                var self = (NatsJSFetch<TMsg>) state!;
                 self.EndSubscription(NatsSubEndReason.Timeout);
                 if (self._debug)
                 {
@@ -114,17 +118,6 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
 
     public void Stop() => EndSubscription(NatsSubEndReason.None);
 
-    public ValueTask CallMsgNextAsync(ConsumerGetnextRequest request, CancellationToken cancellationToken = default) =>
-        Connection.PubModelAsync(
-            subject: $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
-            data: request,
-            serializer: NatsJsonSerializer.Default,
-            replyTo: Subject,
-            headers: default,
-            cancellationToken);
-
-    public void ResetHeartbeatTimer() => _hbTimer.Change(_hbTimeout, Timeout.Infinite);
-
     public override async ValueTask DisposeAsync()
     {
         await base.DisposeAsync().ConfigureAwait(false);
@@ -132,27 +125,33 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         await _expiresTimer.DisposeAsync().ConfigureAwait(false);
     }
 
+    public ValueTask CallMsgNextAsync(ConsumerGetnextRequest request, CancellationToken cancellationToken = default) =>
+        Connection.PubModelAsync(
+            $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
+            request,
+            NatsJsonSerializer.Default,
+            Subject,
+            default,
+            cancellationToken);
+
+    public void ResetHeartbeatTimer() => _hbTimer.Change(_hbTimeout, Timeout.Infinite);
+
     internal override IEnumerable<ICommand> GetReconnectCommands(int sid)
     {
         foreach (var command in base.GetReconnectCommands(sid))
             yield return command;
 
-        var request = new ConsumerGetnextRequest
-        {
-            Batch = _maxMsgs,
-            IdleHeartbeat = _idle,
-            Expires = _expires,
-        };
+        var request = new ConsumerGetnextRequest { Batch = _maxMsgs, IdleHeartbeat = _idle, Expires = _expires };
 
         yield return PublishCommand<ConsumerGetnextRequest>.Create(
-            pool: Connection.ObjectPool,
-            subject: $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
-            replyTo: Subject,
-            headers: default,
-            value: request,
-            serializer: NatsJsonSerializer.Default,
-            errorHandler: default,
-            cancellationToken: default);
+            Connection.ObjectPool,
+            $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
+            Subject,
+            default,
+            request,
+            NatsJsonSerializer.Default,
+            default,
+            default);
     }
 
     protected override async ValueTask ReceiveInternalAsync(
@@ -240,8 +239,5 @@ internal class NatsJSFetch<TMsg> : NatsSubBase, INatsJSFetch<TMsg>
         }
     }
 
-    protected override void TryComplete()
-    {
-        _userMsgs.Writer.TryComplete();
-    }
+    protected override void TryComplete() => _userMsgs.Writer.TryComplete();
 }

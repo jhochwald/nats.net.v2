@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.CONSUMER.LEADER.STEPDOWN API",
   "title": "io.nats.jetstream.api.v1.consumer_leader_stepdown_response",
   "type": "object",
-  "required": ["success"],
+  "required": [
+    "success"
+  ],
   "properties": {
     "success": {
       "type": "boolean",

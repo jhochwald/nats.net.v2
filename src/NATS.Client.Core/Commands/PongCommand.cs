@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
@@ -20,10 +24,7 @@ internal sealed class PongCommand : CommandBase<PongCommand>
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WritePong();
-    }
+    public override void Write(ProtocolWriter writer) => writer.WritePong();
 
     protected override void Reset()
     {

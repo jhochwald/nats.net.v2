@@ -3,7 +3,7 @@ namespace NATS.Client.Core;
 public static class NatsRequestExtensions
 {
     /// <summary>
-    /// Request and receive a single reply from a responder.
+    ///     Request and receive a single reply from a responder.
     /// </summary>
     /// <param name="nats">NATS connection</param>
     /// <param name="msg">Message to be sent as request</param>
@@ -12,12 +12,12 @@ public static class NatsRequestExtensions
     /// <param name="cancellationToken">Cancel this request</param>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TReply">Reply type</typeparam>
-    /// <returns>Returns the <see cref="NatsMsg{T}"/> received from the responder as reply.</returns>
+    /// <returns>Returns the <see cref="NatsMsg{T}" /> received from the responder as reply.</returns>
     /// <exception cref="OperationCanceledException">Raised when cancellation token is used</exception>
     /// <remarks>
-    /// Response can be (null) or one <see cref="NatsMsg{T}"/>.
-    /// Reply option's max messages will be set to 1.
-    /// if reply option's timeout is not defined then it will be set to NatsOpts.RequestTimeout.
+    ///     Response can be (null) or one <see cref="NatsMsg{T}" />.
+    ///     Reply option's max messages will be set to 1.
+    ///     if reply option's timeout is not defined then it will be set to NatsOpts.RequestTimeout.
     /// </remarks>
     public static ValueTask<NatsMsg<TReply?>?> RequestAsync<TRequest, TReply>(
         this INatsConnection nats,
@@ -43,7 +43,7 @@ public static class NatsRequestExtensions
     {
         if (!string.IsNullOrWhiteSpace(replyTo))
         {
-            throw new NatsException($"Can't set reply-to for a request");
+            throw new NatsException("Can't set reply-to for a request");
         }
     }
 }

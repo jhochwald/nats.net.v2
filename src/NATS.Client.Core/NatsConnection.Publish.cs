@@ -7,12 +7,10 @@ public partial class NatsConnection
     {
         if (opts?.WaitUntilSent ?? false)
         {
-            return PubAsync(subject, replyTo, payload: default, headers, cancellationToken);
+            return PubAsync(subject, replyTo, default, headers, cancellationToken);
         }
-        else
-        {
-            return PubPostAsync(subject, replyTo, payload: default, headers, cancellationToken);
-        }
+
+        return PubPostAsync(subject, replyTo, default, headers, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -21,17 +19,12 @@ public partial class NatsConnection
         var serializer = opts?.Serializer ?? Opts.Serializer;
         if (opts?.WaitUntilSent ?? false)
         {
-            return PubModelAsync<T>(subject, data, serializer, replyTo, headers, cancellationToken);
+            return PubModelAsync(subject, data, serializer, replyTo, headers, cancellationToken);
         }
-        else
-        {
-            return PubModelPostAsync<T>(subject, data, serializer, replyTo, headers, opts?.ErrorHandler, cancellationToken);
-        }
+
+        return PubModelPostAsync(subject, data, serializer, replyTo, headers, opts?.ErrorHandler, cancellationToken);
     }
 
     /// <inheritdoc />
-    public ValueTask PublishAsync<T>(in NatsMsg<T> msg, NatsPubOpts? opts = default, CancellationToken cancellationToken = default)
-    {
-        return PublishAsync<T>(msg.Subject, msg.Data, msg.Headers, msg.ReplyTo, opts, cancellationToken);
-    }
+    public ValueTask PublishAsync<T>(in NatsMsg<T> msg, NatsPubOpts? opts = default, CancellationToken cancellationToken = default) => PublishAsync(msg.Subject, msg.Data, msg.Headers, msg.ReplyTo, opts, cancellationToken);
 }

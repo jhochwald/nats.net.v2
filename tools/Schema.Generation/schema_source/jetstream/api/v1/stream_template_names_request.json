@@ -5,6 +5,8 @@
   "title": "io.nats.jetstream.api.v1.stream_template_names_request",
   "type": "object",
   "allOf": [
-    {"$ref": "definitions.json#/definitions/iterable_request"}
+    {
+      "$ref": "definitions.json#/definitions/iterable_request"
+    }
   ]
 }

@@ -52,13 +52,6 @@ internal sealed class NatsUri : IEquatable<NatsUri>
 
     public int Port => Uri.Port;
 
-    public override string ToString()
-    {
-        return IsWebSocket && Uri.AbsolutePath != "/" ? Uri.ToString() : Uri.ToString().Trim('/');
-    }
-
-    public override int GetHashCode() => Uri.GetHashCode();
-
     public bool Equals(NatsUri? other)
     {
         if (other == null)
@@ -68,4 +61,8 @@ internal sealed class NatsUri : IEquatable<NatsUri>
 
         return Uri.Equals(other.Uri);
     }
+
+    public override string ToString() => IsWebSocket && Uri.AbsolutePath != "/" ? Uri.ToString() : Uri.ToString().Trim('/');
+
+    public override int GetHashCode() => Uri.GetHashCode();
 }

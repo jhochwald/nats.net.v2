@@ -1,5 +1,9 @@
+#region
+
 using System.Text;
 using NATS.Client.Core.NaCl;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
@@ -48,7 +52,7 @@ internal class UserCredentials
         opts.JWT = Jwt;
         opts.NKey = NKey;
         opts.AuthToken = Token;
-        opts.Sig = info is { AuthRequired: true, Nonce: { } } ? Sign(info.Nonce) : null;
+        opts.Sig = info is { AuthRequired: true, Nonce: not null } ? Sign(info.Nonce) : null;
     }
 
     private (string, string) LoadCredsFile(string path)

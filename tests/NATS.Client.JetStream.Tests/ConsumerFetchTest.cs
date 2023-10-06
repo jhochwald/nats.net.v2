@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Tests;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -27,10 +31,10 @@ public class ConsumerFetchTest
         var consumer = await js.GetConsumerAsync("s1", "c1", cts.Token);
         var count = 0;
         await using var fc =
-            await consumer.FetchAsync<TestData>(new NatsJSFetchOpts { MaxMsgs = 10 }, cancellationToken: cts.Token);
+            await consumer.FetchAsync<TestData>(new NatsJSFetchOpts { MaxMsgs = 10 }, cts.Token);
         await foreach (var msg in fc.Msgs.ReadAllAsync(cts.Token))
         {
-            await msg.AckAsync(new AckOpts(WaitUntilSent: true), cts.Token);
+            await msg.AckAsync(new AckOpts(true), cts.Token);
             Assert.Equal(count, msg.Data!.Test);
             count++;
         }

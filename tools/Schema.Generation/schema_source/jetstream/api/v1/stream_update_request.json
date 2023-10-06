@@ -5,6 +5,8 @@
   "title": "io.nats.jetstream.api.v1.stream_update_request",
   "type": "object",
   "allOf": [
-    {"$ref": "definitions.json#/definitions/stream_configuration"}
+    {
+      "$ref": "definitions.json#/definitions/stream_configuration"
+    }
   ]
 }

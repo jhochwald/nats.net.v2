@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Tests;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -31,8 +35,8 @@ public class PublishTest
         // Duplicate
         {
             var ack1 = await js.PublishAsync(
-                subject: "s1.foo",
-                data: new TestData { Test = 2 },
+                "s1.foo",
+                new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "2" } },
                 cancellationToken: cts.Token);
             Assert.Null(ack1.Error);
@@ -40,8 +44,8 @@ public class PublishTest
             Assert.False(ack1.Duplicate);
 
             var ack2 = await js.PublishAsync(
-                subject: "s1.foo",
-                data: new TestData { Test = 2 },
+                "s1.foo",
+                new TestData { Test = 2 },
                 headers: new NatsHeaders { { "Nats-Msg-Id", "2" } },
                 cancellationToken: cts.Token);
             Assert.Null(ack2.Error);

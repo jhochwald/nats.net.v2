@@ -4,7 +4,9 @@
   "description": "A response received when publishing a message",
   "title": "io.nats.jetstream.api.v1.pub_ack_response",
   "type": "object",
-  "required": ["stream"],
+  "required": [
+    "stream"
+  ],
   "additionalProperties": false,
   "properties": {
     "error": {
@@ -20,7 +22,7 @@
       "description": "If successful this will be the sequence the message is stored at",
       "$ref": "definitions.json#/definitions/golang_uint64"
     },
-    "duplicate":{
+    "duplicate": {
       "type": "boolean",
       "description": "Indicates that the message was not stored due to the Nats-Msg-Id header and duplicate tracking",
       "default": false

@@ -4,7 +4,10 @@
   "description": "A response from the JetStream $JS.API.STREAM.PURGE API",
   "title": "io.nats.jetstream.api.v1.stream_purge_response",
   "type": "object",
-  "required": ["success", "purged"],
+  "required": [
+    "success",
+    "purged"
+  ],
   "properties": {
     "success": {
       "type": "boolean"

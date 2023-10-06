@@ -1,5 +1,8 @@
-using Microsoft.Extensions.Logging;
+#region
+
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 

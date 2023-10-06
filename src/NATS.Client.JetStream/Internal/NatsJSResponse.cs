@@ -1,9 +1,13 @@
+#region
+
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream.Internal;
 
 /// <summary>
-/// JetStream response including an optional error property encapsulating both successful and failed calls.
+///     JetStream response including an optional error property encapsulating both successful and failed calls.
 /// </summary>
 /// <typeparam name="T">JetStream response type</typeparam>
 internal readonly struct NatsJSResponse<T>

@@ -1,4 +1,7 @@
 #pragma warning disable IDE0044
+
+#region
+
 using System.Text.Json;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using StackExchange.Redis;
 using ZLogger;
+
+#endregion
 
 namespace MicroBenchmark;
 
@@ -37,7 +42,7 @@ public class DefaultBench
     private ConnectionMultiplexer _redis;
     private object _gate;
     private Handler _handler;
-    private IDisposable _subscription = default!;
+    private readonly IDisposable _subscription = default!;
 
     [GlobalSetup]
     public async Task SetupAsync()
@@ -53,18 +58,13 @@ public class DefaultBench
 
         var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
         var logger = loggerFactory.CreateLogger<ILogger<DefaultBench>>();
-        var options = NatsOpts.Default with
-        {
-            LoggerFactory = loggerFactory,
-            Echo = true,
-            Verbose = false,
-        };
+        var options = NatsOpts.Default with { LoggerFactory = loggerFactory, Echo = true, Verbose = false };
 
-        _connection = new NATS.Client.Core.NatsConnection(options);
+        _connection = new NatsConnection(options);
         _subject = "foobar";
         await _connection.ConnectAsync();
         _gate = new object();
-        _redis = StackExchange.Redis.ConnectionMultiplexer.Connect("localhost");
+        _redis = ConnectionMultiplexer.Connect("localhost");
 
         _handler = new Handler();
 
@@ -72,10 +72,7 @@ public class DefaultBench
     }
 
     // [Benchmark]
-    public async Task Nop()
-    {
-        await Task.Yield();
-    }
+    public async Task Nop() => await Task.Yield();
 
     [Benchmark]
     public async Task PublishAsync()
@@ -149,12 +146,6 @@ public class DefaultBench
 
     private class Handler
     {
-#pragma warning disable SA1401
-        public int Called;
-        public int Max;
-        public object Gate;
-#pragma warning restore SA1401
-
         public void Handle(MyVector3 vec)
         {
             if (Interlocked.Increment(ref Called) == Max)
@@ -165,5 +156,10 @@ public class DefaultBench
                 }
             }
         }
+#pragma warning disable SA1401
+        public int Called;
+        public int Max;
+        public object Gate;
+#pragma warning restore SA1401
     }
 }

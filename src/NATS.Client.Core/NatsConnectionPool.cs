@@ -31,7 +31,7 @@ public sealed class NatsConnectionPool : INatsConnectionPool
         _connections = new NatsConnection[poolSize];
         for (var i = 0; i < _connections.Length; i++)
         {
-            var name = (opts.Name == null) ? $"#{i}" : $"{opts.Name}#{i}";
+            var name = opts.Name == null ? $"#{i}" : $"{opts.Name}#{i}";
             var conn = new NatsConnection(opts with { Name = name });
             configureConnection(conn);
             _connections[i] = conn;

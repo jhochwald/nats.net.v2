@@ -1,12 +1,17 @@
+#region
+
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// A response from the JetStream $JS.API.STREAM.TEMPLATE.NAMES API
+///     A response from the JetStream $JS.API.STREAM.TEMPLATE.NAMES API
 /// </summary>
-
 public record StreamTemplateNamesResponse : IterableResponse
 {
-    [System.Text.Json.Serialization.JsonPropertyName("consumers")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.ICollection<string> Consumers { get; set; } = default!;
+    [JsonPropertyName("consumers")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ICollection<string> Consumers { get; set; } = default!;
 }

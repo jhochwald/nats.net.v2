@@ -1,13 +1,17 @@
+#region
+
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
 internal sealed class AsyncSubscribeCommand : AsyncCommandBase<AsyncSubscribeCommand>
 {
-    private string? _subject;
+    private int? _maxMsgs;
     private string? _queueGroup;
     private int _sid;
-    private int? _maxMsgs;
+    private string? _subject;
 
     private AsyncSubscribeCommand()
     {
@@ -29,10 +33,7 @@ internal sealed class AsyncSubscribeCommand : AsyncCommandBase<AsyncSubscribeCom
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WriteSubscribe(_sid, _subject!, _queueGroup, _maxMsgs);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WriteSubscribe(_sid, _subject!, _queueGroup, _maxMsgs);
 
     protected override void Reset()
     {
@@ -50,23 +51,7 @@ internal sealed class AsyncSubscribeBatchCommand : AsyncCommandBase<AsyncSubscri
     {
     }
 
-    public static AsyncSubscribeBatchCommand Create(ObjectPool pool, CancellationTimer timer, (int sid, string subject, string? queueGroup, int? maxMsgs)[]? subscriptions)
-    {
-        if (!TryRent(pool, out var result))
-        {
-            result = new AsyncSubscribeBatchCommand();
-        }
-
-        result._subscriptions = subscriptions;
-        result.SetCancellationTimer(timer);
-
-        return result;
-    }
-
-    public override void Write(ProtocolWriter writer)
-    {
-        (this as IBatchCommand).Write(writer);
-    }
+    public override void Write(ProtocolWriter writer) => (this as IBatchCommand).Write(writer);
 
     int IBatchCommand.Write(ProtocolWriter writer)
     {
@@ -83,8 +68,18 @@ internal sealed class AsyncSubscribeBatchCommand : AsyncCommandBase<AsyncSubscri
         return i;
     }
 
-    protected override void Reset()
+    public static AsyncSubscribeBatchCommand Create(ObjectPool pool, CancellationTimer timer, (int sid, string subject, string? queueGroup, int? maxMsgs)[]? subscriptions)
     {
-        _subscriptions = default;
+        if (!TryRent(pool, out var result))
+        {
+            result = new AsyncSubscribeBatchCommand();
+        }
+
+        result._subscriptions = subscriptions;
+        result.SetCancellationTimer(timer);
+
+        return result;
     }
+
+    protected override void Reset() => _subscriptions = default;
 }

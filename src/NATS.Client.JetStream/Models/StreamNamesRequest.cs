@@ -1,20 +1,26 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// A request to the JetStream $JS.API.STREAM.NAMES API
+///     A request to the JetStream $JS.API.STREAM.NAMES API
 /// </summary>
-
 public record StreamNamesRequest
 {
     /// <summary>
-    /// Limit the list to streams matching this subject filter
+    ///     Limit the list to streams matching this subject filter
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("subject")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("subject")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Subject { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("offset")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("offset")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    [Range(0, int.MaxValue)]
     public int Offset { get; set; } = default!;
 }

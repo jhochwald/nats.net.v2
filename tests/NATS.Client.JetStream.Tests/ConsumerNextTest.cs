@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Tests;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -26,7 +30,7 @@ public class ConsumerNextTest
             var next = await consumer.NextAsync<TestData>(new NatsJSNextOpts(), cts.Token);
             if (next is { } msg)
             {
-                await msg.AckAsync(new AckOpts(WaitUntilSent: true), cts.Token);
+                await msg.AckAsync(new AckOpts(true), cts.Token);
                 Assert.Equal(i, msg.Data!.Test);
             }
         }

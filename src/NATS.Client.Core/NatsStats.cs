@@ -11,6 +11,7 @@ public readonly record struct NatsStats
 
 internal sealed class ConnectionStatsCounter
 {
+    public NatsStats ToStats() => new(SentBytes, ReceivedBytes, PendingMessages, SentMessages, ReceivedMessages, SubscriptionCount);
     // for operate Interlocked.Increment/Decrement/Add, expose field as public
 #pragma warning disable SA1401
     public long SentBytes;
@@ -20,9 +21,4 @@ internal sealed class ConnectionStatsCounter
     public long ReceivedMessages;
     public long SubscriptionCount;
 #pragma warning restore SA1401
-
-    public NatsStats ToStats()
-    {
-        return new NatsStats(SentBytes, ReceivedBytes, PendingMessages, SentMessages, ReceivedMessages, SubscriptionCount);
-    }
 }

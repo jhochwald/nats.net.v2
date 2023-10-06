@@ -12,10 +12,7 @@ internal sealed class CancellationTimerPool
         _rootToken = rootToken;
     }
 
-    public CancellationTimer Start(TimeSpan timeout, CancellationToken externalCancellationToken)
-    {
-        return CancellationTimer.Start(_pool, _rootToken, timeout, externalCancellationToken);
-    }
+    public CancellationTimer Start(TimeSpan timeout, CancellationToken externalCancellationToken) => CancellationTimer.Start(_pool, _rootToken, timeout, externalCancellationToken);
 }
 
 internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
@@ -24,13 +21,13 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ObjectPool _pool;
     private readonly CancellationToken _rootToken;
+    private bool _calledExternalTokenCancel;
+    private CancellationToken _externalCancellationToken;
+    private CancellationTokenRegistration _externalTokenRegistration;
 
     // timer itself is ObjectPool Node
     private CancellationTimer? _next;
-    private bool _calledExternalTokenCancel;
     private TimeSpan _timeout;
-    private CancellationToken _externalCancellationToken;
-    private CancellationTokenRegistration _externalTokenRegistration;
 
     // this timer pool is tightly coupled with rootToken lifetime(e.g. connection lifetime).
     private CancellationTimer(ObjectPool pool, CancellationToken rootToken)
@@ -40,9 +37,9 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(rootToken);
     }
 
-    public ref CancellationTimer? NextNode => ref _next;
-
     public CancellationToken Token => _cancellationTokenSource.Token;
+
+    public ref CancellationTimer? NextNode => ref _next;
 
     public static CancellationTimer Start(ObjectPool pool, CancellationToken rootToken, TimeSpan timeout, CancellationToken externalCancellationToken)
     {
@@ -58,7 +55,7 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
             self._externalTokenRegistration = externalCancellationToken.UnsafeRegister(
                 static state =>
                 {
-                    var self = (CancellationTimer)state!;
+                    var self = (CancellationTimer) state!;
                     self._calledExternalTokenCancel = true;
                     self._cancellationTokenSource.Cancel();
                 },
@@ -109,12 +106,10 @@ internal sealed class CancellationTimer : IObjectPoolNode<CancellationTimer>
             _pool.Return(this);
             return true;
         }
-        else
-        {
-            // otherwise, don't reuse.
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            return false;
-        }
+
+        // otherwise, don't reuse.
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+        return false;
     }
 }

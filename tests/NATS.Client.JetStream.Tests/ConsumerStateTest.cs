@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.JetStream.Internal;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -34,7 +38,7 @@ public class ConsumerStateTest
     [Fact]
     public void Set_msgs_option()
     {
-        var opts = NatsJSOptsDefaults.SetMax(maxMsgs: 10_000);
+        var opts = NatsJSOptsDefaults.SetMax(10_000);
         Assert.Equal(10_000, opts.MaxMsgs);
         Assert.Equal(0, opts.MaxBytes);
         Assert.Equal(5_000, opts.ThresholdMsgs);
@@ -58,11 +62,11 @@ public class ConsumerStateTest
     {
         Assert.Equal(
             TimeSpan.FromSeconds(10),
-            NatsJSOptsDefaults.SetTimeouts(expires: TimeSpan.FromSeconds(10)).Expires);
+            NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(10)).Expires);
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(expires: TimeSpan.FromSeconds(.1)));
+        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(.1)));
 
-        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(expires: TimeSpan.FromSeconds(300)));
+        Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetTimeouts(TimeSpan.FromSeconds(300)));
     }
 
     [Theory]
@@ -74,12 +78,12 @@ public class ConsumerStateTest
         // Msgs
         if (!invalid)
         {
-            var opts = NatsJSOptsDefaults.SetMax(maxMsgs: max, thresholdMsgs: threshold);
+            var opts = NatsJSOptsDefaults.SetMax(max, thresholdMsgs: threshold);
             Assert.Equal(expected, opts.ThresholdMsgs);
         }
         else
         {
-            Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetMax(maxMsgs: max, thresholdMsgs: threshold));
+            Assert.Throws<NatsJSException>(() => NatsJSOptsDefaults.SetMax(max, thresholdMsgs: threshold));
         }
 
         // Bytes

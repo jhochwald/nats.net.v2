@@ -5,7 +5,8 @@ NATS.NET V2 is a [NATS](https://nats.io) client for the modern [.NET](https://do
 ## Preview
 
 The NATS.NET V2 client is in preview and not recommended for production use yet.
-Codebase is still under heavy development and we currently implemented [Core NATS](https://docs.nats.io/nats-concepts/core-nats)
+Codebase is still under heavy development and we currently
+implemented [Core NATS](https://docs.nats.io/nats-concepts/core-nats)
 and basic [JetStream](https://docs.nats.io/nats-concepts/jetstream) features.
 
 Please test and provide feedback:

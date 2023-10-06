@@ -1,5 +1,9 @@
+#region
+
 using JetBrains.dotMemoryUnit;
 using NATS.Client.Core.Tests;
+
+#endregion
 
 namespace NATS.Client.Core.MemoryTests;
 

@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -12,13 +16,7 @@ public class NatsHeaderTest
     [Fact]
     public void WriterTests()
     {
-        var headers = new NatsHeaders
-        {
-            ["k1"] = "v1",
-            ["k2"] = new[] { "v2-0", "v2-1" },
-            ["a-long-header-key"] = "value",
-            ["key"] = "a-long-header-value",
-        };
+        var headers = new NatsHeaders { ["k1"] = "v1", ["k2"] = new[] { "v2-0", "v2-1" }, ["a-long-header-key"] = "value", ["key"] = "a-long-header-value" };
         var writer = new HeaderWriter(Encoding.UTF8);
         var buffer = new FixedArrayBufferWriter();
         var written = writer.Write(buffer, headers);

@@ -1,5 +1,10 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using NATS.Client.Core;
+
+#endregion
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace MicroBenchmark;
@@ -15,8 +20,7 @@ public class SerializationBuffersBench
 
     private NatsConnection _nats;
 
-    [Params(64, 512, 1024)]
-    public int Iter { get; set; }
+    [Params(64, 512, 1024)] public int Iter { get; set; }
 
     [GlobalSetup]
     public void Setup() => _nats = new NatsConnection();

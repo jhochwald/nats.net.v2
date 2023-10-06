@@ -1,9 +1,13 @@
+#region
+
 using System.Buffers;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core.Commands;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core;
 
@@ -17,27 +21,27 @@ public enum NatsSubEndReason
     IdleHeartbeatTimeout,
     StartUpTimeout,
     Exception,
-    JetStreamError,
+    JetStreamError
 }
 
 public abstract class NatsSubBase
 {
-    private readonly ILogger _logger;
+    private readonly bool _countPendingMsgs;
     private readonly bool _debug;
-    private readonly ISubscriptionManager _manager;
-    private readonly Timer? _timeoutTimer;
-    private readonly Timer? _idleTimeoutTimer;
     private readonly TimeSpan _idleTimeout;
+    private readonly Timer? _idleTimeoutTimer;
+    private readonly ILogger _logger;
+    private readonly ISubscriptionManager _manager;
     private readonly TimeSpan _startUpTimeout;
     private readonly TimeSpan _timeout;
-    private readonly bool _countPendingMsgs;
-    private volatile Timer? _startUpTimeoutTimer;
+    private readonly Timer? _timeoutTimer;
     private bool _disposed;
-    private bool _unsubscribed;
-    private bool _endSubscription;
     private int _endReasonRaw;
-    private int _pendingMsgs;
+    private bool _endSubscription;
     private Exception? _exception;
+    private int _pendingMsgs;
+    private volatile Timer? _startUpTimeoutTimer;
+    private bool _unsubscribed;
 
     internal NatsSubBase(
         NatsConnection connection,
@@ -86,14 +90,14 @@ public abstract class NatsSubBase
     }
 
     /// <summary>
-    /// The subject name to subscribe to.
+    ///     The subject name to subscribe to.
     /// </summary>
     public string Subject { get; }
 
     /// <summary>
-    /// If specified, the subscriber will join this queue group. Subscribers with the same queue group name,
-    /// become a queue group, and only one randomly chosen subscriber of the queue group will
-    /// consume a message each time a message is received by the queue group.
+    ///     If specified, the subscriber will join this queue group. Subscribers with the same queue group name,
+    ///     become a queue group, and only one randomly chosen subscriber of the queue group will
+    ///     consume a message each time a message is received by the queue group.
     /// </summary>
     public string? QueueGroup { get; }
 
@@ -103,7 +107,7 @@ public abstract class NatsSubBase
     // since INatsSub is marked as internal.
     public int? PendingMsgs => _pendingMsgs == -1 ? null : Volatile.Read(ref _pendingMsgs);
 
-    public NatsSubEndReason EndReason => (NatsSubEndReason)Volatile.Read(ref _endReasonRaw);
+    public NatsSubEndReason EndReason => (NatsSubEndReason) Volatile.Read(ref _endReasonRaw);
 
     protected NatsConnection Connection { get; }
 
@@ -115,16 +119,16 @@ public abstract class NatsSubBase
             _idleTimeoutTimer?.Change(_idleTimeout, Timeout.InfiniteTimeSpan);
 
         _startUpTimeoutTimer?.Change(_startUpTimeout, Timeout.InfiniteTimeSpan);
-        _timeoutTimer?.Change(dueTime: _timeout, period: Timeout.InfiniteTimeSpan);
+        _timeoutTimer?.Change(_timeout, Timeout.InfiniteTimeSpan);
 
         return ValueTask.CompletedTask;
     }
 
     /// <summary>
-    /// Complete the message channel, stop timers if they were used and send an unsubscribe
-    /// message to the server.
+    ///     Complete the message channel, stop timers if they were used and send an unsubscribe
+    ///     message to the server.
     /// </summary>
-    /// <returns>A <see cref="ValueTask"/> that represents the asynchronous server UNSUB operation.</returns>
+    /// <returns>A <see cref="ValueTask" /> that represents the asynchronous server UNSUB operation.</returns>
     public ValueTask UnsubscribeAsync()
     {
         lock (this)
@@ -206,12 +210,12 @@ public abstract class NatsSubBase
     internal void ClearException() => Interlocked.Exchange(ref _exception, null);
 
     /// <summary>
-    /// Collect commands when reconnecting.
+    ///     Collect commands when reconnecting.
     /// </summary>
     /// <remarks>
-    /// By default this will yield the required subscription command.
-    /// When overriden base must be called to yield the re-subscription command.
-    /// Additional command (e.g. publishing pull requests in case of JetStream consumers) can be yielded as part of the reconnect routine.
+    ///     By default this will yield the required subscription command.
+    ///     When overriden base must be called to yield the re-subscription command.
+    ///     Additional command (e.g. publishing pull requests in case of JetStream consumers) can be yielded as part of the reconnect routine.
     /// </remarks>
     /// <param name="sid">SID which might be required to create subscription commands</param>
     /// <returns>IEnumerable list of commands</returns>
@@ -221,14 +225,14 @@ public abstract class NatsSubBase
     }
 
     /// <summary>
-    /// Invoked when a MSG or HMSG arrives for the subscription.
-    /// <remarks>
-    /// This method is invoked while reading from the socket. Buffers belong to the socket reader and you should process them as quickly as possible or create a copy before you return from this method.
-    /// </remarks>
+    ///     Invoked when a MSG or HMSG arrives for the subscription.
+    ///     <remarks>
+    ///         This method is invoked while reading from the socket. Buffers belong to the socket reader and you should process them as quickly as possible or create a copy before you return from this method.
+    ///     </remarks>
     /// </summary>
     /// <param name="subject">Subject received for this subscription. This might not be the subject you subscribed to especially when using wildcards. For example, if you subscribed to events.* you may receive events.open.</param>
     /// <param name="replyTo">Subject the sender wants you to send messages back to it.</param>
-    /// <param name="headersBuffer">Raw headers bytes. You can use <see cref="NatsConnection"/> <see cref="NatsHeaderParser"/> to decode them.</param>
+    /// <param name="headersBuffer">Raw headers bytes. You can use <see cref="NatsConnection" /> <see cref="NatsHeaderParser" /> to decode them.</param>
     /// <param name="payloadBuffer">Raw payload bytes.</param>
     /// <returns></returns>
     protected abstract ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer);
@@ -241,12 +245,12 @@ public abstract class NatsSubBase
 
     protected void ResetIdleTimeout()
     {
-        _idleTimeoutTimer?.Change(dueTime: _idleTimeout, period: Timeout.InfiniteTimeSpan);
+        _idleTimeoutTimer?.Change(_idleTimeout, Timeout.InfiniteTimeSpan);
 
         // Once the first message is received we don't need to keep resetting the start-up timer
         if (_startUpTimeoutTimer != null)
         {
-            _startUpTimeoutTimer.Change(dueTime: Timeout.InfiniteTimeSpan, period: Timeout.InfiniteTimeSpan);
+            _startUpTimeoutTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             _startUpTimeoutTimer = null;
         }
     }
@@ -261,7 +265,7 @@ public abstract class NatsSubBase
     }
 
     /// <summary>
-    /// Invoked to signal end of the subscription.
+    ///     Invoked to signal end of the subscription.
     /// </summary>
     protected abstract void TryComplete();
 
@@ -277,7 +281,7 @@ public abstract class NatsSubBase
             _endSubscription = true;
         }
 
-        Interlocked.Exchange(ref _endReasonRaw, (int)reason);
+        Interlocked.Exchange(ref _endReasonRaw, (int) reason);
 
         // Stops timers and completes channel writer to exit any message iterators
         // synchronously, which is fine, however, we're not able to wait for

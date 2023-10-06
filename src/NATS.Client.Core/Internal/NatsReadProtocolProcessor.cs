@@ -1,3 +1,5 @@
+#region
+
 using System.Buffers;
 using System.Buffers.Text;
 using System.Collections.Concurrent;
@@ -9,19 +11,21 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core.Commands;
 
+#endregion
+
 namespace NATS.Client.Core.Internal;
 
 internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 {
     private readonly NatsConnection _connection;
-    private readonly SocketReader _socketReader;
-    private readonly Task _readLoop;
-    private readonly TaskCompletionSource _waitForInfoSignal;
-    private readonly TaskCompletionSource _waitForPongOrErrorSignal;  // wait for initial connection
     private readonly Task _infoParsed; // wait for an upgrade
-    private readonly ConcurrentQueue<AsyncPingCommand> _pingCommands; // wait for pong
     private readonly ILogger<NatsReadProtocolProcessor> _logger;
+    private readonly ConcurrentQueue<AsyncPingCommand> _pingCommands; // wait for pong
+    private readonly Task _readLoop;
+    private readonly SocketReader _socketReader;
     private readonly bool _trace;
+    private readonly TaskCompletionSource _waitForInfoSignal;
+    private readonly TaskCompletionSource _waitForPongOrErrorSignal; // wait for initial connection
     private int _disposed;
 
     public NatsReadProtocolProcessor(ISocketConnection socketConnection, NatsConnection connection, TaskCompletionSource waitForInfoSignal, TaskCompletionSource waitForPongOrErrorSignal, Task infoParsed)
@@ -35,14 +39,6 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
         _pingCommands = new ConcurrentQueue<AsyncPingCommand>();
         _socketReader = new SocketReader(socketConnection, connection.Opts.ReaderBufferSize, connection.Counter, connection.Opts.LoggerFactory);
         _readLoop = Task.Run(ReadLoopAsync);
-    }
-
-    public bool TryEnqueuePing(AsyncPingCommand ping)
-    {
-        if (_disposed != 0)
-            return false;
-        _pingCommands.Enqueue(ping);
-        return true;
     }
 
     public async ValueTask DisposeAsync()
@@ -60,11 +56,16 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetCode(ReadOnlySpan<byte> span)
+    public bool TryEnqueuePing(AsyncPingCommand ping)
     {
-        return Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference<byte>(span));
+        if (_disposed != 0)
+            return false;
+        _pingCommands.Enqueue(ping);
+        return true;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int GetCode(ReadOnlySpan<byte> span) => Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference(span));
 
     private static int GetCode(in ReadOnlySequence<byte> sequence)
     {
@@ -91,7 +92,7 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
             return GetInt32(sequence.FirstSpan);
         }
 
-        Span<byte> buf = stackalloc byte[Math.Min((int)sequence.Length, 10)];
+        Span<byte> buf = stackalloc byte[Math.Min((int) sequence.Length, 10)];
         sequence.Slice(buf.Length).CopyTo(buf);
         return GetInt32(buf);
     }
@@ -110,11 +111,9 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#+ok-err
     // -ERR <error message>
-    private static string ParseError(in ReadOnlySequence<byte> errorSlice)
-    {
+    private static string ParseError(in ReadOnlySequence<byte> errorSlice) =>
         // SKip `-ERR `
-        return Encoding.UTF8.GetString(errorSlice.Slice(5));
-    }
+        Encoding.UTF8.GetString(errorSlice.Slice(5));
 
     private async Task ReadLoopAsync()
     {
@@ -143,7 +142,7 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                         {
                             // try get additional buffer to require read Code
                             _socketReader.AdvanceTo(buffer.Start);
-                            buffer = await _socketReader.ReadAtLeastAsync(4 - (int)buffer.Length).ConfigureAwait(false);
+                            buffer = await _socketReader.ReadAtLeastAsync(4 - (int) buffer.Length).ConfigureAwait(false);
                         }
 
                         code = GetCode(buffer);
@@ -158,12 +157,12 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                         // MSG <subject> <sid> [reply-to] <#bytes>\r\n[payload]
 
                         // Try to find before \n
-                        var positionBeforePayload = buffer.PositionOf((byte)'\n');
+                        var positionBeforePayload = buffer.PositionOf((byte) '\n');
                         if (positionBeforePayload == null)
                         {
                             _socketReader.AdvanceTo(buffer.Start);
                             buffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                            positionBeforePayload = buffer.PositionOf((byte)'\n')!;
+                            positionBeforePayload = buffer.PositionOf((byte) '\n')!;
                         }
 
                         var msgHeader = buffer.Slice(0, positionBeforePayload.Value);
@@ -193,10 +192,10 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                             var payloadSlice = buffer.Slice(payloadBegin);
 
                             // slice required \r\n
-                            if (payloadSlice.Length < (payloadLength + 2))
+                            if (payloadSlice.Length < payloadLength + 2)
                             {
                                 _socketReader.AdvanceTo(payloadBegin);
-                                buffer = await _socketReader.ReadAtLeastAsync(payloadLength - (int)payloadSlice.Length + 2).ConfigureAwait(false); // payload + \r\n
+                                buffer = await _socketReader.ReadAtLeastAsync(payloadLength - (int) payloadSlice.Length + 2).ConfigureAwait(false); // payload + \r\n
                                 payloadSlice = buffer.Slice(0, payloadLength);
                             }
                             else
@@ -215,12 +214,12 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                         // HMSG <subject> <sid> [reply-to] <#header bytes> <#total bytes>\r\n[headers]\r\n\r\n[payload]\r\n
 
                         // Find the end of 'HMSG' first message line
-                        var positionBeforeNatsHeader = buffer.PositionOf((byte)'\n');
+                        var positionBeforeNatsHeader = buffer.PositionOf((byte) '\n');
                         if (positionBeforeNatsHeader == null)
                         {
                             _socketReader.AdvanceTo(buffer.Start);
                             buffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                            positionBeforeNatsHeader = buffer.PositionOf((byte)'\n')!;
+                            positionBeforeNatsHeader = buffer.PositionOf((byte) '\n')!;
                         }
 
                         var msgHeader = buffer.Slice(0, positionBeforeNatsHeader.Value);
@@ -249,7 +248,7 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                             _socketReader.AdvanceTo(headerBegin);
 
                             // Read headers + payload + \r\n
-                            var size = totalLength - (int)totalSlice.Length + 2;
+                            var size = totalLength - (int) totalSlice.Length + 2;
                             buffer = await _socketReader.ReadAtLeastAsync(size).ConfigureAwait(false);
                             totalSlice = buffer.Slice(0, totalLength);
                         }
@@ -288,7 +287,6 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occured during read loop.");
-                continue;
             }
         }
     }
@@ -296,7 +294,7 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
     [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>))]
     private async ValueTask<ReadOnlySequence<byte>> DispatchCommandAsync(int code, ReadOnlySequence<byte> buffer)
     {
-        var length = (int)buffer.Length;
+        var length = (int) buffer.Length;
 
         if (code == ServerOpCodes.Ping)
         {
@@ -313,7 +311,8 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 
             return buffer.Slice(PingSize);
         }
-        else if (code == ServerOpCodes.Pong)
+
+        if (code == ServerOpCodes.Pong)
         {
             const int PongSize = 6; // PONG\r\n
 
@@ -336,15 +335,16 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 
             return buffer.Slice(PongSize);
         }
-        else if (code == ServerOpCodes.Error)
+
+        if (code == ServerOpCodes.Error)
         {
             // try to get \n.
-            var position = buffer.PositionOf((byte)'\n');
+            var position = buffer.PositionOf((byte) '\n');
             if (position == null)
             {
                 _socketReader.AdvanceTo(buffer.Start);
                 var newBuffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                var newPosition = newBuffer.PositionOf((byte)'\n');
+                var newPosition = newBuffer.PositionOf((byte) '\n');
                 var error = ParseError(newBuffer.Slice(0, buffer.GetOffset(newPosition!.Value) - 1));
                 _logger.LogError(error);
                 _waitForPongOrErrorSignal.TrySetException(new NatsException(error));
@@ -358,7 +358,8 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
                 return buffer.Slice(buffer.GetPosition(1, position.Value));
             }
         }
-        else if (code == ServerOpCodes.Ok)
+
+        if (code == ServerOpCodes.Ok)
         {
             const int OkSize = 5; // +OK\r\n
 
@@ -371,16 +372,17 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 
             return buffer.Slice(OkSize);
         }
-        else if (code == ServerOpCodes.Info)
+
+        if (code == ServerOpCodes.Info)
         {
             // try to get \n.
-            var position = buffer.PositionOf((byte)'\n');
+            var position = buffer.PositionOf((byte) '\n');
 
             if (position == null)
             {
                 _socketReader.AdvanceTo(buffer.Start);
                 var newBuffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                var newPosition = newBuffer.PositionOf((byte)'\n');
+                var newPosition = newBuffer.PositionOf((byte) '\n');
 
                 var serverInfo = ParseInfo(newBuffer);
                 _connection.WritableServerInfo = serverInfo;
@@ -405,18 +407,16 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
             _logger.LogWarning("reaches invalid line.");
             Interlocked.Decrement(ref _connection.Counter.ReceivedMessages);
 
-            var position = buffer.PositionOf((byte)'\n');
+            var position = buffer.PositionOf((byte) '\n');
             if (position == null)
             {
                 _socketReader.AdvanceTo(buffer.Start);
                 var newBuffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                var newPosition = newBuffer.PositionOf((byte)'\n');
+                var newPosition = newBuffer.PositionOf((byte) '\n');
                 return newBuffer.Slice(newBuffer.GetPosition(1, newPosition!.Value));
             }
-            else
-            {
-                return buffer.Slice(buffer.GetPosition(1, position.Value));
-            }
+
+            return buffer.Slice(buffer.GetPosition(1, position.Value));
         }
     }
 
@@ -459,17 +459,15 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
         // header parsing use Slice frequently so ReadOnlySequence is high cost, should use Span.
         // msgheader is not too long, ok to use stackalloc in most cases.
         const int maxAlloc = 256;
-        var msgHeaderLength = (int)msgHeader.Length;
+        var msgHeaderLength = (int) msgHeader.Length;
         if (msgHeaderLength <= maxAlloc)
         {
             Span<byte> buffer = stackalloc byte[msgHeaderLength];
             msgHeader.CopyTo(buffer);
             return ParseMessageHeader(buffer);
         }
-        else
-        {
-            return ParseMessageHeader(msgHeader.ToSpan());
-        }
+
+        return ParseMessageHeader(msgHeader.ToSpan());
     }
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#hmsg
@@ -520,28 +518,26 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
         // header parsing use Slice frequently so ReadOnlySequence is high cost, should use Span.
         // msgheader is not too long, ok to use stackalloc in most cases.
         const int maxAlloc = 256;
-        var msgHeaderLength = (int)msgHeader.Length;
+        var msgHeaderLength = (int) msgHeader.Length;
         if (msgHeaderLength <= maxAlloc)
         {
             Span<byte> buffer = stackalloc byte[msgHeaderLength];
             msgHeader.CopyTo(buffer);
             return ParseHMessageHeader(buffer);
         }
-        else
-        {
-            return ParseHMessageHeader(msgHeader.ToSpan());
-        }
+
+        return ParseHMessageHeader(msgHeader.ToSpan());
     }
 
     internal static class ServerOpCodes
     {
         // All sent by server commands as int(first 4 characters(includes space, newline)).
-        public const int Info = 1330007625;  // Encoding.ASCII.GetBytes("INFO") |> MemoryMarshal.Read<int>
-        public const int Msg = 541545293;    // Encoding.ASCII.GetBytes("MSG ") |> MemoryMarshal.Read<int>
-        public const int HMsg = 1196641608;  // Encoding.ASCII.GetBytes("HMSG") |> MemoryMarshal.Read<int>
-        public const int Ping = 1196312912;  // Encoding.ASCII.GetBytes("PING") |> MemoryMarshal.Read<int>
-        public const int Pong = 1196314448;  // Encoding.ASCII.GetBytes("PONG") |> MemoryMarshal.Read<int>
-        public const int Ok = 223039275;     // Encoding.ASCII.GetBytes("+OK\r") |> MemoryMarshal.Read<int>
+        public const int Info = 1330007625; // Encoding.ASCII.GetBytes("INFO") |> MemoryMarshal.Read<int>
+        public const int Msg = 541545293; // Encoding.ASCII.GetBytes("MSG ") |> MemoryMarshal.Read<int>
+        public const int HMsg = 1196641608; // Encoding.ASCII.GetBytes("HMSG") |> MemoryMarshal.Read<int>
+        public const int Ping = 1196312912; // Encoding.ASCII.GetBytes("PING") |> MemoryMarshal.Read<int>
+        public const int Pong = 1196314448; // Encoding.ASCII.GetBytes("PONG") |> MemoryMarshal.Read<int>
+        public const int Ok = 223039275; // Encoding.ASCII.GetBytes("+OK\r") |> MemoryMarshal.Read<int>
         public const int Error = 1381123373; // Encoding.ASCII.GetBytes("-ERR") |> MemoryMarshal.Read<int>
     }
 }

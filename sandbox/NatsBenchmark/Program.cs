@@ -1,13 +1,20 @@
+#region
+
 using System.Diagnostics;
 using System.Runtime;
 using System.Text;
+using JetBrains.Profiler.Api;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client;
 using NATS.Client.Core;
+using NATS.Client.Core.Commands;
 using NatsBenchmark;
+using StackExchange.Redis;
 using ZLogger;
+
+#endregion
 
 var isPortableThreadPool = await IsRunOnPortableThreadPoolAsync();
 Console.WriteLine($"RunOnPortableThreadPool:{isPortableThreadPool}");
@@ -60,9 +67,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -71,8 +76,8 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -135,9 +140,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -146,8 +149,8 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -219,9 +222,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -230,8 +231,8 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -255,9 +256,9 @@ namespace NatsBenchmark
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            JetBrains.Profiler.Api.MemoryProfiler.ForceGc();
-            JetBrains.Profiler.Api.MemoryProfiler.CollectAllocations(true);
-            JetBrains.Profiler.Api.MemoryProfiler.GetSnapshot("Before");
+            MemoryProfiler.ForceGc();
+            MemoryProfiler.CollectAllocations(true);
+            MemoryProfiler.GetSnapshot("Before");
             var sw = Stopwatch.StartNew();
 
             for (var i = 0; i < testCount; i++)
@@ -272,7 +273,7 @@ namespace NatsBenchmark
             }
 
             sw.Stop();
-            JetBrains.Profiler.Api.MemoryProfiler.GetSnapshot("Finished");
+            MemoryProfiler.GetSnapshot("Finished");
 
             if (!disableShow)
             {
@@ -299,9 +300,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -310,8 +309,8 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -331,7 +330,7 @@ namespace NatsBenchmark
                 }
             });
 
-            var command = new NATS.Client.Core.Commands.DirectWriteCommand(BuildCommand(testSize), batchSize);
+            var command = new DirectWriteCommand(BuildCommand(testSize), batchSize);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -397,9 +396,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -411,10 +408,10 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
-            var pubConn2 = new NATS.Client.Core.NatsConnection(options);
-            var subConn2 = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
+            var pubConn2 = new NatsConnection(options);
+            var subConn2 = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -514,9 +511,7 @@ namespace NatsBenchmark
             var options = NatsOpts.Default with
             {
                 // LoggerFactory = loggerFactory,
-                UseThreadPoolCallback = false,
-                Echo = false,
-                Verbose = false,
+                UseThreadPoolCallback = false, Echo = false, Verbose = false
             };
 
             var pubSubLock = new object();
@@ -524,8 +519,8 @@ namespace NatsBenchmark
             var subCount = 0;
 
             // byte[] payload = generatePayload(testSize);
-            var pubConn = new NATS.Client.Core.NatsConnection(options);
-            var subConn = new NATS.Client.Core.NatsConnection(options);
+            var pubConn = new NatsConnection(options);
+            var subConn = new NatsConnection(options);
 
             pubConn.ConnectAsync().AsTask().Wait();
             subConn.ConnectAsync().AsTask().Wait();
@@ -672,8 +667,8 @@ namespace NatsBenchmark
 
             var payload = GeneratePayload(testSize);
 
-            var pubConn = StackExchange.Redis.ConnectionMultiplexer.Connect("localhost");
-            var subConn = StackExchange.Redis.ConnectionMultiplexer.Connect("localhost");
+            var pubConn = ConnectionMultiplexer.Connect("localhost");
+            var subConn = ConnectionMultiplexer.Connect("localhost");
 
             subConn.GetSubscriber().Subscribe(_subject, (channel, v) =>
             {
@@ -694,7 +689,7 @@ namespace NatsBenchmark
 
             for (var i = 0; i < testCount; i++)
             {
-                _ = pubConn.GetDatabase().PublishAsync(_subject, payload, StackExchange.Redis.CommandFlags.FireAndForget);
+                _ = pubConn.GetDatabase().PublishAsync(_subject, payload, CommandFlags.FireAndForget);
             }
 
             lock (pubSubLock)
@@ -726,9 +721,9 @@ namespace NatsBenchmark
             // RunPubSubBenchmarkBatchRaw("Benchmark", 100000, 1024 * 8, disableShow: true); // warmup
             // RunPubSubBenchmarkBatchRaw("Benchmark8b_Opt", 10000000, 8);
             // RunPubSubBenchmarkBatchRaw("Benchmark4k_Opt", 500000, 1024 * 4);
-            RunPubSubBenchmarkBatchRaw("Benchmark8k_Opt", 100000, 1024 * 8, batchSize: 10, disableShow: true);
-            RunPubSubBenchmarkBatchRaw("Benchmark8k_Opt", 100000, 1024 * 8, batchSize: 10);
-            RunPubSubBenchmark("Benchmark8k", 100000, 1024 * 8, disableShow: true);
+            RunPubSubBenchmarkBatchRaw("Benchmark8k_Opt", 100000, 1024 * 8, 10, true);
+            RunPubSubBenchmarkBatchRaw("Benchmark8k_Opt", 100000, 1024 * 8, 10);
+            RunPubSubBenchmark("Benchmark8k", 100000, 1024 * 8, true);
             RunPubSubBenchmark("Benchmark8k", 100000, 1024 * 8);
 
             // RunPubSubBenchmark("Benchmark8b", 10000000, 8, disableShow: true);
@@ -801,12 +796,9 @@ namespace NatsBenchmark
 [MessagePackObject]
 public struct Vector3
 {
-    [Key(0)]
-    public float X;
-    [Key(1)]
-    public float Y;
-    [Key(2)]
-    public float Z;
+    [Key(0)] public float X;
+    [Key(1)] public float Y;
+    [Key(2)] public float Z;
 }
 
 internal static class NatsMsgTestUtils

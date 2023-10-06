@@ -1,5 +1,8 @@
+#region
+
 using System.Runtime.CompilerServices;
-using NATS.Client.Core;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -38,9 +41,8 @@ public static class WaitSignalExtensions
 
 public class WaitSignal
 {
-    private TimeSpan _timeout;
+    private readonly TaskCompletionSource _tcs;
     private int _count;
-    private TaskCompletionSource _tcs;
 
     public WaitSignal()
         : this(TimeSpan.FromSeconds(10))
@@ -54,12 +56,12 @@ public class WaitSignal
 
     public WaitSignal(TimeSpan timeout, int count = 1)
     {
-        _timeout = timeout;
+        Timeout = timeout;
         _count = count;
         _tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
-    public TimeSpan Timeout => _timeout;
+    public TimeSpan Timeout { get; }
 
     public Task Task => _tcs.Task;
 
@@ -80,17 +82,13 @@ public class WaitSignal
         }
     }
 
-    public TaskAwaiter GetAwaiter()
-    {
-        return _tcs.Task.WaitAsync(_timeout).GetAwaiter();
-    }
+    public TaskAwaiter GetAwaiter() => _tcs.Task.WaitAsync(Timeout).GetAwaiter();
 }
 
 public class WaitSignal<T>
 {
-    private TimeSpan _timeout;
+    private readonly TaskCompletionSource<T> _tcs;
     private int _count;
-    private TaskCompletionSource<T> _tcs;
 
     public WaitSignal()
         : this(TimeSpan.FromSeconds(10))
@@ -104,12 +102,12 @@ public class WaitSignal<T>
 
     public WaitSignal(TimeSpan timeout, int count = 1)
     {
-        _timeout = timeout;
+        Timeout = timeout;
         _count = count;
         _tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
-    public TimeSpan Timeout => _timeout;
+    public TimeSpan Timeout { get; }
 
     public Task Task => _tcs.Task;
 
@@ -130,8 +128,5 @@ public class WaitSignal<T>
         }
     }
 
-    public TaskAwaiter<T> GetAwaiter()
-    {
-        return _tcs.Task.WaitAsync(_timeout).GetAwaiter();
-    }
+    public TaskAwaiter<T> GetAwaiter() => _tcs.Task.WaitAsync(Timeout).GetAwaiter();
 }

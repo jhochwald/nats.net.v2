@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.STREAM.MSG.DELETE API",
   "title": "io.nats.jetstream.api.v1.stream_msg_delete_response",
   "type": "object",
-  "required": ["success"],
+  "required": [
+    "success"
+  ],
   "properties": {
     "success": {
       "type": "boolean"

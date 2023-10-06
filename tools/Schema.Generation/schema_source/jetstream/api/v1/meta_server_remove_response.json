@@ -3,7 +3,9 @@
   "$id": "https://nats.io/schemas/jetstream/api/v1/meta_server_remove_response.json",
   "description": "A response from the JetStream $JS.API.SERVER.REMOVE API",
   "title": "io.nats.jetstream.api.v1.meta_server_remove_response",
-  "required": ["success"],
+  "required": [
+    "success"
+  ],
   "type": "object",
   "properties": {
     "success": {

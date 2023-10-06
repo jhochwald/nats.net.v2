@@ -4,7 +4,9 @@
   "description": "A request to the JetStream $JS.API.STREAM.PEER.REMOVE API",
   "title": "io.nats.jetstream.api.v1.stream_remove_peer_request",
   "type": "object",
-  "required": ["peer"],
+  "required": [
+    "peer"
+  ],
   "additionalProperties": false,
   "properties": {
     "peer": {

@@ -1,5 +1,3 @@
-using NATS.Client.Core;
-
 namespace NATS.Client.JetStream.Internal;
 
 internal static class NatsJSOptsDefaults
@@ -22,11 +20,13 @@ internal static class NatsJSOptsDefaults
         {
             throw new NatsJSException($"You can only set {nameof(maxBytes)} or {nameof(maxMsgs)}");
         }
-        else if (!maxMsgs.HasValue && !maxBytes.HasValue)
+
+        if (!maxMsgs.HasValue && !maxBytes.HasValue)
         {
             throw new NatsJSException($"You must set {nameof(maxBytes)} or {nameof(maxMsgs)}");
         }
-        else if (maxMsgs.HasValue && !maxBytes.HasValue)
+
+        if (maxMsgs.HasValue && !maxBytes.HasValue)
         {
             maxMsgsOut = maxMsgs.Value;
             maxBytesOut = 0;

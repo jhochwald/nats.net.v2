@@ -1,23 +1,29 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// Subject transform to apply to matching messages going into the stream
+///     Subject transform to apply to matching messages going into the stream
 /// </summary>
-
 public record SubjectTransform
 {
     /// <summary>
-    /// The subject transform source
+    ///     The subject transform source
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("src")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("src")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Src { get; set; } = default!;
 
     /// <summary>
-    /// The subject transform destination
+    ///     The subject transform destination
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("dest")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+    [JsonPropertyName("dest")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
     public string Dest { get; set; } = default!;
 }

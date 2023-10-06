@@ -1,17 +1,21 @@
+#region
+
 using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
+#endregion
+
 namespace NATS.Client.Core.Internal;
 
 internal sealed class SslStreamConnection : ISocketConnection
 {
-    private readonly SslStream _sslStream;
-    private readonly TaskCompletionSource<Exception> _waitForClosedSource;
-    private readonly NatsTlsOpts _tlsOpts;
-    private readonly TlsCerts? _tlsCerts;
     private readonly CancellationTokenSource _closeCts = new();
+    private readonly SslStream _sslStream;
+    private readonly TlsCerts? _tlsCerts;
+    private readonly NatsTlsOpts _tlsOpts;
+    private readonly TaskCompletionSource<Exception> _waitForClosedSource;
     private int _disposed;
 
     public SslStreamConnection(SslStream sslStream, NatsTlsOpts tlsOpts, TlsCerts? tlsCerts, TaskCompletionSource<Exception> waitForClosedSource)
@@ -51,10 +55,7 @@ internal sealed class SslStreamConnection : ISocketConnection
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<int> ReceiveAsync(Memory<byte> buffer)
-    {
-        return _sslStream.ReadAsync(buffer, _closeCts.Token);
-    }
+    public ValueTask<int> ReceiveAsync(Memory<byte> buffer) => _sslStream.ReadAsync(buffer, _closeCts.Token);
 
     public async ValueTask AbortConnectionAsync(CancellationToken cancellationToken)
     {
@@ -64,10 +65,7 @@ internal sealed class SslStreamConnection : ISocketConnection
     }
 
     // when catch SocketClosedException, call this method.
-    public void SignalDisconnected(Exception exception)
-    {
-        _waitForClosedSource.TrySetResult(exception);
-    }
+    public void SignalDisconnected(Exception exception) => _waitForClosedSource.TrySetResult(exception);
 
     public async Task AuthenticateAsClientAsync(string target)
     {
@@ -106,7 +104,7 @@ internal sealed class SslStreamConnection : ISocketConnection
         {
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
             chain.ChainPolicy.ExtraStore.AddRange(_tlsCerts.CaCerts);
-            if (chain.Build((X509Certificate2)certificate))
+            if (chain.Build((X509Certificate2) certificate))
             {
                 sslPolicyErrors &= ~SslPolicyErrors.RemoteCertificateChainErrors;
             }
@@ -152,7 +150,7 @@ internal sealed class SslStreamConnection : ISocketConnection
             EnabledSslProtocols = SslProtocols.Tls12,
             ClientCertificates = _tlsCerts?.ClientCerts,
             LocalCertificateSelectionCallback = lcsCb,
-            RemoteCertificateValidationCallback = rcsCb,
+            RemoteCertificateValidationCallback = rcsCb
         };
 
         return options;

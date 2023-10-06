@@ -9,7 +9,9 @@
       "$ref": "definitions.json#/definitions/iterable_response"
     }
   ],
-  "required": ["consumers"],
+  "required": [
+    "consumers"
+  ],
   "properties": {
     "consumers": {
       "description": "Full Consumer information for each known Consumer",

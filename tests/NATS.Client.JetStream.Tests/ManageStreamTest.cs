@@ -1,5 +1,9 @@
+#region
+
 using NATS.Client.Core.Tests;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -28,8 +32,8 @@ public class ManageStreamTest
         // Create
         {
             var stream = await js.CreateStreamAsync(
-                request: new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" } },
-                cancellationToken: cancellationToken);
+                new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" } },
+                cancellationToken);
             Assert.Equal("events", stream.Info.Config.Name);
 
             var accountInfo = await js.GetAccountInfoAsync(cancellationToken);

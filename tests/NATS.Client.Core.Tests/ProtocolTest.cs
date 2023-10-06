@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -205,7 +209,7 @@ public class ProtocolTest
             }
 
             Assert.Equal(maxMsgs, count);
-            Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)sub).EndReason);
+            Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) sub).EndReason);
         }
 
         Log("### Manual unsubscribe");
@@ -238,7 +242,7 @@ public class ProtocolTest
             }
 
             Assert.Equal(0, count);
-            Assert.Equal(NatsSubEndReason.None, ((NatsSubBase)sub).EndReason);
+            Assert.Equal(NatsSubEndReason.None, ((NatsSubBase) sub).EndReason);
         }
 
         Log("### Reconnect");
@@ -261,7 +265,7 @@ public class ProtocolTest
             await Retry.Until("received", () => Volatile.Read(ref count) == pubMsgs);
 
             var pending = maxMsgs - pubMsgs;
-            Assert.Equal(pending, ((NatsSubBase)sub).PendingMsgs);
+            Assert.Equal(pending, ((NatsSubBase) sub).PendingMsgs);
 
             proxy.Reset();
 
@@ -284,7 +288,7 @@ public class ProtocolTest
 
             await Retry.Until(
                 "unsubscribed with max-msgs",
-                () => ((NatsSubBase)sub).EndReason == NatsSubEndReason.MaxMsgs);
+                () => ((NatsSubBase) sub).EndReason == NatsSubEndReason.MaxMsgs);
 
             Assert.Equal(maxMsgs, Volatile.Read(ref count));
 
@@ -303,7 +307,7 @@ public class ProtocolTest
 
         var sync = 0;
         await using var sub = new NatsSubReconnectTest(nats, subject, i => Interlocked.Exchange(ref sync, i));
-        await nats.SubAsync(sub.Subject, queueGroup: default, opts: default, sub: sub);
+        await nats.SubAsync(sub.Subject, default, default, sub);
 
         await Retry.Until(
             "subscribed",
@@ -341,7 +345,7 @@ public class ProtocolTest
         private readonly Action<int> _callback;
 
         internal NatsSubReconnectTest(NatsConnection connection, string subject, Action<int> callback)
-            : base(connection, connection.SubscriptionManager, subject, queueGroup: default, opts: default) =>
+            : base(connection, connection.SubscriptionManager, subject, default, default) =>
             _callback = callback;
 
         internal override IEnumerable<ICommand> GetReconnectCommands(int sid)

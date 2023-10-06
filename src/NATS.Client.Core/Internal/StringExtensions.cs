@@ -3,8 +3,8 @@ namespace NATS.Client.Core.Internal;
 internal static class StringExtensions
 {
     /// <summary>
-    /// Allocation free ASCII buffer writer.
-    /// There is no protection if string isn't ASCII.
+    ///     Allocation free ASCII buffer writer.
+    ///     There is no protection if string isn't ASCII.
     /// </summary>
     /// <param name="key">ASCII string</param>
     /// <param name="span">Target memory location. Assumed to be large enough.</param>
@@ -14,7 +14,7 @@ internal static class StringExtensions
         for (var i = 0; i < count; i++)
         {
             int c = key[i];
-            span[i] = (byte)c;
+            span[i] = (byte) c;
         }
     }
 }

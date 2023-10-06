@@ -1,17 +1,21 @@
+#region
+
 using System.Buffers;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
 internal sealed class PublishCommand<T> : CommandBase<PublishCommand<T>>
 {
-    private string? _subject;
-    private string? _replyTo;
-    private NatsHeaders? _headers;
-    private T? _value;
-    private INatsSerializer? _serializer;
-    private Action<Exception>? _errorHandler;
     private CancellationToken _cancellationToken;
+    private Action<Exception>? _errorHandler;
+    private NatsHeaders? _headers;
+    private string? _replyTo;
+    private INatsSerializer? _serializer;
+    private string? _subject;
+    private T? _value;
 
     private PublishCommand()
     {
@@ -60,7 +64,7 @@ internal sealed class PublishCommand<T> : CommandBase<PublishCommand<T>>
                         }
                     },
                     (handler: errorHandler, exception: e),
-                    preferLocal: false);
+                    false);
             }
 
             throw;
@@ -80,11 +84,11 @@ internal sealed class PublishCommand<T> : CommandBase<PublishCommand<T>>
 
 internal sealed class PublishBytesCommand : CommandBase<PublishBytesCommand>
 {
-    private string? _subject;
-    private string? _replyTo;
+    private CancellationToken _cancellationToken;
     private NatsHeaders? _headers;
     private ReadOnlySequence<byte> _payload;
-    private CancellationToken _cancellationToken;
+    private string? _replyTo;
+    private string? _subject;
 
     private PublishBytesCommand()
     {
@@ -108,10 +112,7 @@ internal sealed class PublishBytesCommand : CommandBase<PublishBytesCommand>
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WritePublish(_subject!, _replyTo, _headers, _payload);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WritePublish(_subject!, _replyTo, _headers, _payload);
 
     protected override void Reset()
     {
@@ -125,11 +126,11 @@ internal sealed class PublishBytesCommand : CommandBase<PublishBytesCommand>
 
 internal sealed class AsyncPublishCommand<T> : AsyncCommandBase<AsyncPublishCommand<T>>
 {
-    private string? _subject;
-    private string? _replyTo;
     private NatsHeaders? _headers;
-    private T? _value;
+    private string? _replyTo;
     private INatsSerializer? _serializer;
+    private string? _subject;
+    private T? _value;
 
     private AsyncPublishCommand()
     {
@@ -152,10 +153,7 @@ internal sealed class AsyncPublishCommand<T> : AsyncCommandBase<AsyncPublishComm
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WritePublish(_subject!, _replyTo, _headers, _value, _serializer!);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WritePublish(_subject!, _replyTo, _headers, _value, _serializer!);
 
     protected override void Reset()
     {
@@ -168,10 +166,10 @@ internal sealed class AsyncPublishCommand<T> : AsyncCommandBase<AsyncPublishComm
 
 internal sealed class AsyncPublishBytesCommand : AsyncCommandBase<AsyncPublishBytesCommand>
 {
-    private string? _subject;
-    private string? _replyTo;
     private NatsHeaders? _headers;
     private ReadOnlySequence<byte> _payload;
+    private string? _replyTo;
+    private string? _subject;
 
     private AsyncPublishBytesCommand()
     {
@@ -193,10 +191,7 @@ internal sealed class AsyncPublishBytesCommand : AsyncCommandBase<AsyncPublishBy
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WritePublish(_subject!, _replyTo, _headers, _payload);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WritePublish(_subject!, _replyTo, _headers, _payload);
 
     protected override void Reset()
     {

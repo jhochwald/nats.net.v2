@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.JetStream.Internal;
 

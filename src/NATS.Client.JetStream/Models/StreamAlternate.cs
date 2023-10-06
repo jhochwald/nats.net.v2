@@ -1,31 +1,37 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// An alternate location to read mirrored data
+///     An alternate location to read mirrored data
 /// </summary>
-
 public record StreamAlternate
 {
     /// <summary>
-    /// The mirror stream name
+    ///     The mirror stream name
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("name")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
     public string Name { get; set; } = default!;
 
     /// <summary>
-    /// The name of the cluster holding the stream
+    ///     The name of the cluster holding the stream
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("cluster")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+    [JsonPropertyName("cluster")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
     public string Cluster { get; set; } = default!;
 
     /// <summary>
-    /// The domain holding the string
+    ///     The domain holding the string
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("domain")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("domain")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Domain { get; set; } = default!;
 }

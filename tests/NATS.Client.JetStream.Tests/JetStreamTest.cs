@@ -1,5 +1,9 @@
+#region
+
 using NATS.Client.Core.Tests;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests;
 
@@ -13,8 +17,8 @@ public class JetStreamTest
     public async Task Create_stream_test()
     {
         await using var server = NatsServer.Start(
-            outputHelper: _output,
-            opts: new NatsServerOptsBuilder()
+            _output,
+            new NatsServerOptsBuilder()
                 .UseTransport(TransportType.Tcp)
                 .Trace()
                 .UseJetStream()
@@ -29,8 +33,8 @@ public class JetStreamTest
 
             // Create stream
             var stream = await js.CreateStreamAsync(
-                request: new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" }, },
-                cancellationToken: cts1.Token);
+                new StreamConfiguration { Name = "events", Subjects = new[] { "events.*" } },
+                cts1.Token);
             Assert.Equal("events", stream.Info.Config.Name);
 
             // Create consumer
@@ -44,8 +48,8 @@ public class JetStreamTest
                         DurableName = "consumer1",
 
                         // Turn on ACK so we can test them below
-                        AckPolicy = ConsumerConfigurationAckPolicy.@explicit,
-                    },
+                        AckPolicy = ConsumerConfigurationAckPolicy.@explicit
+                    }
                 },
                 cts1.Token);
             Assert.Equal("events", consumer.Info.StreamName);
@@ -85,7 +89,7 @@ public class JetStreamTest
             var messages = new List<NatsJSMsg<TestData?>>();
             var cc = await consumer.ConsumeAsync<TestData>(
                 new NatsJSConsumeOpts { MaxMsgs = 100 },
-                cancellationToken: cts2.Token);
+                cts2.Token);
             await foreach (var msg in cc.Msgs.ReadAllAsync(cts2.Token))
             {
                 messages.Add(msg);
@@ -93,7 +97,7 @@ public class JetStreamTest
                 // Only ACK one message so we can consume again
                 if (messages.Count == 1)
                 {
-                    await msg.AckAsync(new AckOpts(WaitUntilSent: true), cancellationToken: cts2.Token);
+                    await msg.AckAsync(new AckOpts(true), cts2.Token);
                 }
 
                 if (messages.Count == 2)
@@ -115,12 +119,8 @@ public class JetStreamTest
             var exception = await Assert.ThrowsAsync<NatsJSApiException>(async () =>
             {
                 await js.CreateStreamAsync(
-                    request: new StreamConfiguration
-                    {
-                        Name = "events2",
-                        Subjects = new[] { "events.*" },
-                    },
-                    cancellationToken: cts.Token);
+                    new StreamConfiguration { Name = "events2", Subjects = new[] { "events.*" } },
+                    cts.Token);
             });
             Assert.Equal(400, exception.Error.Code);
 

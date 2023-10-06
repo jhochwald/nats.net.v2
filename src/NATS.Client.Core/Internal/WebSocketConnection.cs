@@ -1,6 +1,10 @@
+#region
+
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
@@ -10,51 +14,9 @@ internal sealed class WebSocketConnection : ISocketConnection
     private readonly TaskCompletionSource<Exception> _waitForClosedSource = new();
     private int _disposed;
 
-    public WebSocketConnection()
-    {
-        _socket = new ClientWebSocket();
-    }
+    public WebSocketConnection() => _socket = new ClientWebSocket();
 
     public Task<Exception> WaitForClosed => _waitForClosedSource.Task;
-
-    // CancellationToken is not used, operation lifetime is completely same as socket.
-
-    // socket is closed:
-    //  receiving task returns 0 read
-    //  throws SocketException when call method
-    // socket is disposed:
-    //  throws DisposedException
-
-    // return ValueTask directly for performance, not care exception and signal-disconnected.
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
-    {
-        return _socket.ConnectAsync(uri, cancellationToken);
-    }
-
-    /// <summary>
-    /// Connect with Timeout. When failed, Dispose this connection.
-    /// </summary>
-    public async ValueTask ConnectAsync(Uri uri, TimeSpan timeout)
-    {
-        using var cts = new CancellationTokenSource(timeout);
-        try
-        {
-            await _socket.ConnectAsync(uri, cts.Token).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            await DisposeAsync().ConfigureAwait(false);
-            if (ex is OperationCanceledException)
-            {
-                throw new SocketException(10060); // 10060 = connection timeout.
-            }
-            else
-            {
-                throw;
-            }
-        }
-    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask<int> SendAsync(ReadOnlyMemory<byte> buffer)
@@ -97,8 +59,39 @@ internal sealed class WebSocketConnection : ISocketConnection
     }
 
     // when catch SocketClosedException, call this method.
-    public void SignalDisconnected(Exception exception)
+    public void SignalDisconnected(Exception exception) => _waitForClosedSource.TrySetResult(exception);
+
+    // CancellationToken is not used, operation lifetime is completely same as socket.
+
+    // socket is closed:
+    //  receiving task returns 0 read
+    //  throws SocketException when call method
+    // socket is disposed:
+    //  throws DisposedException
+
+    // return ValueTask directly for performance, not care exception and signal-disconnected.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task ConnectAsync(Uri uri, CancellationToken cancellationToken) => _socket.ConnectAsync(uri, cancellationToken);
+
+    /// <summary>
+    ///     Connect with Timeout. When failed, Dispose this connection.
+    /// </summary>
+    public async ValueTask ConnectAsync(Uri uri, TimeSpan timeout)
     {
-        _waitForClosedSource.TrySetResult(exception);
+        using var cts = new CancellationTokenSource(timeout);
+        try
+        {
+            await _socket.ConnectAsync(uri, cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await DisposeAsync().ConfigureAwait(false);
+            if (ex is OperationCanceledException)
+            {
+                throw new SocketException(10060); // 10060 = connection timeout.
+            }
+
+            throw;
+        }
     }
 }

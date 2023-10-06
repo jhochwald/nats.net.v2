@@ -1,6 +1,9 @@
-// > nats sub bar.*
+#region
+
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
+
+#endregion
 
 var subject = "bar.xyz";
 var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };
@@ -12,7 +15,7 @@ await using var connection = new NatsConnection(options);
 for (var i = 0; i < 10; i++)
 {
     Print($"[PUB] Publishing to subject ({i}) '{subject}'...\n");
-    await connection.PublishAsync<Bar>(subject, new Bar { Id = i, Name = "Baz" });
+    await connection.PublishAsync(subject, new Bar { Id = i, Name = "Baz" });
 }
 
 void Print(string message)

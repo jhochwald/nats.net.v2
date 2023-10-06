@@ -1,4 +1,8 @@
+#region
+
 using System.Security.Cryptography.X509Certificates;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 

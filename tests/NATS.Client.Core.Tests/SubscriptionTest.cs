@@ -22,8 +22,8 @@ public class SubscriptionTest
             var sub = await nats.SubscribeAsync<int>("foo");
 
             await Retry.Until(
-                reason: "unsubscribed",
-                condition: () => proxy.ClientFrames.Count(f => f.Message.StartsWith("SUB")) == 1,
+                "unsubscribed",
+                () => proxy.ClientFrames.Count(f => f.Message.StartsWith("SUB")) == 1,
                 retryDelay: TimeSpan.FromSeconds(.5),
                 timeout: TimeSpan.FromSeconds(20));
 
@@ -36,9 +36,9 @@ public class SubscriptionTest
         GC.Collect();
 
         await Retry.Until(
-            reason: "unsubscribe message received",
-            condition: () => proxy.ClientFrames.Count(f => f.Message.StartsWith("UNSUB")) >= 1,
-            action: () =>
+            "unsubscribe message received",
+            () => proxy.ClientFrames.Count(f => f.Message.StartsWith("UNSUB")) >= 1,
+            () =>
             {
                 GC.Collect();
                 return Task.CompletedTask;
@@ -72,15 +72,15 @@ public class SubscriptionTest
 
         // Publish should trigger UNSUB since NatsSub object should be collected by now.
         await Retry.Until(
-            reason: "unsubscribe message received",
-            condition: () => proxy.ClientFrames.Count(f => f.Message.StartsWith("UNSUB")) >= 1,
-            action: async () =>
+            "unsubscribe message received",
+            () => proxy.ClientFrames.Count(f => f.Message.StartsWith("UNSUB")) >= 1,
+            async () =>
             {
                 GC.Collect();
                 await nats.PublishAsync("foo", 1);
             },
-            timeout: TimeSpan.FromSeconds(20),
-            retryDelay: TimeSpan.FromSeconds(.5));
+            TimeSpan.FromSeconds(20),
+            TimeSpan.FromSeconds(.5));
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class SubscriptionTest
         }
 
         Assert.Equal(1, count1);
-        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)sub1).EndReason);
+        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) sub1).EndReason);
 
         var count2 = 0;
         await foreach (var natsMsg in sub2.Msgs.ReadAllAsync(cancellationToken))
@@ -119,7 +119,7 @@ public class SubscriptionTest
         }
 
         Assert.Equal(2, count2);
-        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)sub2).EndReason);
+        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) sub2).EndReason);
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class SubscriptionTest
         }
 
         Assert.Equal(maxMsgs, count);
-        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)sub).EndReason);
+        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) sub).EndReason);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class SubscriptionTest
             count++;
         }
 
-        Assert.Equal(NatsSubEndReason.Timeout, ((NatsSubBase)sub).EndReason);
+        Assert.Equal(NatsSubEndReason.Timeout, ((NatsSubBase) sub).EndReason);
         Assert.Equal(0, count);
     }
 
@@ -202,7 +202,7 @@ public class SubscriptionTest
             count++;
         }
 
-        Assert.Equal(NatsSubEndReason.IdleTimeout, ((NatsSubBase)sub).EndReason);
+        Assert.Equal(NatsSubEndReason.IdleTimeout, ((NatsSubBase) sub).EndReason);
         Assert.Equal(4, count);
     }
 
@@ -231,6 +231,6 @@ public class SubscriptionTest
         }
 
         Assert.Equal(0, count);
-        Assert.Equal(NatsSubEndReason.None, ((NatsSubBase)sub).EndReason);
+        Assert.Equal(NatsSubEndReason.None, ((NatsSubBase) sub).EndReason);
     }
 }

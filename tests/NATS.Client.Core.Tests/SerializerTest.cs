@@ -1,4 +1,8 @@
-﻿using System.Buffers;
+﻿#region
+
+using System.Buffers;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -25,7 +29,7 @@ public class SerializerTest
                 ErrorHandler = e =>
                 {
                     signal.Pulse(e);
-                },
+                }
             };
 
             await nats.PublishAsync(

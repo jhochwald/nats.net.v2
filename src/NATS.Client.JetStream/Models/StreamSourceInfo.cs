@@ -1,54 +1,60 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// Information about an upstream stream source in a mirror
+///     Information about an upstream stream source in a mirror
 /// </summary>
-
 public record StreamSourceInfo
 {
     /// <summary>
-    /// The name of the Stream being replicated
+    ///     The name of the Stream being replicated
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("name")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
     public string Name { get; set; } = default!;
 
     /// <summary>
-    /// The subject filter to apply to the messages
+    ///     The subject filter to apply to the messages
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("filter_subject")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("filter_subject")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string FilterSubject { get; set; } = default!;
 
     /// <summary>
-    /// The subject transform destination to apply to the messages
+    ///     The subject transform destination to apply to the messages
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("subject_transform_dest")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("subject_transform_dest")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string SubjectTransformDest { get; set; } = default!;
 
     /// <summary>
-    /// How many messages behind the mirror operation is
+    ///     How many messages behind the mirror operation is
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("lag")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0D, 18446744073709552000D)]
+    [JsonPropertyName("lag")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0D, 18446744073709552000D)]
     public long Lag { get; set; } = default!;
 
     /// <summary>
-    /// When last the mirror had activity, in nanoseconds. Value will be -1 when there has been no activity.
+    ///     When last the mirror had activity, in nanoseconds. Value will be -1 when there has been no activity.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("active")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(-9223372036854776000D, 9223372036854776000D)]
+    [JsonPropertyName("active")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(-9223372036854776000D, 9223372036854776000D)]
     public long Active { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("external")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("external")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public ExternalStreamSource External { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("error")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("error")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public ApiError Error { get; set; } = default!;
 }

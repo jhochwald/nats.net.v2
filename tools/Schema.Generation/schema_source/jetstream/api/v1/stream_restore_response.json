@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.STREAM.RESTORE API",
   "title": "io.nats.jetstream.api.v1.stream_restore_response",
   "type": "object",
-  "required": ["deliver_subject"],
+  "required": [
+    "deliver_subject"
+  ],
   "properties": {
     "deliver_subject": {
       "type": "string",

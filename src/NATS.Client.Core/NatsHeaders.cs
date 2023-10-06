@@ -1,11 +1,15 @@
+#region
+
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Primitives;
 
+#endregion
+
 namespace NATS.Client.Core;
 
 /// <summary>
-/// Represents a wrapper for RequestHeaders and ResponseHeaders.
+///     Represents a wrapper for RequestHeaders and ResponseHeaders.
 /// </summary>
 [SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "Keep class format as is for reference")]
 [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1504:All accessors should be single-line or multi-line", Justification = "Keep class format as is for reference")]
@@ -23,36 +27,15 @@ public class NatsHeaders : IDictionary<string, StringValues>
         ConsumerIsPushBased,
         NoMessages,
         RequestTimeout,
-        MessageSizeExceedsMaxBytes,
+        MessageSizeExceedsMaxBytes
     }
 
-    // Uses C# compiler's optimization for static byte[] data
-    // string.Join(",", Encoding.ASCII.GetBytes("Idle Heartbeat"))
-    internal static ReadOnlySpan<byte> MessageIdleHeartbeat => new byte[] { 73, 100, 108, 101, 32, 72, 101, 97, 114, 116, 98, 101, 97, 116 };
     internal static readonly string MessageIdleHeartbeatStr = "Idle Heartbeat";
-
-    // Bad Request
-    internal static ReadOnlySpan<byte> MessageBadRequest => new byte[] { 66, 97, 100, 32, 82, 101, 113, 117, 101, 115, 116 };
     internal static readonly string MessageBadRequestStr = "Bad Request";
-
-    // Consumer Deleted
-    internal static ReadOnlySpan<byte> MessageConsumerDeleted => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 68, 101, 108, 101, 116, 101, 100 };
     internal static readonly string MessageConsumerDeletedStr = "Consumer Deleted";
-
-    // Consumer is push based
-    internal static ReadOnlySpan<byte> MessageConsumerIsPushBased => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 105, 115, 32, 112, 117, 115, 104, 32, 98, 97, 115, 101, 100 };
     internal static readonly string MessageConsumerIsPushBasedStr = "Consumer is push based";
-
-    // No Messages
-    internal static ReadOnlySpan<byte> MessageNoMessages => new byte[] { 78, 111, 32, 77, 101, 115, 115, 97, 103, 101, 115 };
     internal static readonly string MessageNoMessagesStr = "No Messages";
-
-    // Request Timeout
-    internal static ReadOnlySpan<byte> MessageRequestTimeout => new byte[] { 82, 101, 113, 117, 101, 115, 116, 32, 84, 105, 109, 101, 111, 117, 116 };
     internal static readonly string MessageRequestTimeoutStr = "Request Timeout";
-
-    // Message Size Exceeds MaxBytes
-    internal static ReadOnlySpan<byte> MessageMessageSizeExceedsMaxBytes => new byte[] { 77, 101, 115, 115, 97, 103, 101, 32, 83, 105, 122, 101, 32, 69, 120, 99, 101, 101, 100, 115, 32, 77, 97, 120, 66, 121, 116, 101, 115 };
     internal static readonly string MessageMessageSizeExceedsMaxBytesStr = "Message Size Exceeds MaxBytes";
 
     private static readonly string[] EmptyKeys = Array.Empty<string>();
@@ -62,7 +45,48 @@ public class NatsHeaders : IDictionary<string, StringValues>
     private static readonly IEnumerator<KeyValuePair<string, StringValues>> EmptyIEnumeratorType = default(Enumerator);
     private static readonly IEnumerator EmptyIEnumerator = default(Enumerator);
 
-    private int _readonly = 0;
+    private int _readonly;
+
+    /// <summary>
+    ///     Initializes a new instance of <see cref="NatsHeaders" />.
+    /// </summary>
+    public NatsHeaders()
+    {
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of <see cref="NatsHeaders" />.
+    /// </summary>
+    /// <param name="store">The value to use as the backing store.</param>
+    public NatsHeaders(Dictionary<string, StringValues>? store) => Store = store;
+
+    /// <summary>
+    ///     Initializes a new instance of <see cref="NatsHeaders" />.
+    /// </summary>
+    /// <param name="capacity">The initial number of headers that this instance can contain.</param>
+    public NatsHeaders(int capacity) => EnsureStore(capacity);
+
+    // Uses C# compiler's optimization for static byte[] data
+    // string.Join(",", Encoding.ASCII.GetBytes("Idle Heartbeat"))
+    internal static ReadOnlySpan<byte> MessageIdleHeartbeat => new byte[] { 73, 100, 108, 101, 32, 72, 101, 97, 114, 116, 98, 101, 97, 116 };
+
+    // Bad Request
+    internal static ReadOnlySpan<byte> MessageBadRequest => new byte[] { 66, 97, 100, 32, 82, 101, 113, 117, 101, 115, 116 };
+
+    // Consumer Deleted
+    internal static ReadOnlySpan<byte> MessageConsumerDeleted => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 68, 101, 108, 101, 116, 101, 100 };
+
+    // Consumer is push based
+    internal static ReadOnlySpan<byte> MessageConsumerIsPushBased => new byte[] { 67, 111, 110, 115, 117, 109, 101, 114, 32, 105, 115, 32, 112, 117, 115, 104, 32, 98, 97, 115, 101, 100 };
+
+    // No Messages
+    internal static ReadOnlySpan<byte> MessageNoMessages => new byte[] { 78, 111, 32, 77, 101, 115, 115, 97, 103, 101, 115 };
+
+    // Request Timeout
+    internal static ReadOnlySpan<byte> MessageRequestTimeout => new byte[] { 82, 101, 113, 117, 101, 115, 116, 32, 84, 105, 109, 101, 111, 117, 116 };
+
+    // Message Size Exceeds MaxBytes
+    internal static ReadOnlySpan<byte> MessageMessageSizeExceedsMaxBytes => new byte[] { 77, 101, 115, 115, 97, 103, 101, 32, 83, 105, 122, 101, 32, 69, 120, 99, 101, 101, 100, 115, 32, 77, 97, 120, 66, 121, 116, 101, 115 };
 
     public int Version => 1;
 
@@ -72,44 +96,10 @@ public class NatsHeaders : IDictionary<string, StringValues>
 
     public Messages Message { get; internal set; } = Messages.Text;
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="NatsHeaders"/>.
-    /// </summary>
-    public NatsHeaders()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="NatsHeaders"/>.
-    /// </summary>
-    /// <param name="store">The value to use as the backing store.</param>
-    public NatsHeaders(Dictionary<string, StringValues>? store)
-    {
-        Store = store;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="NatsHeaders"/>.
-    /// </summary>
-    /// <param name="capacity">The initial number of headers that this instance can contain.</param>
-    public NatsHeaders(int capacity)
-    {
-        EnsureStore(capacity);
-    }
-
     private Dictionary<string, StringValues>? Store { get; set; }
 
-    [MemberNotNull(nameof(Store))]
-    private void EnsureStore(int capacity)
-    {
-        if (Store == null)
-        {
-            Store = new Dictionary<string, StringValues>(capacity, StringComparer.OrdinalIgnoreCase);
-        }
-    }
-
     /// <summary>
-    /// Get or sets the associated value from the collection as a single string.
+    ///     Get or sets the associated value from the collection as a single string.
     /// </summary>
     /// <param name="key">The header name.</param>
     /// <returns>the associated value from the collection as a StringValues or StringValues.Empty if the key is not present.</returns>
@@ -126,6 +116,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
             {
                 return value;
             }
+
             return StringValues.Empty;
         }
         set
@@ -134,6 +125,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             ThrowIfReadOnly();
 
             if (value.Count == 0)
@@ -150,7 +142,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
 
     StringValues IDictionary<string, StringValues>.this[string key]
     {
-        get { return this[key]; }
+        get => this[key];
         set
         {
             ThrowIfReadOnly();
@@ -159,19 +151,19 @@ public class NatsHeaders : IDictionary<string, StringValues>
     }
 
     /// <summary>
-    /// Gets the number of elements contained in the <see cref="NatsHeaders" />;.
+    ///     Gets the number of elements contained in the <see cref="NatsHeaders" />;.
     /// </summary>
     /// <returns>The number of elements contained in the <see cref="NatsHeaders" />.</returns>
     public int Count => Store?.Count ?? 0;
 
     /// <summary>
-    /// Gets a value that indicates whether the <see cref="NatsHeaders" /> is in read-only mode.
+    ///     Gets a value that indicates whether the <see cref="NatsHeaders" /> is in read-only mode.
     /// </summary>
     /// <returns>true if the <see cref="NatsHeaders" /> is in read-only mode; otherwise, false.</returns>
     public bool IsReadOnly => Volatile.Read(ref _readonly) == 1;
 
     /// <summary>
-    /// Gets the collection of HTTP header names in this instance.
+    ///     Gets the collection of HTTP header names in this instance.
     /// </summary>
     public ICollection<string> Keys
     {
@@ -181,12 +173,13 @@ public class NatsHeaders : IDictionary<string, StringValues>
             {
                 return EmptyKeys;
             }
+
             return Store.Keys;
         }
     }
 
     /// <summary>
-    /// Gets the collection of HTTP header values in this instance.
+    ///     Gets the collection of HTTP header values in this instance.
     /// </summary>
     public ICollection<StringValues> Values
     {
@@ -196,12 +189,13 @@ public class NatsHeaders : IDictionary<string, StringValues>
             {
                 return EmptyValues;
             }
+
             return Store.Values;
         }
     }
 
     /// <summary>
-    /// Adds a new header item to the collection.
+    ///     Adds a new header item to the collection.
     /// </summary>
     /// <param name="item">The item to add.</param>
     public void Add(KeyValuePair<string, StringValues> item)
@@ -210,13 +204,14 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             throw new ArgumentException("The key is null");
         }
+
         ThrowIfReadOnly();
         EnsureStore(1);
         Store.Add(item.Key, item.Value);
     }
 
     /// <summary>
-    /// Adds the given header and values to the collection.
+    ///     Adds the given header and values to the collection.
     /// </summary>
     /// <param name="key">The header name.</param>
     /// <param name="value">The header values.</param>
@@ -226,13 +221,14 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             throw new ArgumentNullException(nameof(key));
         }
+
         ThrowIfReadOnly();
         EnsureStore(1);
         Store.Add(key, value);
     }
 
     /// <summary>
-    /// Clears the entire list of objects.
+    ///     Clears the entire list of objects.
     /// </summary>
     public void Clear()
     {
@@ -241,7 +237,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
     }
 
     /// <summary>
-    /// Returns a value indicating whether the specified object occurs within this collection.
+    ///     Returns a value indicating whether the specified object occurs within this collection.
     /// </summary>
     /// <param name="item">The item.</param>
     /// <returns>true if the specified object occurs within this collection; otherwise, false.</returns>
@@ -253,11 +249,12 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             return false;
         }
+
         return true;
     }
 
     /// <summary>
-    /// Determines whether the <see cref="NatsHeaders" /> contains a specific key.
+    ///     Determines whether the <see cref="NatsHeaders" /> contains a specific key.
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns>true if the <see cref="NatsHeaders" /> contains a specific key; otherwise, false.</returns>
@@ -267,11 +264,12 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             return false;
         }
+
         return Store.ContainsKey(key);
     }
 
     /// <summary>
-    /// Copies the <see cref="NatsHeaders" /> elements to a one-dimensional Array instance at the specified index.
+    ///     Copies the <see cref="NatsHeaders" /> elements to a one-dimensional Array instance at the specified index.
     /// </summary>
     /// <param name="array">The one-dimensional Array that is the destination of the specified objects copied from the <see cref="NatsHeaders" />.</param>
     /// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
@@ -290,7 +288,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
     }
 
     /// <summary>
-    /// Removes the given item from the the collection.
+    ///     Removes the given item from the the collection.
     /// </summary>
     /// <param name="item">The item.</param>
     /// <returns>true if the specified object was removed from the collection; otherwise, false.</returns>
@@ -306,11 +304,12 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             return Store.Remove(item.Key);
         }
+
         return false;
     }
 
     /// <summary>
-    /// Removes the given header from the collection.
+    ///     Removes the given header from the collection.
     /// </summary>
     /// <param name="key">The header name.</param>
     /// <returns>true if the specified object was removed from the collection; otherwise, false.</returns>
@@ -321,11 +320,12 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
             return false;
         }
+
         return Store.Remove(key);
     }
 
     /// <summary>
-    /// Retrieves a value from the dictionary.
+    ///     Retrieves a value from the dictionary.
     /// </summary>
     /// <param name="key">The header name.</param>
     /// <param name="value">The value.</param>
@@ -334,28 +334,15 @@ public class NatsHeaders : IDictionary<string, StringValues>
     {
         if (Store == null)
         {
-            value = default(StringValues);
+            value = default;
             return false;
         }
+
         return Store.TryGetValue(key, out value);
     }
 
     /// <summary>
-    /// Returns an enumerator that iterates through a collection.
-    /// </summary>
-    /// <returns>An <see cref="Enumerator" /> object that can be used to iterate through the collection.</returns>
-    public Enumerator GetEnumerator()
-    {
-        if (Store == null || Store.Count == 0)
-        {
-            // Non-boxed Enumerator
-            return default;
-        }
-        return new Enumerator(Store.GetEnumerator());
-    }
-
-    /// <summary>
-    /// Returns an enumerator that iterates through a collection.
+    ///     Returns an enumerator that iterates through a collection.
     /// </summary>
     /// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
     IEnumerator<KeyValuePair<string, StringValues>> IEnumerable<KeyValuePair<string, StringValues>>.GetEnumerator()
@@ -365,11 +352,12 @@ public class NatsHeaders : IDictionary<string, StringValues>
             // Non-boxed Enumerator
             return EmptyIEnumeratorType;
         }
+
         return Store.GetEnumerator();
     }
 
     /// <summary>
-    /// Returns an enumerator that iterates through a collection.
+    ///     Returns an enumerator that iterates through a collection.
     /// </summary>
     /// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
     IEnumerator IEnumerable.GetEnumerator()
@@ -379,7 +367,32 @@ public class NatsHeaders : IDictionary<string, StringValues>
             // Non-boxed Enumerator
             return EmptyIEnumerator;
         }
+
         return Store.GetEnumerator();
+    }
+
+    [MemberNotNull(nameof(Store))]
+    private void EnsureStore(int capacity)
+    {
+        if (Store == null)
+        {
+            Store = new Dictionary<string, StringValues>(capacity, StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    /// <summary>
+    ///     Returns an enumerator that iterates through a collection.
+    /// </summary>
+    /// <returns>An <see cref="Enumerator" /> object that can be used to iterate through the collection.</returns>
+    public Enumerator GetEnumerator()
+    {
+        if (Store == null || Store.Count == 0)
+        {
+            // Non-boxed Enumerator
+            return default;
+        }
+
+        return new Enumerator(Store.GetEnumerator());
     }
 
     internal void SetReadOnly() => Interlocked.Exchange(ref _readonly, 1);
@@ -393,7 +406,7 @@ public class NatsHeaders : IDictionary<string, StringValues>
     }
 
     /// <summary>
-    /// Enumerates a <see cref="NatsHeaders"/>.
+    ///     Enumerates a <see cref="NatsHeaders" />.
     /// </summary>
     public struct Enumerator : IEnumerator<KeyValuePair<string, StringValues>>
     {
@@ -408,21 +421,24 @@ public class NatsHeaders : IDictionary<string, StringValues>
         }
 
         /// <summary>
-        /// Advances the enumerator to the next element of the <see cref="NatsHeaders"/>.
+        ///     Advances the enumerator to the next element of the <see cref="NatsHeaders" />.
         /// </summary>
-        /// <returns><see langword="true"/> if the enumerator was successfully advanced to the next element;
-        /// <see langword="false"/> if the enumerator has passed the end of the collection.</returns>
+        /// <returns>
+        ///     <see langword="true" /> if the enumerator was successfully advanced to the next element;
+        ///     <see langword="false" /> if the enumerator has passed the end of the collection.
+        /// </returns>
         public bool MoveNext()
         {
             if (_notEmpty)
             {
                 return _dictionaryEnumerator.MoveNext();
             }
+
             return false;
         }
 
         /// <summary>
-        /// Gets the element at the current position of the enumerator.
+        ///     Gets the element at the current position of the enumerator.
         /// </summary>
         public KeyValuePair<string, StringValues> Current
         {
@@ -432,7 +448,8 @@ public class NatsHeaders : IDictionary<string, StringValues>
                 {
                     return _dictionaryEnumerator.Current;
                 }
-                return default(KeyValuePair<string, StringValues>);
+
+                return default;
             }
         }
 
@@ -441,19 +458,13 @@ public class NatsHeaders : IDictionary<string, StringValues>
         {
         }
 
-        object IEnumerator.Current
-        {
-            get
-            {
-                return Current;
-            }
-        }
+        object IEnumerator.Current => Current;
 
         void IEnumerator.Reset()
         {
             if (_notEmpty)
             {
-                ((IEnumerator)_dictionaryEnumerator).Reset();
+                ((IEnumerator) _dictionaryEnumerator).Reset();
             }
         }
     }

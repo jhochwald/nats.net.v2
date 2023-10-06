@@ -1,12 +1,16 @@
+#region
+
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
 
+#endregion
+
 var builder = ConsoleApp.CreateBuilder(args);
 builder.ConfigureServices(services =>
 {
-    services.AddNats(poolSize: 4, configureOpts: opt => opt with { Url = "localhost:4222", Name = "MyClient" });
+    services.AddNats(4, opt => opt with { Url = "localhost:4222", Name = "MyClient" });
 });
 
 // create connection(default, connect to nats://localhost:4222)
@@ -53,17 +57,7 @@ _ = Task.Run(async () =>
 await conn.PublishAsync("foo", new Person(30, "bar"));
 
 // Options can configure `with` expression
-var options = NatsOpts.Default with
-{
-    Url = "nats://127.0.0.1:9999",
-    LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Information),
-    Echo = true,
-    AuthOpts = NatsAuthOpts.Default with
-    {
-        Username = "foo",
-        Password = "bar",
-    },
-};
+var options = NatsOpts.Default with { Url = "nats://127.0.0.1:9999", LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Information), Echo = true, AuthOpts = NatsAuthOpts.Default with { Username = "foo", Password = "bar" } };
 
 var app = builder.Build();
 
@@ -76,10 +70,7 @@ public class Runner : ConsoleAppBase
 {
     private readonly INatsConnection _connection;
 
-    public Runner(INatsConnection connection)
-    {
-        _connection = connection;
-    }
+    public Runner(INatsConnection connection) => _connection = connection;
 
     [RootCommand]
     public async Task Run()

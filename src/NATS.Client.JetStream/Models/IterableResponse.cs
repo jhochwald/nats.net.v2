@@ -1,19 +1,26 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 public record IterableResponse
 {
-    [System.Text.Json.Serialization.JsonPropertyName("total")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("total")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Total { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("offset")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("offset")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Offset { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("limit")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
+    [JsonPropertyName("limit")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Range(0, int.MaxValue)]
     public int Limit { get; set; } = default!;
 }

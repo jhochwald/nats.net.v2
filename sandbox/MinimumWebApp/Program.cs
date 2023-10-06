@@ -1,5 +1,9 @@
+#region
+
 using NATS.Client.Core;
 using NATS.Client.Hosting;
+
+#endregion
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -9,7 +9,9 @@
       "$ref": "definitions.json#/definitions/iterable_response"
     }
   ],
-  "required": ["consumers"],
+  "required": [
+    "consumers"
+  ],
   "properties": {
     "consumers": {
       "type": "array",

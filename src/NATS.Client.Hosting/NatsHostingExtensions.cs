@@ -1,15 +1,19 @@
+#region
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
+
+#endregion
 
 namespace NATS.Client.Hosting;
 
 public static class NatsHostingExtensions
 {
     /// <summary>
-    /// Add NatsConnection/Pool to ServiceCollection. When poolSize = 1, registered `NatsConnection` and `INatsCommand` as singleton.
-    /// Others, registered `NatsConnectionPool` as singleton, `NatsConnection` and `INatsCommand` as transient(get from pool).
+    ///     Add NatsConnection/Pool to ServiceCollection. When poolSize = 1, registered `NatsConnection` and `INatsCommand` as singleton.
+    ///     Others, registered `NatsConnectionPool` as singleton, `NatsConnection` and `INatsCommand` as transient(get from pool).
     /// </summary>
     public static IServiceCollection AddNats(this IServiceCollection services, int poolSize = 1, Func<NatsOpts, NatsOpts>? configureOpts = null, Action<NatsConnection>? configureConnection = null)
     {

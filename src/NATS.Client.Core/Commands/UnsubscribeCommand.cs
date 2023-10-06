@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
@@ -23,13 +27,7 @@ internal sealed class UnsubscribeCommand : CommandBase<UnsubscribeCommand>
         return result;
     }
 
-    public override void Write(ProtocolWriter writer)
-    {
-        writer.WriteUnsubscribe(_sid, null);
-    }
+    public override void Write(ProtocolWriter writer) => writer.WriteUnsubscribe(_sid, null);
 
-    protected override void Reset()
-    {
-        _sid = 0;
-    }
+    protected override void Reset() => _sid = 0;
 }

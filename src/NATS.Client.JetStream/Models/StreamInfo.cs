@@ -1,57 +1,64 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 public record StreamInfo
 {
     /// <summary>
-    /// The active configuration for the Stream
+    ///     The active configuration for the Stream
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("config")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public StreamConfiguration Config { get; set; } = new StreamConfiguration();
+    [JsonPropertyName("config")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public StreamConfiguration Config { get; set; } = new();
 
     /// <summary>
-    /// Detail about the current State of the Stream
+    ///     Detail about the current State of the Stream
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("state")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public StreamState State { get; set; } = new StreamState();
+    [JsonPropertyName("state")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public StreamState State { get; set; } = new();
 
     /// <summary>
-    /// Timestamp when the stream was created
+    ///     Timestamp when the stream was created
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("created")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-    public System.DateTimeOffset Created { get; set; } = default!;
+    [JsonPropertyName("created")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
+    public DateTimeOffset Created { get; set; } = default!;
 
     /// <summary>
-    /// The server time the stream info was created
+    ///     The server time the stream info was created
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("ts")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.DateTimeOffset Ts { get; set; } = default!;
+    [JsonPropertyName("ts")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public DateTimeOffset Ts { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("cluster")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("cluster")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public ClusterInfo Cluster { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("mirror")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("mirror")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public StreamSourceInfo Mirror { get; set; } = default!;
 
     /// <summary>
-    /// Streams being sourced into this Stream
+    ///     Streams being sourced into this Stream
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("sources")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.ICollection<StreamSourceInfo> Sources { get; set; } = default!;
+    [JsonPropertyName("sources")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ICollection<StreamSourceInfo> Sources { get; set; } = default!;
 
     /// <summary>
-    /// List of mirrors sorted by priority
+    ///     List of mirrors sorted by priority
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("alternates")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.ICollection<StreamAlternate> Alternates { get; set; } = default!;
+    [JsonPropertyName("alternates")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ICollection<StreamAlternate> Alternates { get; set; } = default!;
 }

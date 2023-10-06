@@ -1,5 +1,9 @@
+#region
+
 using System.Reflection;
 using System.Text.Json.Serialization;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
@@ -39,12 +43,11 @@ internal sealed class ClientOpts
     [JsonPropertyName("tls_required")]
     public bool TLSRequired { get; init; }
 
-    [JsonPropertyName("nkey")]
-    public string? NKey { get; set; }
+    [JsonPropertyName("nkey")] public string? NKey { get; set; }
 
     /// <summary>The JWT that identifies a user permissions and account.</summary>
     [JsonPropertyName("jwt")]
-    public string? JWT { get; set; } = null;
+    public string? JWT { get; set; }
 
     /// <summary>In case the server has responded with a nonce on INFO, then a NATS client must use this field to reply with the signed nonce.</summary>
     [JsonPropertyName("sig")]
@@ -56,15 +59,15 @@ internal sealed class ClientOpts
 
     /// <summary>Connection username (if auth_required is set)</summary>
     [JsonPropertyName("user")]
-    public string? Username { get; init; } = null;
+    public string? Username { get; init; }
 
     /// <summary>Connection password (if auth_required is set)</summary>
     [JsonPropertyName("pass")]
-    public string? Password { get; init; } = null;
+    public string? Password { get; init; }
 
     /// <summary>Optional client name</summary>
     [JsonPropertyName("name")]
-    public string? Name { get; init; } = null;
+    public string? Name { get; init; }
 
     /// <summary>The implementation language of the client.</summary>
     [JsonPropertyName("lang")]
@@ -78,22 +81,15 @@ internal sealed class ClientOpts
     [JsonPropertyName("protocol")]
     public int Protocol { get; init; } = 1;
 
-    [JsonPropertyName("account")]
-    public string? Account { get; init; } = null;
+    [JsonPropertyName("account")] public string? Account { get; init; } = null;
 
-    [JsonPropertyName("new_account")]
-    public bool? AccountNew { get; init; }
+    [JsonPropertyName("new_account")] public bool? AccountNew { get; init; }
 
-    [JsonPropertyName("headers")]
-    public bool Headers { get; init; } = false;
+    [JsonPropertyName("headers")] public bool Headers { get; init; }
 
-    [JsonPropertyName("no_responders")]
-    public bool NoResponders { get; init; } = false;
+    [JsonPropertyName("no_responders")] public bool NoResponders { get; init; } = false;
 
-    public static ClientOpts Create(NatsOpts opts)
-    {
-        return new ClientOpts(opts);
-    }
+    public static ClientOpts Create(NatsOpts opts) => new(opts);
 
     private static string GetAssemblyVersion()
     {

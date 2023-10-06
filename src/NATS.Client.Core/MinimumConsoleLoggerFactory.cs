@@ -1,4 +1,8 @@
+#region
+
 using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace NATS.Client.Core;
 
@@ -6,19 +10,13 @@ public class MinimumConsoleLoggerFactory : ILoggerFactory
 {
     private readonly LogLevel _logLevel;
 
-    public MinimumConsoleLoggerFactory(LogLevel logLevel)
-    {
-        _logLevel = logLevel;
-    }
+    public MinimumConsoleLoggerFactory(LogLevel logLevel) => _logLevel = logLevel;
 
     public void AddProvider(ILoggerProvider provider)
     {
     }
 
-    public ILogger CreateLogger(string categoryName)
-    {
-        return new Logger(_logLevel);
-    }
+    public ILogger CreateLogger(string categoryName) => new Logger(_logLevel);
 
     public void Dispose()
     {
@@ -28,20 +26,11 @@ public class MinimumConsoleLoggerFactory : ILoggerFactory
     {
         private readonly LogLevel _logLevel;
 
-        public Logger(LogLevel logLevel)
-        {
-            _logLevel = logLevel;
-        }
+        public Logger(LogLevel logLevel) => _logLevel = logLevel;
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return NullDisposable.Instance;
-        }
+        public IDisposable BeginScope<TState>(TState state) => NullDisposable.Instance;
 
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return _logLevel <= logLevel;
-        }
+        public bool IsEnabled(LogLevel logLevel) => _logLevel <= logLevel;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {

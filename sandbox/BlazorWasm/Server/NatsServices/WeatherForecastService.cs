@@ -1,14 +1,15 @@
+#region
+
 using BlazorWasm.Shared;
 using NATS.Client.Core;
+
+#endregion
 
 namespace BlazorWasm.Server.NatsServices;
 
 public class WeatherForecastService : IHostedService, IAsyncDisposable
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching",
-    };
+    private static readonly string[] Summaries = { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
 
     private readonly ILogger<WeatherForecastService> _logger;
     private readonly INatsConnection _natsConnection;
@@ -21,6 +22,14 @@ public class WeatherForecastService : IHostedService, IAsyncDisposable
         _natsConnection = natsConnection;
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        if (_replySubscription != null)
+            await _replySubscription.DisposeAsync();
+        if (_replyTask != null)
+            await _replyTask;
+    }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _replySubscription = await _natsConnection.SubscribeAsync<object>("weather", cancellationToken: cancellationToken);
@@ -29,12 +38,7 @@ public class WeatherForecastService : IHostedService, IAsyncDisposable
             {
                 await foreach (var msg in _replySubscription.Msgs.ReadAllAsync(cancellationToken))
                 {
-                    var forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-                    {
-                        Date = DateTime.Now.AddDays(index),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = Summaries[Random.Shared.Next(Summaries.Length)],
-                    }).ToArray();
+                    var forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast { Date = DateTime.Now.AddDays(index), TemperatureC = Random.Shared.Next(-20, 55), Summary = Summaries[Random.Shared.Next(Summaries.Length)] }).ToArray();
                     await msg.ReplyAsync(forecasts, cancellationToken: cancellationToken);
                 }
             },
@@ -47,14 +51,6 @@ public class WeatherForecastService : IHostedService, IAsyncDisposable
         _logger.LogInformation("Weather Forecast Services is stopping");
         if (_replySubscription != null)
             await _replySubscription.UnsubscribeAsync();
-        if (_replyTask != null)
-            await _replyTask;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_replySubscription != null)
-            await _replySubscription.DisposeAsync();
         if (_replyTask != null)
             await _replyTask;
     }

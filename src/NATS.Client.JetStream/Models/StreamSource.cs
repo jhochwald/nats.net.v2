@@ -1,51 +1,57 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// Defines a source where streams should be replicated from
+///     Defines a source where streams should be replicated from
 /// </summary>
-
 public record StreamSource
 {
     /// <summary>
-    /// Stream name
+    ///     Stream name
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("name")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-    [System.ComponentModel.DataAnnotations.StringLength(int.MaxValue, MinimumLength = 1)]
-    [System.ComponentModel.DataAnnotations.RegularExpression(@"^[^.*>]+$")]
+    [JsonPropertyName("name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required(AllowEmptyStrings = true)]
+    [StringLength(int.MaxValue, MinimumLength = 1)]
+    [RegularExpression(@"^[^.*>]+$")]
     public string Name { get; set; } = default!;
 
     /// <summary>
-    /// Sequence to start replicating from
+    ///     Sequence to start replicating from
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("opt_start_seq")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    [System.ComponentModel.DataAnnotations.Range(0D, 18446744073709552000D)]
+    [JsonPropertyName("opt_start_seq")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    [Range(0D, 18446744073709552000D)]
     public long OptStartSeq { get; set; } = default!;
 
     /// <summary>
-    /// Time stamp to start replicating from
+    ///     Time stamp to start replicating from
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("opt_start_time")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.DateTimeOffset OptStartTime { get; set; } = default!;
+    [JsonPropertyName("opt_start_time")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public DateTimeOffset OptStartTime { get; set; } = default!;
 
     /// <summary>
-    /// Replicate only a subset of messages based on filter
+    ///     Replicate only a subset of messages based on filter
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("filter_subject")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("filter_subject")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string FilterSubject { get; set; } = default!;
 
     /// <summary>
-    /// Subject transforms to apply to matching messages
+    ///     Subject transforms to apply to matching messages
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("subject_transforms")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.ICollection<SubjectTransform> SubjectTransforms { get; set; } = default!;
+    [JsonPropertyName("subject_transforms")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ICollection<SubjectTransform> SubjectTransforms { get; set; } = default!;
 
-    [System.Text.Json.Serialization.JsonPropertyName("external")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    [JsonPropertyName("external")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public ExternalStreamSource External { get; set; } = default!;
 }

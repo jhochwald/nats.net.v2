@@ -1,9 +1,16 @@
+#region
+
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 public record ErrorResponse
 {
-    [System.Text.Json.Serialization.JsonPropertyName("error")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public ApiError Error { get; set; } = new ApiError();
+    [JsonPropertyName("error")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public ApiError Error { get; set; } = new();
 }

@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.STREAM.MSG.GET API",
   "title": "io.nats.jetstream.api.v1.stream_msg_get_response",
   "type": "object",
-  "required": ["message"],
+  "required": [
+    "message"
+  ],
   "properties": {
     "message": {
       "$ref": "definitions.json#/definitions/stored_message"

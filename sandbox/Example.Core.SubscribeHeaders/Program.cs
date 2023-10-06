@@ -1,8 +1,10 @@
-// > nats pub bar.xyz --count=10 "my_message_{{ Count }}" -H X-Foo:Baz
+#region
 
 using System.Text;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
+
+#endregion
 
 var subject = "bar.*";
 var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };

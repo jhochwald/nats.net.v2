@@ -1,9 +1,13 @@
+#region
+
 using System.Threading.Channels;
+
+#endregion
 
 namespace NATS.Client.JetStream;
 
 /// <summary>
-/// Interface to manage a <c>consume()</c> operation on a consumer.
+///     Interface to manage a <c>consume()</c> operation on a consumer.
 /// </summary>
 public interface INatsJSConsume : IAsyncDisposable
 {
@@ -11,7 +15,7 @@ public interface INatsJSConsume : IAsyncDisposable
 }
 
 /// <summary>
-/// Interface to extract messages from a <c>consume()</c> operation on a consumer.
+///     Interface to extract messages from a <c>consume()</c> operation on a consumer.
 /// </summary>
 public interface INatsJSConsume<T> : INatsJSConsume
 {

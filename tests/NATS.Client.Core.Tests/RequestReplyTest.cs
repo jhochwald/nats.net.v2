@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -45,10 +49,7 @@ public class RequestReplyTest
 
         // Request timeout as default timeout
         {
-            await using var nats = server.CreateClientConnection(NatsOpts.Default with
-            {
-                RequestTimeout = TimeSpan.FromSeconds(1),
-            });
+            await using var nats = server.CreateClientConnection(NatsOpts.Default with { RequestTimeout = TimeSpan.FromSeconds(1) });
 
             var reply = await nats.RequestAsync<int, int>("foo", 0);
             Assert.Null(reply);
@@ -125,7 +126,7 @@ public class RequestReplyTest
         }
 
         Assert.Equal(2, count);
-        Assert.Equal(NatsSubEndReason.Timeout, ((NatsSubBase)rep).EndReason);
+        Assert.Equal(NatsSubEndReason.Timeout, ((NatsSubBase) rep).EndReason);
 
         await sub.DisposeAsync();
         await reg;
@@ -159,7 +160,7 @@ public class RequestReplyTest
         }
 
         Assert.Equal(2, count);
-        Assert.Equal(NatsSubEndReason.IdleTimeout, ((NatsSubBase)rep).EndReason);
+        Assert.Equal(NatsSubEndReason.IdleTimeout, ((NatsSubBase) rep).EndReason);
 
         await sub.DisposeAsync();
         await reg;
@@ -189,7 +190,7 @@ public class RequestReplyTest
         }
 
         Assert.Equal(0, count);
-        Assert.Equal(NatsSubEndReason.StartUpTimeout, ((NatsSubBase)rep).EndReason);
+        Assert.Equal(NatsSubEndReason.StartUpTimeout, ((NatsSubBase) rep).EndReason);
 
         await sub.DisposeAsync();
         await reg;
@@ -222,7 +223,7 @@ public class RequestReplyTest
         }
 
         Assert.Equal(2, count);
-        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase)rep).EndReason);
+        Assert.Equal(NatsSubEndReason.MaxMsgs, ((NatsSubBase) rep).EndReason);
 
         await sub.DisposeAsync();
         await reg;

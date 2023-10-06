@@ -1,13 +1,15 @@
-using System;
+#region
+
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
 public class OutputHelperLoggerFactory : ILoggerFactory
 {
-    private readonly ITestOutputHelper _testOutputHelper;
     private readonly NatsServer _natsServer;
+    private readonly ITestOutputHelper _testOutputHelper;
 
     public OutputHelperLoggerFactory(ITestOutputHelper testOutputHelper, NatsServer natsServer)
     {
@@ -19,10 +21,7 @@ public class OutputHelperLoggerFactory : ILoggerFactory
     {
     }
 
-    public ILogger CreateLogger(string categoryName)
-    {
-        return new Logger(categoryName, _testOutputHelper, _natsServer);
-    }
+    public ILogger CreateLogger(string categoryName) => new Logger(categoryName, _testOutputHelper, _natsServer);
 
     public void Dispose()
     {
@@ -31,8 +30,8 @@ public class OutputHelperLoggerFactory : ILoggerFactory
     private class Logger : ILogger
     {
         private readonly string _categoryName;
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly NatsServer _natsServer;
+        private readonly ITestOutputHelper _testOutputHelper;
 
         public Logger(string categoryName, ITestOutputHelper testOutputHelper, NatsServer natsServer)
         {
@@ -41,15 +40,9 @@ public class OutputHelperLoggerFactory : ILoggerFactory
             _natsServer = natsServer;
         }
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return NullDisposable.Instance;
-        }
+        public IDisposable BeginScope<TState>(TState state) => NullDisposable.Instance;
 
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
+        public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
@@ -62,7 +55,7 @@ public class OutputHelperLoggerFactory : ILoggerFactory
                     _testOutputHelper.WriteLine($"[NCLOG] {DateTime.Now:HH:mm:ss.fff} Exception: {exception}");
                 }
 
-                _natsServer.LogMessage<TState>(_categoryName, logLevel, eventId, exception, text, state);
+                _natsServer.LogMessage(_categoryName, logLevel, eventId, exception, text, state);
             }
             catch
             {

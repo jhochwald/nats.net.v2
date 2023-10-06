@@ -1,22 +1,26 @@
+#region
+
 using System.Diagnostics;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core.Commands;
 
+#endregion
+
 namespace NATS.Client.Core.Internal;
 
 internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
 {
+    private readonly FixedArrayBufferWriter _bufferWriter;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Channel<ICommand> _channel;
+    private readonly ConnectionStatsCounter _counter;
+    private readonly NatsOpts _opts;
+    private readonly ObjectPool _pool;
     private readonly ISocketConnection _socketConnection;
     private readonly WriterState _state;
-    private readonly ObjectPool _pool;
-    private readonly ConnectionStatsCounter _counter;
-    private readonly FixedArrayBufferWriter _bufferWriter;
-    private readonly Channel<ICommand> _channel;
-    private readonly NatsOpts _opts;
+    private readonly Stopwatch _stopwatch = new();
     private readonly Task _writeLoop;
-    private readonly Stopwatch _stopwatch = new Stopwatch();
-    private readonly CancellationTokenSource _cancellationTokenSource;
     private int _disposed;
 
     public NatsPipeliningWriteProtocolProcessor(ISocketConnection socketConnection, WriterState state, ObjectPool pool, ConnectionStatsCounter counter)
@@ -116,7 +120,7 @@ internal sealed class NatsPipeliningWriteProtocolProcessor : IAsyncDisposable
             _state.PendingPromises.Clear();
 
             // main writer loop
-            while ((_bufferWriter.WrittenCount != 0) || (await reader.WaitToReadAsync(_cancellationTokenSource.Token).ConfigureAwait(false)))
+            while (_bufferWriter.WrittenCount != 0 || await reader.WaitToReadAsync(_cancellationTokenSource.Token).ConfigureAwait(false))
             {
                 try
                 {

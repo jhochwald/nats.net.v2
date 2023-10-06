@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0-release-23468-02" />
-    <PackageReference Include="xunit" Version="2.5.2-pre.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0-release-23468-02"/>
+    <PackageReference Include="xunit" Version="2.5.2-pre.2"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.2-pre.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -21,12 +21,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <Using Include="Xunit" />
-    <Using Include="Xunit.Abstractions" />
-    <Using Include="FluentAssertions" />
-    <Using Include="NATS.Client.Core" />
-    <Using Include="NATS.Client.Core.Internal" />
-    <Using Include="NATS.Client.Core.Commands" />
+    <Using Include="Xunit"/>
+    <Using Include="Xunit.Abstractions"/>
+    <Using Include="FluentAssertions"/>
+    <Using Include="NATS.Client.Core"/>
+    <Using Include="NATS.Client.Core.Internal"/>
+    <Using Include="NATS.Client.Core.Commands"/>
     <PackageReference Update="Stylecop.Analyzers" Version="1.2.0-beta.507">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,8 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NATS.Client.JetStream\NATS.Client.JetStream.csproj" />
-    <ProjectReference Include="..\NATS.Client.TestUtilities\NATS.Client.TestUtilities.csproj" />
+    <ProjectReference Include="..\..\src\NATS.Client.JetStream\NATS.Client.JetStream.csproj"/>
+    <ProjectReference Include="..\NATS.Client.TestUtilities\NATS.Client.TestUtilities.csproj"/>
   </ItemGroup>
 
 </Project>

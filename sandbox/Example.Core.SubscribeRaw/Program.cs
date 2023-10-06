@@ -1,6 +1,10 @@
+#region
+
 using System.Text;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
+
+#endregion
 
 var subject = "foo.*";
 var options = NatsOpts.Default with { LoggerFactory = new MinimumConsoleLoggerFactory(LogLevel.Error) };

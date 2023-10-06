@@ -1,15 +1,19 @@
+#region
+
 using NATS.Client.Core;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream;
 
 /// <summary>
-/// Generic JetStream exception.
+///     Generic JetStream exception.
 /// </summary>
 public class NatsJSException : NatsException
 {
     /// <summary>
-    /// Create JetStream generic exception.
+    ///     Create JetStream generic exception.
     /// </summary>
     /// <param name="message">Error message.</param>
     public NatsJSException(string message)
@@ -18,7 +22,7 @@ public class NatsJSException : NatsException
     }
 
     /// <summary>
-    /// Create JetStream generic exception.
+    ///     Create JetStream generic exception.
     /// </summary>
     /// <param name="message">Error message.</param>
     /// <param name="exception">Inner exception.</param>
@@ -29,12 +33,12 @@ public class NatsJSException : NatsException
 }
 
 /// <summary>
-/// JetStream protocol errors received during message consumption.
+///     JetStream protocol errors received during message consumption.
 /// </summary>
 public class NatsJSProtocolException : NatsJSException
 {
     /// <summary>
-    /// Create JetStream protocol exception.
+    ///     Create JetStream protocol exception.
     /// </summary>
     /// <param name="message">Error message.</param>
     public NatsJSProtocolException(string message)
@@ -43,7 +47,7 @@ public class NatsJSProtocolException : NatsJSException
     }
 
     /// <summary>
-    /// Create JetStream protocol exception.
+    ///     Create JetStream protocol exception.
     /// </summary>
     /// <param name="message">Error message.</param>
     /// <param name="exception">Inner exception.</param>
@@ -54,12 +58,12 @@ public class NatsJSProtocolException : NatsJSException
 }
 
 /// <summary>
-/// The exception that is thrown when JetStream publish acknowledgment indicates a duplicate sequence error.
+///     The exception that is thrown when JetStream publish acknowledgment indicates a duplicate sequence error.
 /// </summary>
 public class NatsJSDuplicateMessageException : NatsJSException
 {
     /// <summary>
-    /// Create JetStream duplicate message exception.
+    ///     Create JetStream duplicate message exception.
     /// </summary>
     /// <param name="sequence">The duplicate sequence number.</param>
     public NatsJSDuplicateMessageException(long sequence)
@@ -67,18 +71,18 @@ public class NatsJSDuplicateMessageException : NatsJSException
         Sequence = sequence;
 
     /// <summary>
-    /// The duplicate sequence number.
+    ///     The duplicate sequence number.
     /// </summary>
     public long Sequence { get; }
 }
 
 /// <summary>
-/// JetStream API call errors.
+///     JetStream API call errors.
 /// </summary>
 public class NatsJSApiException : NatsJSException
 {
     /// <summary>
-    /// Create JetStream API exception.
+    ///     Create JetStream API exception.
     /// </summary>
     /// <param name="error">Error response received from the server.</param>
     public NatsJSApiException(ApiError error)
@@ -86,7 +90,7 @@ public class NatsJSApiException : NatsJSException
         Error = error;
 
     /// <summary>
-    /// API error response received from the server.
+    ///     API error response received from the server.
     /// </summary>
     public ApiError Error { get; }
 }

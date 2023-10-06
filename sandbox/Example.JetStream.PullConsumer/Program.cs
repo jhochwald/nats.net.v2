@@ -1,8 +1,12 @@
+#region
+
 using System.Diagnostics;
 using Example.JetStream.PullConsumer;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
+
+#endregion
 
 var cts = new CancellationTokenSource();
 
@@ -41,7 +45,7 @@ var consumeOpts = new NatsJSConsumeOpts
     MaxBytes = maxBytes,
     Expires = expires,
     IdleHeartbeat = idle,
-    Serializer = new RawDataSerializer(),
+    Serializer = new RawDataSerializer()
 };
 
 var fetchOpts = new NatsJSFetchOpts
@@ -50,15 +54,10 @@ var fetchOpts = new NatsJSFetchOpts
     MaxBytes = maxBytes,
     Expires = expires,
     IdleHeartbeat = idle,
-    Serializer = new RawDataSerializer(),
+    Serializer = new RawDataSerializer()
 };
 
-var nextOpts = new NatsJSNextOpts
-{
-    Expires = expires,
-    IdleHeartbeat = idle,
-    Serializer = new RawDataSerializer(),
-};
+var nextOpts = new NatsJSNextOpts { Expires = expires, IdleHeartbeat = idle, Serializer = new RawDataSerializer() };
 
 var stopwatch = Stopwatch.StartNew();
 var count = 0;

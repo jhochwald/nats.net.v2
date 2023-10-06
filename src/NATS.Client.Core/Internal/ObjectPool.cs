@@ -1,5 +1,9 @@
+#region
+
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
@@ -12,15 +16,12 @@ internal sealed class ObjectPool
 {
     private static int typeId = -1; // Increment by IdentityGenerator<T>
 
-    private readonly object _gate = new object();
+    private readonly object _gate = new();
     private readonly int _poolLimit;
     private object[] _poolNodes = new object[4]; // ObjectPool<T>[]
 
     // pool-limit per type.
-    public ObjectPool(int poolLimit)
-    {
-        _poolLimit = poolLimit;
-    }
+    public ObjectPool(int poolLimit) => _poolLimit = poolLimit;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryRent<T>([NotNullWhen(true)] out T? value)
@@ -66,10 +67,7 @@ internal sealed class ObjectPool
             {
                 _poolNodes[id] = new ObjectPool<T>(_poolLimit);
             }
-            else
-            {
-                // other thread already created new ObjectPool<T> so do nothing.
-            }
+            // other thread already created new ObjectPool<T> so do nothing.
         }
     }
 
@@ -77,13 +75,10 @@ internal sealed class ObjectPool
     private static class IdentityGenerator<T>
     {
 #pragma warning disable SA1401
-        public static int Identity;
+        public static readonly int Identity;
 #pragma warning restore SA1401
 
-        static IdentityGenerator()
-        {
-            Identity = Interlocked.Increment(ref typeId);
-        }
+        static IdentityGenerator() => Identity = Interlocked.Increment(ref typeId);
     }
 }
 
@@ -92,15 +87,11 @@ internal sealed class ObjectPool<T>
 {
     private readonly int _limit;
     private int _gate;
-    private int _size;
     private T? _root;
 
-    public ObjectPool(int limit)
-    {
-        _limit = limit;
-    }
+    public ObjectPool(int limit) => _limit = limit;
 
-    public int Size => _size;
+    public int Size { get; private set; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryPop([NotNullWhen(true)] out T? result)
@@ -115,7 +106,7 @@ internal sealed class ObjectPool<T>
                 ref var nextNode = ref v.NextNode;
                 _root = nextNode;
                 nextNode = null;
-                _size--;
+                Size--;
                 result = v;
                 Volatile.Write(ref _gate, 0);
                 return true;
@@ -133,18 +124,16 @@ internal sealed class ObjectPool<T>
     {
         if (Interlocked.CompareExchange(ref _gate, 1, 0) == 0)
         {
-            if (_size < _limit)
+            if (Size < _limit)
             {
                 item.NextNode = _root;
                 _root = item;
-                _size++;
+                Size++;
                 Volatile.Write(ref _gate, 0);
                 return true;
             }
-            else
-            {
-                Volatile.Write(ref _gate, 0);
-            }
+
+            Volatile.Write(ref _gate, 0);
         }
 
         return false;

@@ -1,4 +1,4 @@
-// Adapted from https://github.com/dotnet/aspnetcore/blob/v6.0.18/src/Servers/Kestrel/Core/src/Internal/Http/HttpParser.cs
+#region
 
 using System.Buffers;
 using System.Buffers.Text;
@@ -8,17 +8,19 @@ using Microsoft.Extensions.Primitives;
 using NATS.Client.Core.Commands;
 using NATS.Client.Core.Internal;
 
+#endregion
+
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable PossiblyImpureMethodCallOnReadonlyVariable
 namespace NATS.Client.Core;
 
 public class NatsHeaderParser
 {
-    private const byte ByteCR = (byte)'\r';
-    private const byte ByteLF = (byte)'\n';
-    private const byte ByteColon = (byte)':';
-    private const byte ByteSpace = (byte)' ';
-    private const byte ByteTab = (byte)'\t';
+    private const byte ByteCR = (byte) '\r';
+    private const byte ByteLF = (byte) '\n';
+    private const byte ByteColon = (byte) ':';
+    private const byte ByteSpace = (byte) ' ';
+    private const byte ByteTab = (byte) '\t';
     private static readonly byte[] ByteCRLF = { ByteCR, ByteLF };
 
     private readonly Encoding _encoding;
@@ -139,7 +141,7 @@ public class NatsHeaderParser
         // If not found length with be -1; casting to uint will turn it to uint.MaxValue
         // which will be larger than any possible headerLine.Length. This also serves to eliminate
         // the bounds check for the next lookup of headerLine[nameEnd]
-        if ((uint)nameEnd >= (uint)headerLine.Length)
+        if ((uint) nameEnd >= (uint) headerLine.Length)
         {
             // Colon not found.
             return false;
@@ -163,7 +165,7 @@ public class NatsHeaderParser
         var valueStart = nameEnd + 1;
 
         // Generally there will only be one space, so we will check it directly
-        if ((uint)valueStart < (uint)headerLine.Length)
+        if ((uint) valueStart < (uint) headerLine.Length)
         {
             var ch = headerLine[valueStart];
             if (ch == ByteSpace || ch == ByteTab)
@@ -172,7 +174,7 @@ public class NatsHeaderParser
                 valueStart++;
 
                 // More header chars?
-                if ((uint)valueStart < (uint)headerLine.Length)
+                if ((uint) valueStart < (uint) headerLine.Length)
                 {
                     ch = headerLine[valueStart];
 

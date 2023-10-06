@@ -1,18 +1,22 @@
+#region
+
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#endregion
+
 namespace NATS.Client.Core.Tests;
 
 public class NatsProxy : IDisposable
 {
-    private readonly ITestOutputHelper _outputHelper;
-    private readonly bool _trace;
-    private readonly TcpListener _tcpListener;
     private readonly List<TcpClient> _clients = new();
     private readonly List<Frame> _frames = new();
+    private readonly ITestOutputHelper _outputHelper;
+    private readonly TcpListener _tcpListener;
+    private readonly bool _trace;
     private readonly Stopwatch _watch = new();
     private int _syncCount;
 
@@ -65,7 +69,7 @@ public class NatsProxy : IDisposable
                         }
                     });
 
-                    while (NatsProtoDump(n, $"S", sr2, sw1, ServerInterceptor))
+                    while (NatsProtoDump(n, "S", sr2, sw1, ServerInterceptor))
                     {
                     }
                 });
@@ -94,7 +98,7 @@ public class NatsProxy : IDisposable
 
     public List<Func<string?, string?>> ServerInterceptors { get; } = new();
 
-    public int Port => ((IPEndPoint)_tcpListener.Server.LocalEndPoint!).Port;
+    public int Port => ((IPEndPoint) _tcpListener.Server.LocalEndPoint!).Port;
 
     public IReadOnlyList<Frame> AllFrames
     {
@@ -280,13 +284,13 @@ public class NatsProxy : IDisposable
             }
 
             if (client > 0)
-                AddFrame(new Frame(_watch.Elapsed, client, origin, Message: $"{message}␍␊{bufferDump}"));
+                AddFrame(new Frame(_watch.Elapsed, client, origin, $"{message}␍␊{bufferDump}"));
 
             return true;
         }
 
         if (client > 0)
-            AddFrame(new Frame(_watch.Elapsed, client, Origin: "ERROR", Message: $"Unknown protocol: {message}"));
+            AddFrame(new Frame(_watch.Elapsed, client, "ERROR", $"Unknown protocol: {message}"));
 
         return false;
     }

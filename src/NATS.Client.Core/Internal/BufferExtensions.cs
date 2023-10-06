@@ -1,9 +1,9 @@
-// Adapted from https://github.com/dotnet/aspnetcore/blob/v6.0.18/src/Shared/ServerInfrastructure/BufferExtensions.cs
-
-#nullable enable
+#region
 
 using System.Buffers;
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
@@ -12,7 +12,7 @@ internal static class BufferExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Split(this ReadOnlySpan<byte> span, out ReadOnlySpan<byte> left, out ReadOnlySpan<byte> right)
     {
-        var i = span.IndexOf((byte)' ');
+        var i = span.IndexOf((byte) ' ');
         if (i == -1)
         {
             left = span;
@@ -36,7 +36,7 @@ internal static class BufferExtensions
     }
 
     /// <summary>
-    /// Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}"/>
+    ///     Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}" />
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SequencePosition? PositionOfAny<T>(in this ReadOnlySequence<T> source, T value0, T value1)
@@ -52,10 +52,8 @@ internal static class BufferExtensions
 
             return null;
         }
-        else
-        {
-            return PositionOfAnyMultiSegment(source, value0, value1);
-        }
+
+        return PositionOfAnyMultiSegment(source, value0, value1);
     }
 
     private static SequencePosition? PositionOfAnyMultiSegment<T>(in ReadOnlySequence<T> source, T value0, T value1)
@@ -70,7 +68,8 @@ internal static class BufferExtensions
             {
                 return source.GetPosition(index, result);
             }
-            else if (position.GetObject() == null)
+
+            if (position.GetObject() == null)
             {
                 break;
             }

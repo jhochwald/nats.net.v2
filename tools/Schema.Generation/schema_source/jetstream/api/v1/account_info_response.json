@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.INFO API",
   "title": "io.nats.jetstream.api.v1.account_info_response",
   "type": "object",
-  "allOf": [{
-    "$ref": "definitions.json#/definitions/account_stats"
-  }]
+  "allOf": [
+    {
+      "$ref": "definitions.json#/definitions/account_stats"
+    }
+  ]
 }

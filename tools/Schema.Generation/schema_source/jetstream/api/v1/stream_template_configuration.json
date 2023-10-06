@@ -3,8 +3,8 @@
   "$id": "https://nats.io/schemas/jetstream/api/v1/stream_template_configuration.json",
   "description": "The data structure that describe the configuration of a NATS JetStream Stream Template",
   "title": "io.nats.jetstream.api.v1.stream_template_configuration",
-  "type":"object",
-  "required":[
+  "type": "object",
+  "required": [
     "name",
     "config",
     "max_streams"

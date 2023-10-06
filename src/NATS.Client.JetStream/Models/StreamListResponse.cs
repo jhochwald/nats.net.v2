@@ -1,23 +1,30 @@
+#region
+
+using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+#endregion
+
 namespace NATS.Client.JetStream.Models;
 
 /// <summary>
-/// A response from the JetStream $JS.API.STREAM.LIST API
+///     A response from the JetStream $JS.API.STREAM.LIST API
 /// </summary>
-
 public record StreamListResponse : IterableResponse
 {
     /// <summary>
-    /// Full Stream information for each known Stream
+    ///     Full Stream information for each known Stream
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("streams")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
-    [System.ComponentModel.DataAnnotations.Required]
-    public System.Collections.Generic.ICollection<StreamInfo> Streams { get; set; } = new System.Collections.ObjectModel.Collection<StreamInfo>();
+    [JsonPropertyName("streams")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    [Required]
+    public ICollection<StreamInfo> Streams { get; set; } = new Collection<StreamInfo>();
 
     /// <summary>
-    /// In clustered environments gathering Stream info might time out, this list would be a list of Streams for which information was not obtainable
+    ///     In clustered environments gathering Stream info might time out, this list would be a list of Streams for which information was not obtainable
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("missing")]
-    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
-    public System.Collections.Generic.ICollection<string> Missing { get; set; } = default!;
+    [JsonPropertyName("missing")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ICollection<string> Missing { get; set; } = default!;
 }

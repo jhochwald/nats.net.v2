@@ -1,20 +1,24 @@
+#region
+
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace NATS.Client.Core.Internal;
 
 // When socket is closed/disposed, operation throws SocketClosedException
 internal sealed class SocketReader
 {
-    private readonly int _minimumBufferSize;
     private readonly ConnectionStatsCounter _counter;
-    private readonly SeqeunceBuilder _seqeunceBuilder = new SeqeunceBuilder();
-    private readonly Stopwatch _stopwatch = new Stopwatch();
-    private readonly ILogger<SocketReader> _logger;
     private readonly bool _isTraceLogging;
-    private ISocketConnection _socketConnection;
+    private readonly ILogger<SocketReader> _logger;
+    private readonly int _minimumBufferSize;
+    private readonly SeqeunceBuilder _seqeunceBuilder = new();
+    private readonly ISocketConnection _socketConnection;
+    private readonly Stopwatch _stopwatch = new();
 
     private Memory<byte> _availableMemory;
 
@@ -67,8 +71,7 @@ internal sealed class SocketReader
             Interlocked.Add(ref _counter.ReceivedBytes, read);
             _seqeunceBuilder.Append(_availableMemory.Slice(0, read));
             _availableMemory = _availableMemory.Slice(read);
-        }
-        while (totalRead < minimumSize);
+        } while (totalRead < minimumSize);
 
         return _seqeunceBuilder.ToReadOnlySequence();
     }
@@ -113,7 +116,7 @@ internal sealed class SocketReader
             _seqeunceBuilder.Append(appendMemory);
             _availableMemory = _availableMemory.Slice(read);
 
-            if (appendMemory.Span.Contains((byte)'\n'))
+            if (appendMemory.Span.Contains((byte) '\n'))
             {
                 break;
             }
@@ -122,8 +125,5 @@ internal sealed class SocketReader
         return _seqeunceBuilder.ToReadOnlySequence();
     }
 
-    public void AdvanceTo(SequencePosition start)
-    {
-        _seqeunceBuilder.AdvanceTo(start);
-    }
+    public void AdvanceTo(SequencePosition start) => _seqeunceBuilder.AdvanceTo(start);
 }

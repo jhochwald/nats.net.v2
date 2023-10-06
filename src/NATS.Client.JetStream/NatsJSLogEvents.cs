@@ -1,4 +1,8 @@
+#region
+
 using Microsoft.Extensions.Logging;
+
+#endregion
 
 namespace NATS.Client.JetStream;
 

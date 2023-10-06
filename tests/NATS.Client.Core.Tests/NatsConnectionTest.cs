@@ -1,7 +1,8 @@
-using System.Diagnostics;
+#region
+
 using System.Text;
-using System.Threading.Channels;
-using Xunit.Sdk;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -59,7 +60,7 @@ public abstract partial class NatsConnectionTest
 
         var serializer1 = NatsOpts.Default.Serializer;
 
-        foreach (var serializer in new INatsSerializer[] { serializer1 })
+        foreach (var serializer in new[] { serializer1 })
         {
             var options = NatsOpts.Default with { Serializer = serializer };
             await using var subConnection = server.CreateClientConnection(options);
@@ -89,7 +90,7 @@ public abstract partial class NatsConnectionTest
             await sub.DisposeAsync();
             await register;
 
-            actual.ShouldEqual(new[] { one, two, three });
+            actual.ShouldEqual(one, two, three);
         }
     }
 
@@ -150,12 +151,7 @@ public abstract partial class NatsConnectionTest
     [Fact]
     public async Task ReconnectSingleTest()
     {
-        using var options = new NatsServerOpts
-        {
-            TransportType = _transportType,
-            EnableWebSocket = _transportType == TransportType.WebSocket,
-            ServerDisposeReturnsPorts = false,
-        };
+        using var options = new NatsServerOpts { TransportType = _transportType, EnableWebSocket = _transportType == TransportType.WebSocket, ServerDisposeReturnsPorts = false };
         await using var server = NatsServer.Start(_output, options);
         var subject = Guid.NewGuid().ToString();
 
@@ -249,11 +245,11 @@ public abstract partial class NatsConnectionTest
         await connection3.ConnectAsync();
 
         _output.WriteLine("Server1 ClientConnectUrls:" +
-                         string.Join(", ", connection1.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
+                          string.Join(", ", connection1.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
         _output.WriteLine("Server2 ClientConnectUrls:" +
-                         string.Join(", ", connection2.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
+                          string.Join(", ", connection2.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
         _output.WriteLine("Server3 ClientConnectUrls:" +
-                         string.Join(", ", connection3.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
+                          string.Join(", ", connection3.ServerInfo?.ClientConnectUrls ?? Array.Empty<string>()));
 
         connection1.ServerInfo!.ClientConnectUrls!.Select(x => new NatsUri(x, true).Port).Distinct().Count().ShouldBe(3);
         connection2.ServerInfo!.ClientConnectUrls!.Select(x => new NatsUri(x, true).Port).Distinct().Count().ShouldBe(3);
@@ -369,16 +365,10 @@ public class SampleClass : IEquatable<SampleClass>
             return false;
         }
 
-        return Equals((SampleClass)obj);
+        return Equals((SampleClass) obj);
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Id, Name);
-    }
+    public override int GetHashCode() => HashCode.Combine(Id, Name);
 
-    public override string ToString()
-    {
-        return $"{Id}-{Name}";
-    }
+    public override string ToString() => $"{Id}-{Name}";
 }

@@ -1,24 +1,29 @@
+#region
+
 using System.ComponentModel.DataAnnotations;
 using NATS.Client.Core;
 using NATS.Client.JetStream.Internal;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream;
 
 /// <summary>Provides management and access to NATS JetStream streams and consumers.</summary>
 public partial class NatsJSContext
 {
-    /// <inheritdoc cref="NatsJSContext(NATS.Client.Core.NatsConnection,NATS.Client.JetStream.NatsJSOpts)"/>>
+    /// <inheritdoc cref="NatsJSContext(NATS.Client.Core.NatsConnection,NATS.Client.JetStream.NatsJSOpts)" />
+    /// >
     public NatsJSContext(NatsConnection connection)
         : this(connection, new NatsJSOpts(connection.Opts))
     {
     }
 
     /// <summary>
-    /// Creates a NATS JetStream context used to manage and access streams and consumers.
+    ///     Creates a NATS JetStream context used to manage and access streams and consumers.
     /// </summary>
-    /// <param name="connection">A NATS server connection <see cref="NatsConnection"/> to access the JetStream APIs, publishers and consumers.</param>
-    /// <param name="opts">Context wide <see cref="NatsJSOpts"/> JetStream options.</param>
+    /// <param name="connection">A NATS server connection <see cref="NatsConnection" /> to access the JetStream APIs, publishers and consumers.</param>
+    /// <param name="opts">Context wide <see cref="NatsJSOpts" /> JetStream options.</param>
     public NatsJSContext(NatsConnection connection, NatsJSOpts opts)
     {
         Connection = connection;
@@ -30,42 +35,42 @@ public partial class NatsJSContext
     internal NatsJSOpts Opts { get; }
 
     /// <summary>
-    /// Calls JetStream Account Info API.
+    ///     Calls JetStream Account Info API.
     /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the API call.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> used to cancel the API call.</param>
     /// <returns>The account information based on the NATS connection credentials.</returns>
     public ValueTask<AccountInfoResponse> GetAccountInfoAsync(CancellationToken cancellationToken = default) =>
         JSRequestResponseAsync<object, AccountInfoResponse>(
-            subject: $"{Opts.Prefix}.INFO",
-            request: null,
+            $"{Opts.Prefix}.INFO",
+            null,
             cancellationToken);
 
     /// <summary>
-    /// Sends data to a stream associated with the subject.
+    ///     Sends data to a stream associated with the subject.
     /// </summary>
     /// <param name="subject">Subject to publish the data to.</param>
     /// <param name="data">Data to publish.</param>
     /// <param name="msgId">Sets <c>Nats-Msg-Id</c> header for idempotent message writes.</param>
     /// <param name="headers">Optional message headers.</param>
     /// <param name="opts">Options to be used by publishing command.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the publishing call or the wait for response.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> used to cancel the publishing call or the wait for response.</param>
     /// <typeparam name="T">Type of the data being sent.</typeparam>
     /// <returns>
-    /// The ACK response to indicate if stream accepted the message as well as additional
-    /// information like the sequence number of the message stored by the stream.
+    ///     The ACK response to indicate if stream accepted the message as well as additional
+    ///     information like the sequence number of the message stored by the stream.
     /// </returns>
     /// <exception cref="NatsJSException">There was a problem receiving the response.</exception>
     /// <remarks>
-    /// <para>
-    /// Note that if the subject isn't backed by a stream or the connected NATS server
-    /// isn't running with JetStream enabled, this call will hang waiting for an ACK
-    /// until the request times out.
-    /// </para>
-    /// <para>
-    /// By setting <c>msgId</c> you can ensure messages written to a stream only once. JetStream support idempotent
-    /// message writes by ignoring duplicate messages as indicated by the Nats-Msg-Id header. If both <c>msgId</c>
-    /// and the <c>Nats-Msg-Id</c> header value was set, <c>msgId</c> parameter value will be used.
-    /// </para>
+    ///     <para>
+    ///         Note that if the subject isn't backed by a stream or the connected NATS server
+    ///         isn't running with JetStream enabled, this call will hang waiting for an ACK
+    ///         until the request times out.
+    ///     </para>
+    ///     <para>
+    ///         By setting <c>msgId</c> you can ensure messages written to a stream only once. JetStream support idempotent
+    ///         message writes by ignoring duplicate messages as indicated by the Nats-Msg-Id header. If both <c>msgId</c>
+    ///         and the <c>Nats-Msg-Id</c> header value was set, <c>msgId</c> parameter value will be used.
+    ///     </para>
     /// </remarks>
     public async ValueTask<PubAckResponse> PublishAsync<T>(
         string subject,
@@ -82,11 +87,11 @@ public partial class NatsJSContext
         }
 
         await using var sub = await Connection.RequestSubAsync<T, PubAckResponse>(
-                subject: subject,
-                data: data,
-                headers: headers,
-                requestOpts: opts,
-                replyOpts: default,
+                subject,
+                data,
+                headers,
+                opts,
+                default,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -133,11 +138,11 @@ public partial class NatsJSContext
         }
 
         await using var sub = await Connection.RequestSubAsync<TRequest, TResponse>(
-                subject: subject,
-                data: request,
-                headers: default,
-                requestOpts: default,
-                replyOpts: new NatsSubOpts { Serializer = NatsJSErrorAwareJsonSerializer.Default },
+                subject,
+                request,
+                default,
+                default,
+                new NatsSubOpts { Serializer = NatsJSErrorAwareJsonSerializer.Default },
                 cancellationToken)
             .ConfigureAwait(false);
 

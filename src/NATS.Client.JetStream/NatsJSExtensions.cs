@@ -1,14 +1,18 @@
+#region
+
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream;
 
 public static class NatsJSExtensions
 {
     /// <summary>
-    /// Make sure acknowledgment was successful and throw an exception otherwise.
+    ///     Make sure acknowledgment was successful and throw an exception otherwise.
     /// </summary>
     /// <param name="ack">ACK response.</param>
-    /// <exception cref="ArgumentNullException"><see cref="PubAckResponse"/> is <c>NULL</c>.</exception>
+    /// <exception cref="ArgumentNullException"><see cref="PubAckResponse" /> is <c>NULL</c>.</exception>
     /// <exception cref="NatsJSApiException">Server responded with an error.</exception>
     /// <exception cref="NatsJSDuplicateMessageException">A message with the same <c>Nats-Msg-Id</c> was received before.</exception>
     public static void EnsureSuccess(this PubAckResponse ack)

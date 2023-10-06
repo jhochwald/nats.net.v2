@@ -1,3 +1,5 @@
+#region
+
 using System.Buffers;
 using System.Text;
 using System.Threading.Channels;
@@ -5,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.Core.Commands;
 using NATS.Client.JetStream.Models;
+
+#endregion
 
 namespace NATS.Client.JetStream.Internal;
 
@@ -17,28 +21,28 @@ internal struct PullRequest
 
 internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
 {
-    private readonly ILogger _logger;
-    private readonly bool _debug;
-    private readonly Channel<NatsJSMsg<TMsg?>> _userMsgs;
-    private readonly Channel<PullRequest> _pullRequests;
-    private readonly NatsJSContext _context;
-    private readonly string _stream;
     private readonly string _consumer;
-    private readonly INatsSerializer _serializer;
-    private readonly Timer _timer;
-    private readonly Task _pullTask;
+    private readonly NatsJSContext _context;
+    private readonly bool _debug;
+    private readonly long _expires;
+    private readonly long _hbTimeout;
+    private readonly long _idle;
+    private readonly ILogger _logger;
+    private readonly long _maxBytes;
 
     private readonly long _maxMsgs;
-    private readonly long _expires;
-    private readonly long _idle;
-    private readonly long _hbTimeout;
-    private readonly long _thresholdMsgs;
-    private readonly long _maxBytes;
-    private readonly long _thresholdBytes;
 
     private readonly object _pendingGate = new();
-    private long _pendingMsgs;
+    private readonly Channel<PullRequest> _pullRequests;
+    private readonly Task _pullTask;
+    private readonly INatsSerializer _serializer;
+    private readonly string _stream;
+    private readonly long _thresholdBytes;
+    private readonly long _thresholdMsgs;
+    private readonly Timer _timer;
+    private readonly Channel<NatsJSMsg<TMsg?>> _userMsgs;
     private long _pendingBytes;
+    private long _pendingMsgs;
 
     public NatsJSConsume(
         long maxMsgs,
@@ -68,7 +72,7 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
         _thresholdBytes = thresholdBytes;
         _expires = expires.ToNanos();
         _idle = idle.ToNanos();
-        _hbTimeout = (int)(idle * 2).TotalMilliseconds;
+        _hbTimeout = (int) (idle * 2).TotalMilliseconds;
 
         if (_debug)
         {
@@ -83,14 +87,14 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
                     thresholdBytes,
                     expires,
                     idle,
-                    _hbTimeout,
+                    _hbTimeout
                 });
         }
 
         _timer = new Timer(
             static state =>
             {
-                var self = (NatsJSConsume<TMsg>)state!;
+                var self = (NatsJSConsume<TMsg>) state!;
                 self.Pull("heartbeat-timeout", self._maxMsgs, self._maxBytes);
                 self.ResetPending();
                 if (self._debug)
@@ -118,6 +122,13 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
 
     public void Stop() => EndSubscription(NatsSubEndReason.None);
 
+    public override async ValueTask DisposeAsync()
+    {
+        await base.DisposeAsync().ConfigureAwait(false);
+        await _pullTask.ConfigureAwait(false);
+        await _timer.DisposeAsync().ConfigureAwait(false);
+    }
+
     public ValueTask CallMsgNextAsync(string origin, ConsumerGetnextRequest request, CancellationToken cancellationToken = default)
     {
         if (_debug)
@@ -126,22 +137,15 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
         }
 
         return Connection.PubModelAsync(
-            subject: $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
-            data: request,
-            serializer: NatsJsonSerializer.Default,
-            replyTo: Subject,
-            headers: default,
+            $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
+            request,
+            NatsJsonSerializer.Default,
+            Subject,
+            default,
             cancellationToken);
     }
 
     public void ResetHeartbeatTimer() => _timer.Change(_hbTimeout, Timeout.Infinite);
-
-    public override async ValueTask DisposeAsync()
-    {
-        await base.DisposeAsync().ConfigureAwait(false);
-        await _pullTask.ConfigureAwait(false);
-        await _timer.DisposeAsync().ConfigureAwait(false);
-    }
 
     internal override IEnumerable<ICommand> GetReconnectCommands(int sid)
     {
@@ -150,23 +154,17 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
 
         ResetPending();
 
-        var request = new ConsumerGetnextRequest
-        {
-            Batch = _maxMsgs,
-            MaxBytes = _maxBytes,
-            IdleHeartbeat = _idle,
-            Expires = _expires,
-        };
+        var request = new ConsumerGetnextRequest { Batch = _maxMsgs, MaxBytes = _maxBytes, IdleHeartbeat = _idle, Expires = _expires };
 
         yield return PublishCommand<ConsumerGetnextRequest>.Create(
-            pool: Connection.ObjectPool,
-            subject: $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
-            replyTo: Subject,
-            headers: default,
-            value: request,
-            serializer: NatsJsonSerializer.Default,
-            errorHandler: default,
-            cancellationToken: default);
+            Connection.ObjectPool,
+            $"{_context.Opts.Prefix}.CONSUMER.MSG.NEXT.{_stream}.{_consumer}",
+            Subject,
+            default,
+            request,
+            NatsJsonSerializer.Default,
+            default,
+            default);
     }
 
     protected override async ValueTask ReceiveInternalAsync(
@@ -355,17 +353,7 @@ internal class NatsJSConsume<TMsg> : NatsSubBase, INatsJSConsume<TMsg>
         }
     }
 
-    private void Pull(string origin, long batch, long maxBytes) => _pullRequests.Writer.TryWrite(new PullRequest
-    {
-        Request = new ConsumerGetnextRequest
-        {
-            Batch = batch,
-            MaxBytes = maxBytes,
-            IdleHeartbeat = _idle,
-            Expires = _expires,
-        },
-        Origin = origin,
-    });
+    private void Pull(string origin, long batch, long maxBytes) => _pullRequests.Writer.TryWrite(new PullRequest { Request = new ConsumerGetnextRequest { Batch = batch, MaxBytes = maxBytes, IdleHeartbeat = _idle, Expires = _expires }, Origin = origin });
 
     private async Task PullLoop()
     {

@@ -1,5 +1,3 @@
-using NATS.Client.Core.Internal;
-
 namespace NATS.Client.Core.Tests;
 
 public class FixedArrayBufferWriterTest
@@ -35,6 +33,6 @@ public class FixedArrayBufferWriterTest
 
         var newSpan = writer.GetSpan(50000);
 
-        newSpan.Length.Should().Be((ushort.MaxValue * 2) - 20000);
+        newSpan.Length.Should().Be(ushort.MaxValue * 2 - 20000);
     }
 }

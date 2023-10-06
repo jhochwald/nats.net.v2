@@ -1,5 +1,9 @@
+#region
+
 using System.Text;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
@@ -33,10 +37,7 @@ internal sealed class DirectWriteCommand : ICommand
     }
 
     /// <param name="protocol">raw command protocol, requires \r\n.</param>
-    public DirectWriteCommand(byte[] protocol)
-    {
-        _protocol = protocol;
-    }
+    public DirectWriteCommand(byte[] protocol) => _protocol = protocol;
 
     bool ICommand.IsCanceled => false;
 
@@ -44,10 +45,7 @@ internal sealed class DirectWriteCommand : ICommand
     {
     }
 
-    void ICommand.Write(ProtocolWriter writer)
-    {
-        writer.WriteRaw(_protocol);
-    }
+    void ICommand.Write(ProtocolWriter writer) => writer.WriteRaw(_protocol);
 
     void ICommand.SetCancellationTimer(CancellationTimer timer)
     {

@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using System.Text;
+
+#endregion
 
 namespace NATS.Client.Core.Tests;
 
@@ -18,7 +22,7 @@ public class LowLevelApiTest
         var subject = "foo.*";
         var builder = new NatsSubCustomTestBuilder(_output);
         var sub = builder.Build(subject, default, nats, nats.SubscriptionManager);
-        await nats.SubAsync(subject, queueGroup: default, opts: default, sub: sub);
+        await nats.SubAsync(subject, default, default, sub);
 
         await Retry.Until(
             "subscription is ready",
@@ -28,7 +32,7 @@ public class LowLevelApiTest
         for (var i = 0; i < 10; i++)
         {
             var headers = new NatsHeaders { { "X-Test", $"value-{i}" } };
-            await nats.PubModelAsync<int>($"foo.data{i}", i, NatsJsonSerializer.Default, "bar", headers);
+            await nats.PubModelAsync($"foo.data{i}", i, NatsJsonSerializer.Default, "bar", headers);
         }
 
         await nats.PubAsync("foo.done");
@@ -45,7 +49,7 @@ public class LowLevelApiTest
         private readonly ITestOutputHelper _output;
 
         public NatsSubTest(string subject, NatsConnection connection, NatsSubCustomTestBuilder builder, ITestOutputHelper output, ISubscriptionManager manager)
-        : base(connection, manager, subject, default, default)
+            : base(connection, manager, subject, default, default)
         {
             _builder = builder;
             _output = output;
@@ -69,7 +73,7 @@ public class LowLevelApiTest
                 var sb = new StringBuilder();
                 sb.AppendLine($"Subject: {subject}");
                 sb.AppendLine($"Reply-To: {replyTo}");
-                sb.Append($"Headers: ");
+                sb.Append("Headers: ");
                 if (headers != null)
                     sb.Append(Encoding.ASCII.GetString(headers).Replace("\r\n", " "));
                 sb.AppendLine();
@@ -90,16 +94,15 @@ public class LowLevelApiTest
 
     private class NatsSubCustomTestBuilder
     {
-        private readonly ITestOutputHelper _output;
-        private readonly WaitSignal _done = new();
         private readonly List<string> _messages = new();
+        private readonly ITestOutputHelper _output;
         private int _sync;
 
         public NatsSubCustomTestBuilder(ITestOutputHelper output) => _output = output;
 
         public bool IsSynced => Volatile.Read(ref _sync) == 1;
 
-        public WaitSignal Done => _done;
+        public WaitSignal Done { get; } = new();
 
         public IEnumerable<string> Messages
         {
@@ -110,14 +113,11 @@ public class LowLevelApiTest
             }
         }
 
-        public NatsSubTest Build(string subject, NatsSubOpts? opts, NatsConnection connection, ISubscriptionManager manager)
-        {
-            return new NatsSubTest(subject, connection, builder: this, _output, manager);
-        }
+        public NatsSubTest Build(string subject, NatsSubOpts? opts, NatsConnection connection, ISubscriptionManager manager) => new(subject, connection, this, _output, manager);
 
         public void Sync() => Interlocked.Exchange(ref _sync, 1);
 
-        public void MarkAsDone() => _done.Pulse();
+        public void MarkAsDone() => Done.Pulse();
 
         public void MessageReceived(string message)
         {

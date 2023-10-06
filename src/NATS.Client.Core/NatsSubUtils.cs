@@ -1,7 +1,11 @@
+#region
+
 using System.Buffers;
 using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core;
 
@@ -24,9 +28,9 @@ public sealed class NatsSub<T> : NatsSubBase, INatsSub<T>
         Serializer = serializer;
     }
 
-    public ChannelReader<NatsMsg<T?>> Msgs => _msgs.Reader;
-
     private INatsSerializer Serializer { get; }
+
+    public ChannelReader<NatsMsg<T?>> Msgs => _msgs.Reader;
 
     protected override async ValueTask ReceiveInternalAsync(string subject, string? replyTo, ReadOnlySequence<byte>? headersBuffer, ReadOnlySequence<byte> payloadBuffer)
     {
@@ -67,13 +71,7 @@ public class NatsSubException : NatsException
 internal sealed class NatsSubUtils
 {
     private static readonly BoundedChannelOptions DefaultChannelOpts =
-        new BoundedChannelOptions(1_000)
-        {
-            FullMode = BoundedChannelFullMode.Wait,
-            SingleWriter = true,
-            SingleReader = false,
-            AllowSynchronousContinuations = false,
-        };
+        new(1_000) { FullMode = BoundedChannelFullMode.Wait, SingleWriter = true, SingleReader = false, AllowSynchronousContinuations = false };
 
     internal static BoundedChannelOptions GetChannelOpts(
         NatsSubChannelOpts? subChannelOpts)
@@ -88,12 +86,10 @@ internal sealed class NatsSubUtils
                 FullMode =
                     overrideOpts.FullMode ?? DefaultChannelOpts.FullMode,
                 SingleWriter = DefaultChannelOpts.SingleWriter,
-                SingleReader = DefaultChannelOpts.SingleReader,
+                SingleReader = DefaultChannelOpts.SingleReader
             };
         }
-        else
-        {
-            return DefaultChannelOpts;
-        }
+
+        return DefaultChannelOpts;
     }
 }

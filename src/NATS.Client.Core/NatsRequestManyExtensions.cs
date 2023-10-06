@@ -3,7 +3,7 @@ namespace NATS.Client.Core;
 public static class NatsRequestManyExtensions
 {
     /// <summary>
-    /// Request and receive zero or more replies from a responder.
+    ///     Request and receive zero or more replies from a responder.
     /// </summary>
     /// <param name="nats">NATS connection</param>
     /// <param name="msg">Message to be sent as request</param>
@@ -12,10 +12,10 @@ public static class NatsRequestManyExtensions
     /// <param name="cancellationToken">Cancel this request</param>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TReply">Reply type</typeparam>
-    /// <returns>An asynchronous enumerable of <see cref="NatsMsg{TReply}"/> objects</returns>
+    /// <returns>An asynchronous enumerable of <see cref="NatsMsg{TReply}" /> objects</returns>
     /// <exception cref="OperationCanceledException">Raised when cancellation token is used</exception>
     /// <remarks>
-    /// if reply option's timeout is not defined then it will be set to NatsOpts.RequestTimeout.
+    ///     if reply option's timeout is not defined then it will be set to NatsOpts.RequestTimeout.
     /// </remarks>
     public static IAsyncEnumerable<NatsMsg<TReply?>> RequestManyAsync<TRequest, TReply>(
         this INatsConnection nats,

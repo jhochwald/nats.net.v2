@@ -1,9 +1,12 @@
+#region
+
 using System.Buffers;
 using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core.Commands;
 
@@ -11,16 +14,13 @@ internal sealed class ProtocolWriter
 {
     private const int MaxIntStringLength = 10; // int.MaxValue.ToString().Length
     private const int NewLineLength = 2; // \r\n
-
-    private readonly FixedArrayBufferWriter _writer; // where T : IBufferWriter<byte>
     private readonly FixedArrayBufferWriter _bufferHeaders = new();
     private readonly FixedArrayBufferWriter _bufferPayload = new();
     private readonly HeaderWriter _headerWriter = new(Encoding.UTF8);
 
-    public ProtocolWriter(FixedArrayBufferWriter writer)
-    {
-        _writer = writer;
-    }
+    private readonly FixedArrayBufferWriter _writer; // where T : IBufferWriter<byte>
+
+    public ProtocolWriter(FixedArrayBufferWriter writer) => _writer = writer;
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#connect
     // CONNECT {["option_name":option_value],...}
@@ -35,16 +35,10 @@ internal sealed class ProtocolWriter
     }
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#ping-pong
-    public void WritePing()
-    {
-        WriteConstant(CommandConstants.PingNewLine);
-    }
+    public void WritePing() => WriteConstant(CommandConstants.PingNewLine);
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#ping-pong
-    public void WritePong()
-    {
-        WriteConstant(CommandConstants.PongNewLine);
-    }
+    public void WritePong() => WriteConstant(CommandConstants.PongNewLine);
 
     // https://docs.nats.io/reference/reference-protocols/nats-protocol#pub
     // PUB <subject> [reply-to] <#bytes>\r\n[payload]\r\n
@@ -121,10 +115,10 @@ internal sealed class ProtocolWriter
         var offset = 0;
 
         var maxLength = CommandConstants.SubWithPadding.Length
-            + subject.Length + 1
-            + (queueGroup == null ? 0 : queueGroup.Length + 1)
-            + MaxIntStringLength
-            + NewLineLength; // newline
+                        + subject.Length + 1
+                        + (queueGroup == null ? 0 : queueGroup.Length + 1)
+                        + MaxIntStringLength
+                        + NewLineLength; // newline
 
         var writableSpan = _writer.GetSpan(maxLength);
         CommandConstants.SubWithPadding.CopyTo(writableSpan);
@@ -132,14 +126,14 @@ internal sealed class ProtocolWriter
 
         subject.WriteASCIIBytes(writableSpan.Slice(offset));
         offset += subject.Length;
-        writableSpan.Slice(offset)[0] = (byte)' ';
+        writableSpan.Slice(offset)[0] = (byte) ' ';
         offset += 1;
 
         if (queueGroup != null)
         {
             queueGroup.WriteASCIIBytes(writableSpan.Slice(offset));
             offset += queueGroup.Length;
-            writableSpan.Slice(offset)[0] = (byte)' ';
+            writableSpan.Slice(offset)[0] = (byte) ' ';
             offset += 1;
         }
 
@@ -170,9 +164,9 @@ internal sealed class ProtocolWriter
     {
         var offset = 0;
         var maxLength = CommandConstants.UnsubWithPadding.Length
-            + MaxIntStringLength
-            + ((maxMessages != null) ? (1 + MaxIntStringLength) : 0)
-            + NewLineLength;
+                        + MaxIntStringLength
+                        + (maxMessages != null ? 1 + MaxIntStringLength : 0)
+                        + NewLineLength;
 
         var writableSpan = _writer.GetSpan(maxLength);
         CommandConstants.UnsubWithPadding.CopyTo(writableSpan);
@@ -187,7 +181,7 @@ internal sealed class ProtocolWriter
 
         if (maxMessages != null)
         {
-            writableSpan.Slice(offset)[0] = (byte)' ';
+            writableSpan.Slice(offset)[0] = (byte) ' ';
             offset += 1;
             if (!Utf8Formatter.TryFormat(maxMessages.Value, writableSpan.Slice(offset), out written))
             {

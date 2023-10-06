@@ -1,7 +1,11 @@
+#region
+
 using System.Text.RegularExpressions;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration;
 using NJsonSchema.CodeGeneration.CSharp;
+
+#endregion
 
 var enumNameGenerator = new ProperCaseEnumNameGenerator();
 var propertyNameGenerator = new ProperCasePropertyNameGenerator();
@@ -15,7 +19,7 @@ var generatorSettings = new CSharpGeneratorSettings
     GenerateNullableReferenceTypes = true,
     EnumNameGenerator = enumNameGenerator,
     TypeNameGenerator = typeNameGenerator,
-    PropertyNameGenerator = propertyNameGenerator,
+    PropertyNameGenerator = propertyNameGenerator
 };
 
 var slnDirInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
@@ -46,7 +50,7 @@ foreach (var (typeName, typeDef) in schema.Definitions)
     if (typeDef.AdditionalPropertiesSchema == default)
         typeDef.AllowAdditionalProperties = false;
 
-    schema.Properties[typeName] = new JsonSchemaProperty { Reference = typeDef, };
+    schema.Properties[typeName] = new JsonSchemaProperty { Reference = typeDef };
 }
 
 // generate

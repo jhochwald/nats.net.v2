@@ -1,5 +1,10 @@
+#region
+
+using System.Runtime.CompilerServices;
 using NATS.Client.Core.Commands;
 using NATS.Client.Core.Internal;
+
+#endregion
 
 namespace NATS.Client.Core;
 
@@ -66,7 +71,7 @@ public partial class NatsConnection
         }
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal CancellationTimer GetCancellationTimer(CancellationToken cancellationToken, TimeSpan timeout = default)
     {
         if (timeout == default)
@@ -80,7 +85,7 @@ public partial class NatsConnection
         await command.AsValueTask().ConfigureAwait(false);
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool TryEnqueueCommand(ICommand command)
     {
         if (_commandWriter.TryWrite(command))
@@ -88,9 +93,7 @@ public partial class NatsConnection
             Interlocked.Increment(ref Counter.PendingMessages);
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 }

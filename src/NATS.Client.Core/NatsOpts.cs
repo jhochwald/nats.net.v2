@@ -1,12 +1,16 @@
+#region
+
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NATS.Client.Core.Internal;
 
+#endregion
+
 namespace NATS.Client.Core;
 
 /// <summary>
-/// Immutable options for NatsConnection, you can configure via `with` operator.
+///     Immutable options for NatsConnection, you can configure via `with` operator.
 /// </summary>
 /// <param name="Url"></param>
 /// <param name="Name"></param>
@@ -64,32 +68,32 @@ public sealed record NatsOpts
     bool WaitUntilSent)
 {
     public static readonly NatsOpts Default = new(
-        Url: "nats://localhost:4222",
-        Name: "NATS .Net Client",
-        Echo: true,
-        Verbose: false,
-        Headers: true,
-        AuthOpts: NatsAuthOpts.Default,
-        TlsOpts: NatsTlsOpts.Default,
-        Serializer: NatsDefaultSerializer.Default,
-        LoggerFactory: NullLoggerFactory.Instance,
-        WriterBufferSize: 65534, // 32767
-        ReaderBufferSize: 1048576,
-        UseThreadPoolCallback: false,
-        InboxPrefix: "_INBOX",
-        NoRandomize: false,
-        PingInterval: TimeSpan.FromMinutes(2),
-        MaxPingOut: 2,
-        ReconnectWait: TimeSpan.FromSeconds(2),
-        ReconnectJitter: TimeSpan.FromMilliseconds(100),
-        ConnectTimeout: TimeSpan.FromSeconds(2),
-        ObjectPoolSize: 256,
-        RequestTimeout: TimeSpan.FromSeconds(5),
-        CommandTimeout: TimeSpan.FromMinutes(1),
-        SubscriptionCleanUpInterval: TimeSpan.FromMinutes(5),
-        WriterCommandBufferLimit: 1_000,
-        HeaderEncoding: Encoding.ASCII,
-        WaitUntilSent: false);
+        "nats://localhost:4222",
+        "NATS .Net Client",
+        true,
+        false,
+        true,
+        NatsAuthOpts.Default,
+        NatsTlsOpts.Default,
+        NatsDefaultSerializer.Default,
+        NullLoggerFactory.Instance,
+        65534, // 32767
+        1048576,
+        false,
+        "_INBOX",
+        false,
+        TimeSpan.FromMinutes(2),
+        2,
+        TimeSpan.FromSeconds(2),
+        TimeSpan.FromMilliseconds(100),
+        TimeSpan.FromSeconds(2),
+        256,
+        TimeSpan.FromSeconds(5),
+        TimeSpan.FromMinutes(1),
+        TimeSpan.FromMinutes(5),
+        1_000,
+        Encoding.ASCII,
+        false);
 
     internal NatsUri[] GetSeedUris()
     {

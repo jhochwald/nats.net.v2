@@ -1,4 +1,8 @@
+#region
+
 using NATS.Client.JetStream.Internal;
+
+#endregion
 
 namespace NATS.Client.JetStream.Tests.Internal;
 

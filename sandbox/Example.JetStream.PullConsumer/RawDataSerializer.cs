@@ -1,5 +1,9 @@
+#region
+
 using System.Buffers;
 using NATS.Client.Core;
+
+#endregion
 
 namespace Example.JetStream.PullConsumer;
 
@@ -23,6 +27,6 @@ public class RawDataSerializer : INatsSerializer
         if (typeof(T) != typeof(RawData))
             throw new Exception($"Can only work with '{typeof(RawData)}'");
 
-        return (T)(object)new RawData(buffer.ToArray());
+        return (T) (object) new RawData(buffer.ToArray());
     }
 }

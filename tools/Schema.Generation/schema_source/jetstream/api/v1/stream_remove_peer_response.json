@@ -4,7 +4,9 @@
   "description": "A response from the JetStream $JS.API.STREAM.PEER.REMOVE API",
   "title": "io.nats.jetstream.api.v1.stream_remove_peer_response",
   "type": "object",
-  "required": ["success"],
+  "required": [
+    "success"
+  ],
   "properties": {
     "success": {
       "type": "boolean",

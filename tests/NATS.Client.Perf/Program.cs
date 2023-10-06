@@ -1,8 +1,11 @@
+#region
+
 using System.Buffers;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using NATS.Client.Core;
 using NATS.Client.Core.Tests;
+
+#endregion
 
 var t = new TestParams
 {
@@ -12,7 +15,7 @@ var t = new TestParams
     PubTasks = 10,
     MaxNatsBenchRatio = 0.20,
     MaxMemoryMb = 500,
-    MaxAllocatedMb = 750,
+    MaxAllocatedMb = 750
 };
 
 Console.WriteLine("NATS NET v2 Perf Tests");
@@ -87,8 +90,8 @@ double RunNatsBench(string url, TestParams testParams)
             Arguments = $"bench {testParams.Subject} --pub 1 --sub 1 --size={testParams.Size} --msgs={testParams.Msgs} --no-progress",
             RedirectStandardOutput = true,
             UseShellExecute = false,
-            Environment = { { "NATS_URL", $"{url}" } },
-        },
+            Environment = { { "NATS_URL", $"{url}" } }
+        }
     };
     process.Start();
     process.WaitForExit();
@@ -116,7 +119,7 @@ internal class Result
     }
 
     public static void Add(string message, Func<bool> test) =>
-        Results.Add(new Result(message: message, test: test));
+        Results.Add(new Result(message, test));
 
     public static int Eval()
     {
