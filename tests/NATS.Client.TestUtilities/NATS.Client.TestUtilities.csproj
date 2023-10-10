@@ -12,8 +12,8 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="7.0.0-alpha.1"/>
     <PackageReference Include="ProcessX" Version="1.5.5"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0-release-23468-02"/>
-    <PackageReference Include="xunit" Version="2.5.2-pre.2"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-preview-23503-02" />
+    <PackageReference Include="xunit" Version="2.5.2-pre.6" />
     <PackageReference Update="Stylecop.Analyzers" Version="1.2.0-beta.507">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
